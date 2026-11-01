@@ -7,6 +7,8 @@ import { PageHeader, Panel, Field, ErrorBox, Chip, MathToolbar, num } from "@/co
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Funções · CalculusLab" },
       { name: "description", content: "Digite uma função f(x) e veja seu gráfico e tabela de valores." },
       { property: "og:title", content: "Funções · CalculusLab" },
@@ -36,19 +38,19 @@ function Funcoes() {
   const stepErr = st === null || st <= 0 ? "O passo deve ser um número positivo." : null;
 
   const rows = useMemo(() => {
-    if (!fn || rangeErr || stepErr) return [];
+    if (!fn || rangeErr || stepErr || xMin === null || xMax === null || st === null) return [];
     const out: { x: number; y: number }[] = [];
-    for (let x = xMin!; x <= xMax! + 1e-9 && out.length < 200; x += st!) out.push({ x: Number(x.toFixed(8)), y: fn(Number(x.toFixed(8))) });
+    for (let x = xMin; x <= xMax + 1e-9 && out.length < 200; x += st) out.push({ x: Number(x.toFixed(8)), y: fn(Number(x.toFixed(8))) });
     return out;
   }, [fn, xMin, xMax, st, rangeErr, stepErr]);
 
   return (
     <>
       <PageHeader tag="Módulo 01" title="Funções" desc="Digite uma função de x e explore seu comportamento pelo gráfico e pela tabela de valores." />
-      <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
-        <div className="space-y-4">
+      <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+        <div className="space-y-5">
           <Panel>
-            <div className="space-y-3">
+            <div className="space-y-5">
               <MathToolbar inputRef={inputRef} value={expr} onChange={setExpr} />
               <Field ref={inputRef} label="f(x) =" value={expr} onChange={setExpr} placeholder="ex: x^2, sin(x), exp(x)" />
               <div className="flex flex-wrap gap-2">
@@ -79,7 +81,7 @@ function Funcoes() {
           </Panel>
         </div>
         <Panel title={`Gráfico de f(x) = ${expr}`}>
-          {fn && !rangeErr ? <Plot fn={fn} xMin={xMin!} xMax={xMax!} /> : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
+          {fn && !rangeErr && xMin !== null && xMax !== null ? <Plot fn={fn} xMin={xMin} xMax={xMax} /> : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
         </Panel>
       </div>
     </>

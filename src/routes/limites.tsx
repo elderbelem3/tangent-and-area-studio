@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
 import { useMemo, useRef, useState } from "react";
 import { parseFn, fmt } from "@/lib/calc";
 import { Plot } from "@/components/Plot";
@@ -7,6 +8,8 @@ import { PageHeader, Panel, Field, ErrorBox, Chip, MathToolbar, Stat, num } from
 export const Route = createFileRoute("/limites")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Limites · CalculusLab" },
       { name: "description", content: "Aproximação numérica de limites laterais com tabela e gráfico." },
       { property: "og:title", content: "Limites · CalculusLab" },
@@ -55,9 +58,9 @@ function Limites() {
   return (
     <>
       <PageHeader tag="Módulo 02" title="Limites" desc="Observe f(x) quando x se aproxima de c. Se os valores se estabilizam em L, então lim f(x) = L." />
-      <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
         <Panel>
-          <div className="space-y-3">
+          <div className="space-y-5">
             <MathToolbar inputRef={inputRef} value={expr} onChange={setExpr} />
             <Field ref={inputRef} label="f(x) =" value={expr} onChange={setExpr} />
             <div className="flex flex-wrap gap-2">
@@ -71,17 +74,17 @@ function Limites() {
               <span className="mb-1 block text-sm font-medium text-muted-foreground">Direção</span>
               <div className="grid grid-cols-3 gap-1 rounded-lg bg-secondary p-1">
                 {([["esq", "Esquerda"], ["dir", "Direita"], ["ambos", "Ambos"]] as const).map(([v, l]) => (
-                  <button key={v} onClick={() => setDir(v)} className={`rounded-md py-1.5 text-sm font-medium transition ${dir === v ? "bg-card text-primary shadow-soft" : "text-muted-foreground"}`}>{l}</button>
+                  <Button variant="ghost" size="sm" aria-pressed={dir === v} key={v} onClick={() => setDir(v)} className={`rounded-md py-1.5 text-sm font-medium transition ${dir === v ? "bg-card text-primary shadow-soft" : "text-muted-foreground"}`}>{l}</Button>
                 ))}
               </div>
             </div>
             {error && <ErrorBox msg={error} />}
             {c === null && <ErrorBox msg="Informe um número válido para c." />}
-            {data && <Stat label={`lim x→${fmt(c!)}${dirLabel} f(x)`} value={fmt(data.L, 5)} />}
+            {data && c !== null && <Stat label={`lim x→${fmt(c)}${dirLabel} f(x)`} value={fmt(data.L, 5)} />}
             {data?.note && <p className="text-sm text-muted-foreground">{data.note}</p>}
           </div>
         </Panel>
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <Panel title="Gráfico">
             {fn && c !== null && data ? (
               <Plot fn={fn} xMin={c - span} xMax={c + span} points={Number.isFinite(data.L) ? [{ x: c, y: data.L, label: `(${fmt(c)}, ${fmt(data.L, 3)})`, hollow: Number.isNaN(fn(c)) }] : []} />

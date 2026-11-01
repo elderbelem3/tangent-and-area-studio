@@ -7,6 +7,8 @@ import { PageHeader, Panel, Field, ErrorBox, Chip, MathToolbar, Stat, num } from
 export const Route = createFileRoute("/integrais")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Integrais · CalculusLab" },
       { name: "description", content: "Calcule integrais definidas e visualize a área sob a curva." },
       { property: "og:title", content: "Integrais · CalculusLab" },
@@ -32,10 +34,10 @@ function Integrais() {
   return (
     <>
       <PageHeader tag="Módulo 04" title="Integrais" desc="A integral definida de a até b acumula a área (com sinal) entre a curva e o eixo x." />
-      <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
-        <div className="space-y-4">
+      <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+        <div className="space-y-5">
           <Panel>
-            <div className="space-y-3">
+            <div className="space-y-5">
               <MathToolbar inputRef={inputRef} value={expr} onChange={setExpr} />
               <Field ref={inputRef} label="f(x) =" value={expr} onChange={setExpr} />
               <div className="flex flex-wrap gap-2">
@@ -52,7 +54,7 @@ function Integrais() {
           </Panel>
           {valid && !bad && <Stat label={`∫ de ${fmt(a)} a ${fmt(b)} f(x) dx`} value={fmt(value, 6)} />}
         </div>
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <Panel title="Área sob a curva">
             {valid ? <Plot fn={fn} xMin={lo - pad} xMax={hi + pad} shade={[a, b]} /> : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
           </Panel>

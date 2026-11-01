@@ -5,7 +5,11 @@ import logoAsset from "@/assets/unicatolica-logo.png.asset.json";
 export const Route = createFileRoute("/creditos")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Créditos · CalculusLab" },
+      { property: "og:image", content: logoAsset.url },
+      { name: "twitter:image", content: logoAsset.url },
       {
         name: "description",
         content:
@@ -31,7 +35,7 @@ const alunos = [
 function Creditos() {
   return (
     <div className="mx-auto max-w-2xl">
-      <div className="rounded-3xl border border-border bg-card p-8 shadow-soft md:p-12">
+      <div className="rounded-xl border border-border bg-card p-6 shadow-soft md:p-12">
         {/* Instituição */}
         <div className="flex flex-col items-center text-center">
           <img
@@ -66,7 +70,7 @@ function Creditos() {
           <span className="h-px flex-1 bg-border" />
         </div>
 
-        <div className="rounded-2xl bg-secondary p-5">
+        <div className="border-t border-border py-6">
           <div className="flex items-center gap-3">
             <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-background text-primary">
               <BookOpen className="h-5 w-5" />
@@ -80,7 +84,7 @@ function Creditos() {
           </div>
         </div>
 
-        <div className="mt-6 rounded-2xl bg-secondary p-5">
+        <div className="mt-2 border-t border-border py-6">
           <div className="flex items-center gap-3">
             <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-background text-primary">
               <Users className="h-5 w-5" />
@@ -89,7 +93,7 @@ function Creditos() {
               Alunos integrantes do grupo
             </p>
           </div>
-          <ol className="mt-4 space-y-3">
+          <ol className="mt-4 space-y-5">
             {alunos.map((nome, i) => (
               <li key={nome} className="flex items-center gap-3">
                 <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary font-mono text-xs font-semibold text-primary-foreground">

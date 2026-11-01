@@ -1,3 +1,4 @@
+import { useId } from "react";
 import type { Fn } from "@/lib/calc";
 
 type Props = {
@@ -12,6 +13,7 @@ type Props = {
 const W = 640, H = 400, P = 36;
 
 export function Plot({ fn, xMin, xMax, points = [], lines = [], shade }: Props) {
+  const clipId = useId();
   const N = 600;
   const xs = Array.from({ length: N + 1 }, (_, i) => xMin + ((xMax - xMin) * i) / N);
   const ys = xs.map(fn).filter((y) => Number.isFinite(y));
@@ -65,25 +67,26 @@ export function Plot({ fn, xMin, xMax, points = [], lines = [], shade }: Props) 
   }
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full rounded-xl border border-border bg-card" role="img" aria-label="Gráfico da função">
+    <div>
+    <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full rounded-lg bg-card font-mono" role="img" aria-label="Gráfico da função">
       <defs>
-        <clipPath id="plotclip"><rect x={P} y={P} width={W - 2 * P} height={H - 2 * P} /></clipPath>
+        <clipPath id={clipId}><rect x={P} y={P} width={W - 2 * P} height={H - 2 * P} /></clipPath>
       </defs>
       {ticks(xMin, xMax).map((t) => (
         <g key={`x${t}`}>
           <line x1={sx(t)} x2={sx(t)} y1={P} y2={H - P} className="stroke-grid" />
-          <text x={sx(t)} y={H - P + 16} textAnchor="middle" className="fill-muted-foreground text-[11px]">{t}</text>
+          <text x={sx(t)} y={H - P + 16} textAnchor="middle" className="fill-muted-foreground text-[12px]">{t}</text>
         </g>
       ))}
       {ticks(yMin, yMax).map((t) => (
         <g key={`y${t}`}>
           <line x1={P} x2={W - P} y1={sy(t)} y2={sy(t)} className="stroke-grid" />
-          <text x={P - 6} y={sy(t) + 4} textAnchor="end" className="fill-muted-foreground text-[11px]">{t}</text>
+          <text x={P - 6} y={sy(t) + 4} textAnchor="end" className="fill-muted-foreground text-[12px]">{t}</text>
         </g>
       ))}
       <line x1={P} x2={W - P} y1={sy(0)} y2={sy(0)} className="stroke-axis" strokeWidth={1.5} />
       {xMin <= 0 && xMax >= 0 && <line x1={sx(0)} x2={sx(0)} y1={P} y2={H - P} className="stroke-axis" strokeWidth={1.5} />}
-      <g clipPath="url(#plotclip)">
+      <g clipPath={`url(#${clipId})`}>
         {shade && <path d={shadePath} className="fill-primary/25 stroke-primary/40" />}
         <path d={path(fn)} fill="none" className="stroke-primary" strokeWidth={2.5} strokeLinejoin="round" />
         {lines.map((l, i) => (
@@ -97,5 +100,7 @@ export function Plot({ fn, xMin, xMax, points = [], lines = [], shade }: Props) 
         ))}
       </g>
     </svg>
+    <div className="mt-4 flex flex-wrap items-center justify-center gap-5 border-t border-border pt-4 text-xs text-muted-foreground"><span className="inline-flex items-center gap-2"><span className="h-0.5 w-5 bg-primary" />f(x)</span>{lines.length > 0 && <span className="inline-flex items-center gap-2"><span className="h-0.5 w-5 bg-accent-strong" />Reta tangente</span>}{shade && <span className="inline-flex items-center gap-2"><span className="h-3 w-3 rounded-sm bg-primary/25" />Área integrada</span>}</div>
+    </div>
   );
 }
