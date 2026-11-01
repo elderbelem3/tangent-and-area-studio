@@ -28,14 +28,14 @@ function Aprenda() {
   return (
     <>
       <PageHeader tag="Centro de estudos" title="Aprenda" desc="Teoria, fórmulas e exemplos resolvidos de Cálculo 1 e 2. Abra cada tópico e teste os exercícios nos outros módulos." />
-      <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
-        <aside className="lg:sticky lg:top-24 lg:self-start">
+      <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+        <aside className="min-w-0 lg:sticky lg:top-36 lg:self-start">
           <nav className="flex gap-2 overflow-x-auto lg:flex-col" aria-label="Índice">
             {LEARN.map((m) => (
               <Button variant="ghost" aria-pressed={m.id === active}
                 key={m.id}
                 onClick={() => setActive(m.id)}
-                className={`h-auto min-w-52 flex-col items-start whitespace-normal rounded-xl border p-4 text-left transition lg:min-w-0 ${m.id === active ? "border-primary bg-card shadow-soft" : "border-border bg-background hover:border-primary/50"}`}
+                className={`h-auto min-w-52 shrink-0 flex-col items-start whitespace-normal rounded-xl border p-4 text-left transition lg:min-w-0 ${m.id === active ? "border-primary bg-card shadow-soft" : "border-border bg-background hover:border-primary/50"}`}
               >
                 <p className="font-mono text-xs uppercase tracking-widest text-primary">{m.tag}</p>
                 <p className="font-display font-semibold">{m.title}</p>
@@ -62,7 +62,7 @@ function Aprenda() {
                 <AccordionTrigger className="font-display text-lg hover:no-underline">
                   <span><span className="mr-2 font-mono text-sm text-primary">{String(i + 1).padStart(2, "0")}</span>{t.title}</span>
                 </AccordionTrigger>
-                <AccordionContent className="space-y-5 text-base leading-relaxed">
+                <AccordionContent className="space-y-5 break-words text-base leading-relaxed">
                   {t.theory.map((p, k) => <p key={k} className="max-w-prose">{p}</p>)}
 
                   <div className="rounded-xl bg-secondary p-4">
@@ -79,7 +79,7 @@ function Aprenda() {
                       {t.example.steps.map((s, k) => (
                         <li key={k} className="flex gap-3 text-sm">
                           <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-primary font-mono text-xs text-primary-foreground">{k + 1}</span>
-                          <span className="pt-0.5">{s}</span>
+                          <span className="min-w-0 pt-0.5">{s}</span>
                         </li>
                       ))}
                     </ol>
