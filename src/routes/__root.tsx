@@ -87,7 +87,8 @@ const nav = [
   { to: "/limites", label: "Limites", n: "02" },
   { to: "/derivadas", label: "Derivadas", n: "03" },
   { to: "/integrais", label: "Integrais", n: "04" },
-  { to: "/creditos", label: "Créditos", n: "05" },
+  { to: "/aprenda", label: "Aprenda", n: "05" },
+  { to: "/creditos", label: "Créditos", n: "06" },
 ] as const;
 
 function RootComponent() {
