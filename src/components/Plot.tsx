@@ -20,9 +20,8 @@ export function Plot({ fn, xMin, xMax, points = [], lines = [], shade }: Props) 
   // robust clipping for asymptotes
   const sorted = [...ys].sort((a, b) => a - b);
   if (sorted.length > 20) {
-    yMin = Math.min(yMin, sorted[Math.floor(sorted.length * 0.03)]);
-    yMin = sorted[Math.floor(sorted.length * 0.03)];
-    yMax = sorted[Math.floor(sorted.length * 0.97)];
+    yMin = sorted[Math.floor(sorted.length * 0.03)] ?? yMin;
+    yMax = sorted[Math.floor(sorted.length * 0.97)] ?? yMax;
   }
   points.forEach((p) => { if (Number.isFinite(p.y)) { yMin = Math.min(yMin, p.y); yMax = Math.max(yMax, p.y); } });
   yMin = Math.min(yMin, 0); yMax = Math.max(yMax, 0);
