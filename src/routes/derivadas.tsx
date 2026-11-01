@@ -7,6 +7,8 @@ import { PageHeader, Panel, Field, ErrorBox, Chip, MathToolbar, Stat, num } from
 export const Route = createFileRoute("/derivadas")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Derivadas · CalculusLab" },
       { name: "description", content: "Calcule a derivada num ponto e veja a reta tangente no gráfico." },
       { property: "og:title", content: "Derivadas · CalculusLab" },
@@ -30,10 +32,10 @@ function Derivadas() {
   return (
     <>
       <PageHeader tag="Módulo 03" title="Derivadas" desc="A derivada em x₀ é a inclinação da reta tangente à curva nesse ponto." />
-      <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
-        <div className="space-y-4">
+      <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+        <div className="space-y-5">
           <Panel>
-            <div className="space-y-3">
+            <div className="space-y-5">
               <MathToolbar inputRef={inputRef} value={expr} onChange={setExpr} />
               <Field ref={inputRef} label="f(x) =" value={expr} onChange={setExpr} />
               <div className="flex flex-wrap gap-2">
@@ -57,7 +59,7 @@ function Derivadas() {
             </div>
           )}
         </div>
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <Panel title="Curva e reta tangente">
             {fn && x0 !== null ? (
               <Plot fn={fn} xMin={x0 - 4} xMax={x0 + 4} lines={ok ? [(x) => m * (x - x0) + y0] : []} points={ok ? [{ x: x0, y: y0, label: `(${fmt(x0)}, ${fmt(y0, 3)})` }] : []} />

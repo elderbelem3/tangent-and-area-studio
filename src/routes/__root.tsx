@@ -4,12 +4,15 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
+import { ChartSpline, MoveHorizontal, TrendingUp, Sigma, BookOpen, GraduationCap, ArrowUpRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -39,12 +42,12 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold text-foreground">A página não carregou</h1>
-        <button
+        <Button
           onClick={() => { router.invalidate(); reset(); }}
           className="mt-6 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
         >
           Tentar novamente
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -83,44 +86,43 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 const nav = [
-  { to: "/", label: "Funções", n: "01" },
-  { to: "/limites", label: "Limites", n: "02" },
-  { to: "/derivadas", label: "Derivadas", n: "03" },
-  { to: "/integrais", label: "Integrais", n: "04" },
-  { to: "/aprenda", label: "Aprenda", n: "05" },
-  { to: "/creditos", label: "Créditos", n: "06" },
+  { to: "/", label: "Funções", icon: ChartSpline },
+  { to: "/limites", label: "Limites", icon: MoveHorizontal },
+  { to: "/derivadas", label: "Derivadas", icon: TrendingUp },
+  { to: "/integrais", label: "Integrais", icon: Sigma },
+  { to: "/aprenda", label: "Aprenda", icon: BookOpen },
+  { to: "/creditos", label: "Créditos", icon: GraduationCap },
 ] as const;
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-background bg-grid">
-        <header className="sticky top-0 z-10 border-b border-border bg-background/85 backdrop-blur">
-          <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 md:flex-row md:items-center md:justify-between">
-            <Link to="/" className="flex items-center gap-2 font-display text-xl font-bold">
-              <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary font-mono text-primary-foreground">∫</span>
-              Calculus<span className="text-primary">Lab</span>
+      <div className="min-h-screen bg-background">
+        <header className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
+            <Link to="/" className="flex items-center gap-3 font-display text-2xl font-bold">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary font-mono text-2xl text-primary-foreground">∫</span>
+              <span>Calculus<span className="text-primary">Lab</span></span>
             </Link>
-            <nav className="-mx-1 flex gap-1 overflow-x-auto">
-              {nav.map((n) => (
-                <Link
-                  key={n.to}
-                  to={n.to}
-                  activeOptions={{ exact: true }}
-                  className="whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground"
-                  activeProps={{ className: "bg-secondary !text-primary" }}
-                >
-                  <span className="mr-1 font-mono text-xs opacity-60">{n.n}</span>{n.label}
-                </Link>
-              ))}
-            </nav>
+            <span className="hidden items-center gap-2 text-xs font-medium text-muted-foreground sm:flex"><GraduationCap className="h-4 w-4" />Cálculo Diferencial e Integral</span>
           </div>
+          <nav className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4 sm:px-7" aria-label="Módulos">
+            {nav.map((n) => (
+              <Button key={n.to} asChild variant="ghost" className="h-12 shrink-0 rounded-none border-b-2 border-transparent px-4 text-muted-foreground hover:bg-muted/60 hover:text-foreground">
+                <Link to={n.to} activeOptions={{ exact: true }} activeProps={{ className: "border-primary bg-primary/5 !text-primary" }}><n.icon className="h-4 w-4" />{n.label}</Link>
+              </Button>
+            ))}
+          </nav>
         </header>
-        <main className="mx-auto max-w-6xl px-4 py-8">
-          <Outlet />
+        <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 md:py-10">
+          <div key={pathname} className="module-enter"><Outlet /></div>
         </main>
-        <footer className="py-8 text-center text-xs text-muted-foreground">CalculusLab · Cálculo 1 e 2</footer>
+        <footer className="mx-auto mt-8 flex max-w-7xl flex-wrap items-center justify-between gap-3 border-t border-border px-5 py-6 text-xs text-muted-foreground sm:px-8">
+          <span className="font-display font-medium">CalculusLab <span className="mx-2 text-border">/</span> Cálculo 1 e 2</span>
+          <Link to="/creditos" className="inline-flex items-center gap-1.5 transition hover:text-primary">UniCatólica do RN<ArrowUpRight className="h-3 w-3" /></Link>
+        </footer>
       </div>
     </QueryClientProvider>
   );
