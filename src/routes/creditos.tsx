@@ -1,13 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BookOpen, GraduationCap, Users, Sigma } from "lucide-react";
+import { BookOpen, GraduationCap, Landmark, Users, Sigma } from "lucide-react";
 
 export const Route = createFileRoute("/creditos")({
   head: () => ({
     meta: [
       { title: "Créditos · CalculusLab" },
-      { name: "description", content: "AP2 de Cálculo Diferencial e Integral — professora e alunos integrantes do grupo." },
+      {
+        name: "description",
+        content:
+          "AP2 de Cálculo Diferencial e Integral — UniCatólica do RN, professora e alunos integrantes do grupo.",
+      },
       { property: "og:title", content: "Créditos · CalculusLab" },
-      { property: "og:description", content: "AP2 de Cálculo Diferencial e Integral — professora e alunos integrantes do grupo." },
+      {
+        property: "og:description",
+        content:
+          "AP2 de Cálculo Diferencial e Integral — UniCatólica do RN, professora e alunos integrantes do grupo.",
+      },
     ],
   }),
   component: Creditos,
@@ -23,12 +31,28 @@ function Creditos() {
   return (
     <div className="mx-auto max-w-2xl">
       <div className="rounded-3xl border border-border bg-card p-8 shadow-soft md:p-12">
+        {/* Instituição */}
         <div className="flex flex-col items-center text-center">
-          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-soft">
-            <GraduationCap className="h-8 w-8" />
+          <div className="grid h-20 w-20 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-soft">
+            <Landmark className="h-10 w-10" />
           </div>
-          <p className="mt-5 font-mono text-xs uppercase tracking-widest text-primary">Trabalho acadêmico</p>
-          <h1 className="mt-2 font-display text-3xl font-bold leading-tight md:text-4xl">
+          <p className="mt-5 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+            Instituição de ensino
+          </p>
+          <h2 className="mt-1 font-display text-2xl font-bold leading-tight md:text-3xl">
+            UniCatólica do RN
+          </h2>
+        </div>
+
+        {/* Título do trabalho */}
+        <div className="mt-8 flex flex-col items-center text-center">
+          <div className="grid h-14 w-14 place-items-center rounded-2xl bg-secondary text-primary">
+            <GraduationCap className="h-7 w-7" />
+          </div>
+          <p className="mt-4 font-mono text-xs uppercase tracking-widest text-primary">
+            Trabalho acadêmico
+          </p>
+          <h1 className="mt-2 font-display text-2xl font-bold leading-tight md:text-3xl">
             AP2 de Cálculo Diferencial e Integral
           </h1>
         </div>
@@ -45,7 +69,9 @@ function Creditos() {
               <BookOpen className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Professora</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Professora
+              </p>
               <p className="font-display text-lg font-semibold">Flaviana Moreira de Souza Amorim</p>
             </div>
           </div>
@@ -56,7 +82,9 @@ function Creditos() {
             <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-background text-primary">
               <Users className="h-5 w-5" />
             </div>
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Alunos integrantes do grupo</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Alunos integrantes do grupo
+            </p>
           </div>
           <ol className="mt-4 space-y-3">
             {alunos.map((nome, i) => (
@@ -71,7 +99,7 @@ function Creditos() {
         </div>
 
         <p className="mt-8 text-center text-xs text-muted-foreground">
-          CalculusLab · Cálculo 1 e 2
+          UniCatólica do RN · CalculusLab · Cálculo 1 e 2
         </p>
       </div>
     </div>
