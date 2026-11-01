@@ -148,7 +148,7 @@ export const LEARN: LearnModule[] = [
           steps: ["u = x ⇒ du = dx; dv = eˣ dx ⇒ v = eˣ.", "∫ x·eˣ dx = x·eˣ − ∫ eˣ dx.", "= x·eˣ − eˣ + C."],
           answer: "eˣ(x − 1) + C",
         },
-        tip: { module: "Integrais", text: "Digite x*exp(x) de 0 a 1: o resultado deve ser e⁰(0−1)… ou seja, F(1) − F(0) = 0 − (−1) = 1." },
+        tip: { module: "Integrais", text: "Digite x*exp(x) de 0 a 1: o resultado deve ser F(1) − F(0) = 0 − (−1) = 1." },
       },
     ],
   },
