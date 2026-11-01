@@ -20,7 +20,7 @@ type Dir = "esq" | "dir" | "ambos";
 const hs = [0.1, 0.01, 0.001, 0.0001, 0.00001];
 
 function estimate(vals: number[]): number {
-  const last = vals[vals.length - 1], prev = vals[vals.length - 2];
+  const last = vals[vals.length - 1] ?? NaN, prev = vals[vals.length - 2] ?? NaN;
   if (!Number.isFinite(last)) return NaN;
   if (Math.abs(last) > 1e6 && Math.abs(last) > Math.abs(prev) * 5) return last > 0 ? Infinity : -Infinity;
   return Math.abs(last - prev) < 1e-3 * Math.max(1, Math.abs(last)) ? last : NaN;
