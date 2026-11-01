@@ -18,7 +18,7 @@ export const Route = createFileRoute("/aprenda")({
 });
 
 function Aprenda() {
-  const [active, setActive] = useState(LEARN[0].id);
+  const [active, setActive] = useState(LEARN[0]?.id ?? "");
   const mod = LEARN.find((m) => m.id === active)!;
 
   return (
@@ -52,7 +52,7 @@ function Aprenda() {
               <p className="text-sm text-muted-foreground">{mod.subtitle}</p>
             </div>
           </div>
-          <Accordion key={mod.id} type="multiple" defaultValue={[mod.topics[0].id]}>
+          <Accordion key={mod.id} type="multiple" defaultValue={mod.topics[0] ? [mod.topics[0].id] : []}>
             {mod.topics.map((t, i) => (
               <AccordionItem key={t.id} value={t.id}>
                 <AccordionTrigger className="font-display text-lg hover:no-underline">
