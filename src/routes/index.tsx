@@ -1,24 +1,85 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
+import { parseFn, fmt } from "@/lib/calc";
+import { Plot } from "@/components/Plot";
+import { PageHeader, Panel, Field, ErrorBox, Chip, num } from "@/components/Lab";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Funções · CalculusLab" },
+      { name: "description", content: "Digite uma função f(x) e veja seu gráfico e tabela de valores." },
+      { property: "og:title", content: "Funções · CalculusLab" },
+      { property: "og:description", content: "Plote funções e explore tabelas de valores." },
+    ],
+  }),
+  component: Funcoes,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+const examples = [
+  { label: "Quadrática", f: "x^2 - 2x - 3" },
+  { label: "Trigonométrica", f: "sin(x)" },
+  { label: "Exponencial", f: "exp(x)" },
+  { label: "Cúbica", f: "x^3 - 3x" },
+  { label: "Racional", f: "1/x" },
+];
+
+function Funcoes() {
+  const [expr, setExpr] = useState("x^3 - 3x");
+  const [a, setA] = useState("-3");
+  const [b, setB] = useState("3");
+  const [step, setStep] = useState("0.5");
+  const { fn, error } = useMemo(() => parseFn(expr), [expr]);
+  const xMin = num(a), xMax = num(b), st = num(step);
+  const rangeErr = xMin === null || xMax === null ? "Informe números válidos para o intervalo." : xMin >= xMax ? "O início do intervalo deve ser menor que o fim." : null;
+  const stepErr = st === null || st <= 0 ? "O passo deve ser um número positivo." : null;
+
+  const rows = useMemo(() => {
+    if (!fn || rangeErr || stepErr) return [];
+    const out: { x: number; y: number }[] = [];
+    for (let x = xMin!; x <= xMax! + 1e-9 && out.length < 200; x += st!) out.push({ x: Number(x.toFixed(8)), y: fn(Number(x.toFixed(8))) });
+    return out;
+  }, [fn, xMin, xMax, st, rangeErr, stepErr]);
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <>
+      <PageHeader tag="Módulo 01" title="Funções" desc="Digite uma função de x e explore seu comportamento pelo gráfico e pela tabela de valores." />
+      <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
+        <div className="space-y-4">
+          <Panel>
+            <div className="space-y-3">
+              <Field label="f(x) =" value={expr} onChange={setExpr} placeholder="ex: x^2, sin(x), exp(x)" />
+              <div className="flex flex-wrap gap-2">
+                {examples.map((e) => <Chip key={e.label} onClick={() => setExpr(e.f)}>{e.label}</Chip>)}
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <Field label="x mín" value={a} onChange={setA} />
+                <Field label="x máx" value={b} onChange={setB} />
+                <Field label="passo" value={step} onChange={setStep} />
+              </div>
+              {error && <ErrorBox msg={error} />}
+              {rangeErr && <ErrorBox msg={rangeErr} />}
+              {stepErr && <ErrorBox msg={stepErr} />}
+              <p className="text-xs text-muted-foreground">Suporta: + − * / ^, sin, cos, tan, exp, log (ln), sqrt, abs, pi, e.</p>
+            </div>
+          </Panel>
+          <Panel title="Tabela de valores">
+            <div className="max-h-80 overflow-auto">
+              <table className="w-full font-mono text-sm">
+                <thead className="sticky top-0 bg-card text-left text-muted-foreground"><tr><th className="py-1">x</th><th>f(x)</th></tr></thead>
+                <tbody>
+                  {rows.map((r) => (
+                    <tr key={r.x} className="border-t border-border"><td className="py-1">{fmt(r.x, 4)}</td><td className={Number.isNaN(r.y) ? "text-destructive" : ""}>{fmt(r.y, 4)}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Panel>
+        </div>
+        <Panel title={`Gráfico de f(x) = ${expr}`}>
+          {fn && !rangeErr ? <Plot fn={fn} xMin={xMin!} xMax={xMax!} /> : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
+        </Panel>
+      </div>
+    </>
   );
 }

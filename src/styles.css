@@ -51,6 +51,13 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --font-display: "Space Grotesk", sans-serif;
+  --font-sans: "DM Sans", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --color-grid: var(--grid);
+  --color-axis: var(--axis);
+  --color-accent-strong: var(--accent-strong);
+  --shadow-soft: 0 1px 2px oklch(0.2 0.03 250 / 6%), 0 8px 24px -12px oklch(0.2 0.03 250 / 15%);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -63,20 +70,23 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
+  --background: oklch(0.985 0.004 240);
+  --foreground: oklch(0.2 0.03 250);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
+  --card-foreground: oklch(0.2 0.03 250);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --popover-foreground: oklch(0.2 0.03 250);
+  --primary: oklch(0.52 0.14 215);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.955 0.012 230);
+  --secondary-foreground: oklch(0.2 0.03 250);
+  --muted: oklch(0.955 0.012 230);
+  --muted-foreground: oklch(0.5 0.03 250);
+  --accent: oklch(0.955 0.012 230);
+  --accent-foreground: oklch(0.2 0.03 250);
+  --accent-strong: oklch(0.68 0.19 40);
+  --grid: oklch(0.93 0.01 240);
+  --axis: oklch(0.6 0.02 250);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(0.929 0.013 255.508);
@@ -142,3 +152,12 @@
     color: var(--color-foreground);
   }
 }
+
+@layer base { body { font-family: var(--font-sans); } }
+@utility bg-grid {
+  background-image: radial-gradient(var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+@utility stroke-grid { stroke: var(--grid); }
+@utility stroke-axis { stroke: var(--axis); }
+@utility shadow-soft { box-shadow: var(--shadow-soft); }
