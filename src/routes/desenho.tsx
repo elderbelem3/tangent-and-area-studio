@@ -95,6 +95,45 @@ function Desenho() {
       ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
     }
     ctx.globalAlpha = 1;
+    // plano cartesiano: eixos X e Y cruzando no centro do canvas
+    const cx = W / 2, cy = H / 2;
+    ctx.strokeStyle = fg;
+    ctx.fillStyle = fg;
+    ctx.lineWidth = 1.8;
+    ctx.lineCap = "butt";
+    // eixo X (com seta e rótulo)
+    ctx.beginPath(); ctx.moveTo(10, cy); ctx.lineTo(W - 16, cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(W - 6, cy); ctx.lineTo(W - 18, cy - 5); ctx.lineTo(W - 18, cy + 5); ctx.closePath(); ctx.fill();
+    ctx.font = "italic 700 15px 'JetBrains Mono', monospace";
+    ctx.fillText("X", W - 12, cy + 22);
+    // eixo Y (com seta e rótulo)
+    ctx.beginPath(); ctx.moveTo(cx, H - 8); ctx.lineTo(cx, 14); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, 6); ctx.lineTo(cx - 5, 18); ctx.lineTo(cx + 5, 18); ctx.closePath(); ctx.fill();
+    ctx.fillText("Y", cx + 10, 18);
+    // marcas de graduação e números no eixo X
+    ctx.font = "500 11px 'JetBrains Mono', monospace";
+    ctx.lineWidth = 1.6;
+    for (let i = -8; i <= 8; i++) {
+      if (i === 0) continue;
+      const px = cx + i * U;
+      if (px < 8 || px > W - 24) continue;
+      ctx.beginPath(); ctx.moveTo(px, cy - 5); ctx.lineTo(px, cy + 5); ctx.stroke();
+      ctx.textAlign = "center";
+      ctx.fillText(String(i), px, cy + 19);
+    }
+    // marcas de graduação e números no eixo Y
+    for (let i = -4; i <= 4; i++) {
+      if (i === 0) continue;
+      const py = cy - i * U;
+      if (py < 8 || py > H - 10) continue;
+      ctx.beginPath(); ctx.moveTo(cx - 5, py); ctx.lineTo(cx + 5, py); ctx.stroke();
+      ctx.textAlign = "right";
+      ctx.fillText(String(i), cx - 9, py + 4);
+    }
+    ctx.textAlign = "left";
+    ctx.beginPath(); ctx.arc(cx, cy, 2.5, 0, Math.PI * 2); ctx.fill(); // origem 0,0
+    ctx.font = "500 11px 'JetBrains Mono', monospace";
+    ctx.fillText("0", cx - 14, cy + 19);
     // área sombreada animada
     if (res) {
       const n = Math.max(2, Math.floor(res.curve.length * progress));
