@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CreditosRouteImport } from './routes/creditos'
 import { Route as DerivadasRouteImport } from './routes/derivadas'
+import { Route as DesenhoRouteImport } from './routes/desenho'
 import { Route as IntegraisRouteImport } from './routes/integrais'
 import { Route as LimitesRouteImport } from './routes/limites'
 
@@ -30,6 +31,11 @@ const DerivadasRoute = DerivadasRouteImport.update({
   path: '/derivadas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DesenhoRoute = DesenhoRouteImport.update({
+  id: '/desenho',
+  path: '/desenho',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IntegraisRoute = IntegraisRouteImport.update({
   id: '/integrais',
   path: '/integrais',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/creditos': typeof CreditosRoute
   '/derivadas': typeof DerivadasRoute
+  '/desenho': typeof DesenhoRoute
   '/integrais': typeof IntegraisRoute
   '/limites': typeof LimitesRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/creditos': typeof CreditosRoute
   '/derivadas': typeof DerivadasRoute
+  '/desenho': typeof DesenhoRoute
   '/integrais': typeof IntegraisRoute
   '/limites': typeof LimitesRoute
 }
@@ -60,21 +68,31 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/creditos': typeof CreditosRoute
   '/derivadas': typeof DerivadasRoute
+  '/desenho': typeof DesenhoRoute
   '/integrais': typeof IntegraisRoute
   '/limites': typeof LimitesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/creditos' | '/derivadas' | '/integrais' | '/limites'
+  fullPaths:
+    '/' | '/creditos' | '/derivadas' | '/desenho' | '/integrais' | '/limites'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/creditos' | '/derivadas' | '/integrais' | '/limites'
-  id: '__root__' | '/' | '/creditos' | '/derivadas' | '/integrais' | '/limites'
+  to: '/' | '/creditos' | '/derivadas' | '/desenho' | '/integrais' | '/limites'
+  id:
+    | '__root__'
+    | '/'
+    | '/creditos'
+    | '/derivadas'
+    | '/desenho'
+    | '/integrais'
+    | '/limites'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CreditosRoute: typeof CreditosRoute
   DerivadasRoute: typeof DerivadasRoute
+  DesenhoRoute: typeof DesenhoRoute
   IntegraisRoute: typeof IntegraisRoute
   LimitesRoute: typeof LimitesRoute
 }
@@ -102,6 +120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DerivadasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/desenho': {
+      id: '/desenho'
+      path: '/desenho'
+      fullPath: '/desenho'
+      preLoaderRoute: typeof DesenhoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/integrais': {
       id: '/integrais'
       path: '/integrais'
@@ -123,6 +148,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CreditosRoute: CreditosRoute,
   DerivadasRoute: DerivadasRoute,
+  DesenhoRoute: DesenhoRoute,
   IntegraisRoute: IntegraisRoute,
   LimitesRoute: LimitesRoute,
 }
