@@ -10,33 +10,63 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DerivadasRouteImport } from './routes/derivadas'
+import { Route as IntegraisRouteImport } from './routes/integrais'
+import { Route as LimitesRouteImport } from './routes/limites'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DerivadasRoute = DerivadasRouteImport.update({
+  id: '/derivadas',
+  path: '/derivadas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntegraisRoute = IntegraisRouteImport.update({
+  id: '/integrais',
+  path: '/integrais',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LimitesRoute = LimitesRouteImport.update({
+  id: '/limites',
+  path: '/limites',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/derivadas': typeof DerivadasRoute
+  '/integrais': typeof IntegraisRoute
+  '/limites': typeof LimitesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/derivadas': typeof DerivadasRoute
+  '/integrais': typeof IntegraisRoute
+  '/limites': typeof LimitesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/derivadas': typeof DerivadasRoute
+  '/integrais': typeof IntegraisRoute
+  '/limites': typeof LimitesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/derivadas' | '/integrais' | '/limites'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/derivadas' | '/integrais' | '/limites'
+  id: '__root__' | '/' | '/derivadas' | '/integrais' | '/limites'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DerivadasRoute: typeof DerivadasRoute
+  IntegraisRoute: typeof IntegraisRoute
+  LimitesRoute: typeof LimitesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +78,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/derivadas': {
+      id: '/derivadas'
+      path: '/derivadas'
+      fullPath: '/derivadas'
+      preLoaderRoute: typeof DerivadasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integrais': {
+      id: '/integrais'
+      path: '/integrais'
+      fullPath: '/integrais'
+      preLoaderRoute: typeof IntegraisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/limites': {
+      id: '/limites'
+      path: '/limites'
+      fullPath: '/limites'
+      preLoaderRoute: typeof LimitesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DerivadasRoute: DerivadasRoute,
+  IntegraisRoute: IntegraisRoute,
+  LimitesRoute: LimitesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
