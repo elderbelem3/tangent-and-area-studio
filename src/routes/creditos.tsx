@@ -1,0 +1,79 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { BookOpen, GraduationCap, Users, Sigma } from "lucide-react";
+
+export const Route = createFileRoute("/creditos")({
+  head: () => ({
+    meta: [
+      { title: "Créditos · CalculusLab" },
+      { name: "description", content: "AP2 de Cálculo Diferencial e Integral — professora e alunos integrantes do grupo." },
+      { property: "og:title", content: "Créditos · CalculusLab" },
+      { property: "og:description", content: "AP2 de Cálculo Diferencial e Integral — professora e alunos integrantes do grupo." },
+    ],
+  }),
+  component: Creditos,
+});
+
+const alunos = [
+  "Elder Belem da Silva Terceiro",
+  "Nathan Emanuel Silva de Paiva",
+  "Erick Emanoel Oliveria Araujo",
+];
+
+function Creditos() {
+  return (
+    <div className="mx-auto max-w-2xl">
+      <div className="rounded-3xl border border-border bg-card p-8 shadow-soft md:p-12">
+        <div className="flex flex-col items-center text-center">
+          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-soft">
+            <GraduationCap className="h-8 w-8" />
+          </div>
+          <p className="mt-5 font-mono text-xs uppercase tracking-widest text-primary">Trabalho acadêmico</p>
+          <h1 className="mt-2 font-display text-3xl font-bold leading-tight md:text-4xl">
+            AP2 de Cálculo Diferencial e Integral
+          </h1>
+        </div>
+
+        <div className="my-8 flex items-center gap-3">
+          <span className="h-px flex-1 bg-border" />
+          <Sigma className="h-4 w-4 text-muted-foreground" />
+          <span className="h-px flex-1 bg-border" />
+        </div>
+
+        <div className="rounded-2xl bg-secondary p-5">
+          <div className="flex items-center gap-3">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-background text-primary">
+              <BookOpen className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Professora</p>
+              <p className="font-display text-lg font-semibold">Flaviana Moreira de Souza Amorim</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 rounded-2xl bg-secondary p-5">
+          <div className="flex items-center gap-3">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-background text-primary">
+              <Users className="h-5 w-5" />
+            </div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Alunos integrantes do grupo</p>
+          </div>
+          <ol className="mt-4 space-y-3">
+            {alunos.map((nome, i) => (
+              <li key={nome} className="flex items-center gap-3">
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary font-mono text-xs font-semibold text-primary-foreground">
+                  {i + 1}
+                </span>
+                <span className="font-display text-base font-semibold md:text-lg">{nome}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <p className="mt-8 text-center text-xs text-muted-foreground">
+          CalculusLab · Cálculo 1 e 2
+        </p>
+      </div>
+    </div>
+  );
+}
