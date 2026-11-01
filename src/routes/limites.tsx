@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { parseFn, fmt } from "@/lib/calc";
 import { Plot } from "@/components/Plot";
-import { PageHeader, Panel, Field, ErrorBox, Chip, Stat, num } from "@/components/Lab";
+import { PageHeader, Panel, Field, ErrorBox, Chip, MathToolbar, Stat, num } from "@/components/Lab";
 
 export const Route = createFileRoute("/limites")({
   head: () => ({
@@ -30,6 +30,7 @@ function Limites() {
   const [expr, setExpr] = useState("sin(x)/x");
   const [cS, setC] = useState("0");
   const [dir, setDir] = useState<Dir>("ambos");
+  const inputRef = useRef<HTMLInputElement>(null);
   const { fn, error } = useMemo(() => parseFn(expr), [expr]);
   const c = num(cS);
 
@@ -57,7 +58,8 @@ function Limites() {
       <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
         <Panel>
           <div className="space-y-3">
-            <Field label="f(x) =" value={expr} onChange={setExpr} />
+            <MathToolbar inputRef={inputRef} value={expr} onChange={setExpr} />
+            <Field ref={inputRef} label="f(x) =" value={expr} onChange={setExpr} />
             <div className="flex flex-wrap gap-2">
               <Chip onClick={() => { setExpr("sin(x)/x"); setC("0"); }}>sin(x)/x</Chip>
               <Chip onClick={() => { setExpr("(x^2-1)/(x-1)"); setC("1"); }}>(x²−1)/(x−1)</Chip>

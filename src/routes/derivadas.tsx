@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { parseFn, derivative, fmt } from "@/lib/calc";
 import { Plot } from "@/components/Plot";
-import { PageHeader, Panel, Field, ErrorBox, Chip, Stat, num } from "@/components/Lab";
+import { PageHeader, Panel, Field, ErrorBox, Chip, MathToolbar, Stat, num } from "@/components/Lab";
 
 export const Route = createFileRoute("/derivadas")({
   head: () => ({
@@ -19,6 +19,7 @@ export const Route = createFileRoute("/derivadas")({
 function Derivadas() {
   const [expr, setExpr] = useState("x^2");
   const [x0S, setX0] = useState("1");
+  const inputRef = useRef<HTMLInputElement>(null);
   const { fn, error } = useMemo(() => parseFn(expr), [expr]);
   const x0 = num(x0S);
   const y0 = fn && x0 !== null ? fn(x0) : NaN;
@@ -33,7 +34,8 @@ function Derivadas() {
         <div className="space-y-4">
           <Panel>
             <div className="space-y-3">
-              <Field label="f(x) =" value={expr} onChange={setExpr} />
+              <MathToolbar inputRef={inputRef} value={expr} onChange={setExpr} />
+              <Field ref={inputRef} label="f(x) =" value={expr} onChange={setExpr} />
               <div className="flex flex-wrap gap-2">
                 {["x^2", "sin(x)", "exp(x)", "x^3 - 3x", "log(x)"].map((f) => <Chip key={f} onClick={() => setExpr(f)}>{f}</Chip>)}
               </div>

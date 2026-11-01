@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { parseFn, fmt } from "@/lib/calc";
 import { Plot } from "@/components/Plot";
-import { PageHeader, Panel, Field, ErrorBox, Chip, num } from "@/components/Lab";
+import { PageHeader, Panel, Field, ErrorBox, Chip, MathToolbar, num } from "@/components/Lab";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -29,6 +29,7 @@ function Funcoes() {
   const [a, setA] = useState("-3");
   const [b, setB] = useState("3");
   const [step, setStep] = useState("0.5");
+  const inputRef = useRef<HTMLInputElement>(null);
   const { fn, error } = useMemo(() => parseFn(expr), [expr]);
   const xMin = num(a), xMax = num(b), st = num(step);
   const rangeErr = xMin === null || xMax === null ? "Informe números válidos para o intervalo." : xMin >= xMax ? "O início do intervalo deve ser menor que o fim." : null;
@@ -48,7 +49,8 @@ function Funcoes() {
         <div className="space-y-4">
           <Panel>
             <div className="space-y-3">
-              <Field label="f(x) =" value={expr} onChange={setExpr} placeholder="ex: x^2, sin(x), exp(x)" />
+              <MathToolbar inputRef={inputRef} value={expr} onChange={setExpr} />
+              <Field ref={inputRef} label="f(x) =" value={expr} onChange={setExpr} placeholder="ex: x^2, sin(x), exp(x)" />
               <div className="flex flex-wrap gap-2">
                 {examples.map((e) => <Chip key={e.label} onClick={() => setExpr(e.f)}>{e.label}</Chip>)}
               </div>
