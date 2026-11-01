@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "katex/dist/katex.min.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -179,6 +180,10 @@
 .lab-panel table tbody tr:nth-child(even) { background: var(--muted); }
 .lab-panel table tbody tr:hover { background: var(--secondary); }
 .lab-panel > h2 { overflow-wrap: anywhere; }
+.math-formula .katex-display { margin: 0.6em 0; text-align: left; }
+.math-formula .katex-display > .katex { text-align: left; white-space: nowrap; }
+.math-formula { padding-block: 0.25rem; }
+.math-formula .katex { font-size: 1.12em; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
