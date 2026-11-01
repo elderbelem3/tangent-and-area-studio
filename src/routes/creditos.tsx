@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BookOpen, GraduationCap, Landmark, Users, Sigma } from "lucide-react";
+import { BookOpen, GraduationCap, Users, Sigma } from "lucide-react";
+import logoAsset from "@/assets/unicatolica-logo.png.asset.json";
 
 export const Route = createFileRoute("/creditos")({
   head: () => ({
@@ -33,9 +34,11 @@ function Creditos() {
       <div className="rounded-3xl border border-border bg-card p-8 shadow-soft md:p-12">
         {/* Instituição */}
         <div className="flex flex-col items-center text-center">
-          <div className="grid h-20 w-20 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-soft">
-            <Landmark className="h-10 w-10" />
-          </div>
+          <img
+            src={logoAsset.url}
+            alt="UniCatólica do Rio Grande do Norte"
+            className="h-28 w-auto md:h-32"
+          />
           <p className="mt-5 font-mono text-xs uppercase tracking-widest text-muted-foreground">
             Instituição de ensino
           </p>
