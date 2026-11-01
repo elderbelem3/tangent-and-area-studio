@@ -50,7 +50,7 @@ function analyze(strokes: P[][]): Result | null {
   if (curve.length < 3) return null;
   let up = 0, down = 0, area = 0, best = { i: 1, s: 0 };
   for (let i = 1; i < curve.length; i++) {
-    const a = curve[i - 1], b = curve[i];
+    const a = curve[i - 1]!, b = curve[i]!;
     const dx = (b.x - a.x) / U;
     const dy = (a.y - b.y) / U; // y do canvas é invertido
     if (dy > 0.02) up += dx; else if (dy < -0.02) down += dx;
@@ -60,7 +60,7 @@ function analyze(strokes: P[][]): Result | null {
   }
   const total = up + down || 1;
   const trend = up + down < 0.3 ? "constante" : up / total > 0.75 ? "crescente" : down / total > 0.75 ? "decrescente" : "oscilante";
-  const a = curve[best.i - 1], b = curve[best.i];
+  const a = curve[best.i - 1]!, b = curve[best.i]!;
   return { trend, up, down, area, curve, tangent: { p: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, slope: best.s } };
 }
 
@@ -100,9 +100,9 @@ function Desenho() {
       const n = Math.max(2, Math.floor(res.curve.length * progress));
       const pts = res.curve.slice(0, n);
       ctx.beginPath();
-      ctx.moveTo(pts[0].x, H);
+      ctx.moveTo(pts[0]!.x, H);
       pts.forEach((p) => ctx.lineTo(p.x, p.y));
-      ctx.lineTo(pts[pts.length - 1].x, H);
+      ctx.lineTo(pts[pts.length - 1]!.x, H);
       ctx.closePath();
       ctx.fillStyle = primary;
       ctx.globalAlpha = 0.18;
@@ -155,7 +155,7 @@ function Desenho() {
   };
   const move = (e: React.PointerEvent) => {
     if (!drawing.current) return;
-    strokes.current[strokes.current.length - 1].push(pos(e));
+    strokes.current[strokes.current.length - 1]?.push(pos(e));
     redraw(null);
   };
   const up = () => { drawing.current = false; };
