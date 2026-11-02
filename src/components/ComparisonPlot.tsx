@@ -16,6 +16,7 @@ export function ComparisonPlot({ functions, xMin, xMax, tangentAt }: {
   }, [functions]);
   const curves = useMemo(() => functions.map((item) => ({ ...item, ...parseFn(item.expression) })), [functions]);
   const annotations = useMemo(() => curves.flatMap((item) => item.fn ? findPlotAnnotations(item.fn, xMin, xMax).map((point) => ({ ...point, slot: item.slot })) : []), [curves, xMin, xMax]);
+  const yIntercepts = xMin <= 0 && xMax >= 0 ? curves.map((item) => ({ slot: item.slot, y: item.fn?.(0) ?? NaN })).filter((p) => Number.isFinite(p.y)) : [];
   const visible = curves.filter((item) => item.fn && !hidden.includes(item.slot));
   const samples = Array.from({ length: 601 }, (_, i) => xMin + (xMax - xMin) * i / 600);
   const values = visible.flatMap((item) => samples.map((x) => item.fn?.(x) ?? NaN)).filter(Number.isFinite).sort((a, b) => a - b);
@@ -63,9 +64,31 @@ export function ComparisonPlot({ functions, xMin, xMax, tangentAt }: {
           {tangentAt !== undefined && tangents.filter((item) => Number.isFinite(item.y)).map((item) => <ReferenceDot key={item.slot} x={tangentAt} y={item.y} r={4} fill={`var(--chart-${item.slot + 1})`} stroke="var(--card)" />)}
           {annotations.filter((point) => !hidden.includes(point.slot) && point.y >= low && point.y <= high).map((point, index) => <ReferenceDot key={`annotation-${point.slot}-${index}`} x={point.x} y={point.y} ifOverflow="hidden" shape={(props: { cx?: number; cy?: number }) => <ChalkAnnotation {...props} point={point} color={`var(--chart-${point.slot + 1})`} />} />)}
           {annotations.filter((point) => point.kind !== "Raiz" && !hidden.includes(point.slot) && point.y >= low && point.y <= high).map((point, index) => <ReferenceLine key={`guide-${point.slot}-${index}`} segment={[{ x: point.x, y: 0 }, { x: point.x, y: point.y }]} stroke="var(--chart-2)" strokeDasharray="4 5" className="chalk-guide" />)}
+          {annotations.filter((point) => !hidden.includes(point.slot) && point.y >= low && point.y <= high).flatMap((point, index) => [
+            <ReferenceLine key={`uvx-${point.slot}-${index}`} x={point.x} stroke="var(--uv)" strokeDasharray="2 4" className="uv-layer" />,
+            <ReferenceLine key={`uvy-${point.slot}-${index}`} y={point.y} stroke="var(--uv)" strokeDasharray="2 4" className="uv-layer" />,
+            <ReferenceDot key={`uvd-${point.slot}-${index}`} x={point.x} y={point.y} ifOverflow="hidden" shape={(props: { cx?: number; cy?: number }) => props.cx === undefined || props.cy === undefined ? <g /> : <g className="uv-layer"><circle cx={props.cx} cy={props.cy} r={5} fill="var(--uv)" /><text x={props.cx + 8} y={props.cy + 16} className="uv-label">{`(${fmt(point.x, 3)}, ${fmt(point.y, 3)})`}</text></g>} />,
+          ])}
+          {yIntercepts.filter((p) => !hidden.includes(p.slot) && p.y >= low && p.y <= high).map((p) => <ReferenceDot key={`uvi-${p.slot}`} x={0} y={p.y} ifOverflow="hidden" shape={(props: { cx?: number; cy?: number }) => props.cx === undefined || props.cy === undefined ? <g /> : <g className="uv-layer"><rect x={props.cx - 4} y={props.cy - 4} width={8} height={8} fill="var(--uv)" transform={`rotate(45 ${props.cx} ${props.cy})`} /><text x={props.cx + 8} y={props.cy - 8} className="uv-label">{`y₀ = ${fmt(p.y, 3)}`}</text></g>} />)}
         </LineChart>
       </ResponsiveContainer>
     </div>
+    <section className="uv-panel" aria-label="Painel Raio-X">
+      <div><div className="uv-box">
+        <h3 className="mb-3 text-lg">Raio-X · Luz Negra</h3>
+        <ul className="grid gap-3 sm:grid-cols-2">
+          {curves.filter((item) => item.fn && !hidden.includes(item.slot)).map((item) => {
+            const fn = item.fn!; const pts = annotations.filter((a) => a.slot === item.slot); const y0 = yIntercepts.find((p) => p.slot === item.slot);
+            return <li key={item.slot} className="space-y-1 text-sm">
+              <p className="font-mono">{FUNCTION_SLOTS[item.slot]}(x) = {item.expression}</p>
+              {y0 && <p className="font-mono">Interseção Y: (0, {fmt(y0.y, 5)}) · {FUNCTION_SLOTS[item.slot]}′(0) ≈ {fmt(derivative(fn, 0), 5)}</p>}
+              {tangentAt !== undefined && <p className="font-mono">{FUNCTION_SLOTS[item.slot]}′({fmt(tangentAt, 3)}) ≈ {fmt(derivative(fn, tangentAt), 5)}</p>}
+              {pts.length ? pts.map((a, i) => <p key={i} className="font-mono">{a.kind}: ({fmt(a.x, 5)}, {fmt(a.y, 5)}) · {FUNCTION_SLOTS[item.slot]}′ ≈ {fmt(derivative(fn, a.x), 4)}</p>) : <p className="font-mono">Sem raízes ou extremos no intervalo.</p>}
+            </li>;
+          })}
+        </ul>
+      </div></div>
+    </section>
     {visible.length === 0 && <p className="mt-3 text-sm text-muted-foreground">Nenhuma função válida visível.</p>}
     {tangentAt !== undefined && <p className="mt-4 border-t border-border pt-4 text-center text-xs text-muted-foreground">Curvas: linhas contínuas · Retas tangentes: linhas tracejadas</p>}
   </div>;

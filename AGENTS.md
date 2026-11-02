@@ -16,3 +16,4 @@
 - Keep the calculus tutor's AI calls inside a TanStack server function using the Gateway SDK with validated structured output; store its explicitly session-only history in sessionStorage and use shared KaTeX rendering for formulas.
 - Apply the optional chalkboard theme through root CSS tokens and a hydration-safe header toggle; keep decorative texture/tray theme-only and use shared SVG axis/annotation primitives without changing calculation results.
 - Transfer tutor graph suggestions through a validated Functions search parameter; verify expressions with the shared mathjs parser and keep legacy session solutions readable when graph fields are absent.
+- Blacklight is a chalkboard-only root class (html.blacklight) persisted beside the theme; UV overlays and the Raio-X panel are always rendered and shown/hidden via CSS so toggling never re-renders charts.

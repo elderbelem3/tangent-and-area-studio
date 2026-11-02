@@ -17,4 +17,11 @@ describe("Chalkboard preference", () => {
     const store = { getItem: () => { throw new Error("blocked"); }, setItem: () => { throw new Error("blocked"); } };
     expect(readTheme(store)).toBe("standard"); expect(() => saveTheme(store, "chalkboard")).not.toThrow();
   });
+});import { readBlacklight, saveBlacklight } from "@/lib/theme";
+describe("Blacklight preference", () => {
+  it("starts off and retains on", () => {
+    const values = new Map<string, string>();
+    const store = { getItem: (k: string) => values.get(k) ?? null, setItem: (k: string, v: string) => { values.set(k, v); } };
+    expect(readBlacklight(store)).toBe(false); saveBlacklight(store, true); expect(readBlacklight(store)).toBe(true);
+  });
 });
