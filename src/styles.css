@@ -316,3 +316,18 @@
 .uv-panel p.font-mono { font-family: var(--font-math, monospace); font-weight: 500; line-height: 1.85; }
 .uv-panel ol > li { line-height: 1.8; }
 .uv-panel ol > li + li { margin-top: 1rem; }
+
+/* Chalkboard legibility v2: bigger scale, mono math, no text shadows */
+html.chalkboard { font-size: 18px; }
+.chalkboard *, .chalkboard *::before, .chalkboard *::after { text-shadow: none !important; }
+.chalkboard text { filter: none !important; }
+.chalkboard { --font-math: "Roboto Mono", "JetBrains Mono", ui-monospace, monospace; }
+.chalkboard :is(input, textarea, .font-mono, table, td, th, .recharts-cartesian-axis-tick text, svg text.fill-muted-foreground, .uv-label, .recharts-tooltip-wrapper, [role="toolbar"] button) {
+  font-family: var(--font-math) !important; font-weight: 600; color: oklch(0.97 0.01 120);
+}
+.chalkboard .recharts-cartesian-axis-tick text { font-size: 15px !important; fill: oklch(0.95 0.01 120) !important; }
+.chalkboard svg text.fill-muted-foreground { font-size: 15px; fill: oklch(0.95 0.01 120); }
+.chalkboard :is(input, textarea) { font-size: 17px; }
+.chalkboard .uv-label { font-size: 16px; font-weight: 600; letter-spacing: 0; stroke: none; fill: oklch(0.9 0.12 305); }
+.chalkboard .chalk-label { font-size: 17px; }
+.uv-panel p.font-mono { color: oklch(0.92 0.09 305); }
