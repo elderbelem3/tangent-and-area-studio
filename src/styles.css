@@ -364,3 +364,21 @@ html.chalkboard { font-size: 18px; }
 /* Copilot side panel */
 .help-chat { top: 0; right: 0; bottom: 0; height: 100vh; width: min(380px, 100vw); border-radius: 0; border-width: 0 0 0 1px; animation: copilot-in 300ms ease; }
 @keyframes copilot-in { from { transform: translateX(24px); opacity: 0; } }
+
+/* Luz Negra on the IA tab: fluorescent ink chat + hidden annotations revealed (always rendered, swapped via CSS). */
+.uv-reveal { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 450ms ease, opacity 450ms ease, margin 450ms ease; }
+.uv-reveal > div { overflow: hidden; display: grid; gap: .6rem; }
+.blacklight .uv-reveal { grid-template-rows: 1fr; opacity: 1; margin-top: 1rem; }
+.uv-reveal-label { display: block; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .2rem; }
+.uv-reveal :is(.uv-ink-purple, .uv-ink-blue, .uv-ink-green) { border: 2px dashed currentColor; border-radius: 8px; padding: .6rem .8rem; font-size: .92rem; line-height: 1.6; }
+.uv-ink-purple { color: oklch(0.85 0.17 305); }
+.uv-ink-blue { color: oklch(0.85 0.14 230); }
+.uv-ink-green { color: oklch(0.88 0.2 145); }
+.blacklight .ia-uv-scope { background: oklch(0.13 0.04 295); border-radius: 14px; padding: 1.25rem; box-shadow: 0 0 0 2px oklch(0.72 0.18 305 / 45%), 0 0 28px oklch(0.6 0.2 305 / 35%); transition: background 400ms ease, box-shadow 400ms ease; }
+.blacklight .ia-uv-scope article, .blacklight .ia-uv-scope [data-testid=enade-feedback], .blacklight .ia-uv-scope [role=radio] { background: oklch(0.17 0.05 295 / 80%); border-color: oklch(0.72 0.18 305 / 55%); }
+.blacklight .ia-uv-scope :is(h2, h3) { color: oklch(0.85 0.14 230); }
+.blacklight .ia-uv-scope p, .blacklight .ia-uv-scope li, .blacklight .ia-uv-scope [role=radio] span:last-child { color: oklch(0.88 0.12 305); }
+.blacklight .ia-uv-scope .text-primary, .blacklight .ia-uv-scope .katex { color: oklch(0.88 0.2 145); }
+.blacklight .ia-uv-scope .uv-ink-blue, .blacklight .ia-uv-scope .uv-ink-blue p { color: oklch(0.85 0.14 230); }
+.blacklight .ia-uv-scope .uv-ink-green { color: oklch(0.88 0.2 145); }
+.blacklight .ia-uv-scope .uv-ink-purple { color: oklch(0.85 0.17 305); }

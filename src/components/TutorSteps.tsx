@@ -21,6 +21,10 @@ export function TutorSteps({ solution, onQuestion }: { solution: TutorSolution; 
         {onQuestion && <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 text-primary" title={`Perguntar sobre ${index === solution.steps.length ? "a conclusão" : `o passo ${index + 1}`}`} aria-label={`Perguntar sobre ${index === solution.steps.length ? "a conclusão" : `o passo ${index + 1}`}`} onClick={() => onQuestion(index)}><MessageCircle className="h-4 w-4" /></Button>}
       </div>
       <TutorStepContent step={step} />
+      {(step.dica || step.intermediario) && <div className="uv-reveal" aria-label="Anotações em luz negra"><div>
+        {step.intermediario && <div className="uv-ink-blue"><p className="uv-reveal-label">Passo intermediário</p><MathFormula formula={step.intermediario} /></div>}
+        {step.dica && <p className={index === solution.steps.length ? "uv-ink-green" : "uv-ink-purple"}><span className="uv-reveal-label">{index === solution.steps.length ? "Gabarito detalhado" : "Dica oculta"}</span>{step.dica}</p>}
+      </div></div>}
     </article>)}
   </div>;
 }

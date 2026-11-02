@@ -57,6 +57,10 @@ export function EnadePanel({ startToken, onClose }: { startToken: number; onClos
       <p className="leading-relaxed">{q.contexto}</p>
       {q.formula && <div className="rounded-lg bg-secondary px-4 py-2"><MathFormula formula={q.formula} /></div>}
       <p className="font-medium leading-relaxed">{q.enunciado}</p>
+      {(q.dica || q.gabarito) && <div className="uv-reveal" aria-label="Anotações em luz negra"><div>
+        {q.dica && <p className="uv-ink-blue"><span className="uv-reveal-label">Dica oculta</span>{q.dica}</p>}
+        {q.gabarito && <p className="uv-ink-green"><span className="uv-reveal-label">Gabarito · alternativa {q.correta}</span>{q.gabarito}</p>}
+      </div></div>}
       <div className="space-y-2" role="radiogroup" aria-label="Alternativas">
         {q.alternativas.map((a) => {
           const right = feedback && a.letra === q.correta, wrong = feedback && choice === a.letra && a.letra !== q.correta;
