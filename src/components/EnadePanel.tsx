@@ -81,7 +81,7 @@ export function EnadePanel({ startToken, onClose }: { startToken: number; onClos
         {!solution && <Button type="button" variant="outline" size="sm" className="mt-3" onClick={() => void showSolution()} disabled={!!busy}>{busy === "sol" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <ListChecks className="h-4 w-4" />}Ver Resolução Passo a Passo</Button>}
       </div>}
       {busy === "sol" && <p className="flex items-center gap-2 text-sm text-muted-foreground"><LoaderCircle className="h-4 w-4 animate-spin" />Preparando a resolução…</p>}
-      {solution && <div className="border-t border-border pt-4"><TutorSteps solution={solution} onQuestion={() => {}} /></div>}
+      {solution && <div className="border-t border-border pt-4"><TutorSteps solution={solution} /></div>}
     </article>}
   </div>;
 }
