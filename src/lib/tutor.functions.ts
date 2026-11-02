@@ -20,7 +20,7 @@ export const askTutor = createServerFn({ method: "POST" })
       if (error instanceof GatewayError) {
         console.error("Tutor request failed", { code: error.code, ids: error.ids, outcome: error.outcome });
         if (error.code === "payment_required") return { solution: null, error: "Os créditos de IA estão indisponíveis. O responsável pela aplicação precisa revisar o saldo." };
-        if (error.code === "rate_limit") return { solution: null, error: "O tutor está recebendo muitas solicitações. Aguarde antes de enviar outra pergunta." };
+        if (error.code === "rate_limited") return { solution: null, error: "O tutor está recebendo muitas solicitações. Aguarde antes de enviar outra pergunta." };
         if (error.code === "permission_denied" || error.code === "configuration_error" || error.code === "authentication_error") return { solution: null, error: "O acesso ao tutor está indisponível. A conexão de IA precisa ser revisada pelo responsável." };
       } else console.error("Tutor response validation failed");
       return { solution: null, error: "Não foi possível receber a resolução. Seu texto foi preservado; tente novamente quando desejar." };
