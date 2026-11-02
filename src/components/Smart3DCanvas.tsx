@@ -91,7 +91,7 @@ function CurveLine({ segs, color }: { segs: V3[][]; color: string }) {
   return <>{segs.map((pts, k) => <Line key={k} points={pts} color={color} lineWidth={5} />)}</>;
 }
 
-function SurfaceMesh({ d, chalk, color, chalkColor }: { d: NonNullable<ReturnType<typeof surfaceData>>; chalk: boolean; color?: string; chalkColor?: string }) {
+function SurfaceMesh({ d, chalk, color, chalkColor }: { d: NonNullable<ReturnType<typeof surfaceData>>; chalk: boolean; color?: string | undefined; chalkColor?: string | undefined }) {
   const geo = useMemo(() => {
     const g = new THREE.BufferGeometry(), pos: number[] = [], col: number[] = [], idx: number[] = [];
     const c = new THREE.Color();
