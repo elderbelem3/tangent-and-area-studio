@@ -7,8 +7,19 @@ export type TutorStep = z.infer<typeof tutorStepSchema>;
 export type TutorQuestion = { question: string; answer: TutorSolution };
 export type TutorEntry = { id: string; problem: string; solution: TutorSolution; questions: Record<string, TutorQuestion[]> };
 
+export const ATTACHMENT_TYPES = ["application/pdf", "image/png", "image/jpeg"] as const;
+export const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024;
+export const tutorAttachmentSchema = z.object({
+  name: z.string().min(1).max(200),
+  type: z.enum(ATTACHMENT_TYPES),
+  // data: URL with base64 payload; length cap ≈ 8 MB of binary.
+  dataUrl: z.string().regex(/^data:(application\/pdf|image\/png|image\/jpeg);base64,[A-Za-z0-9+/=]+$/).max(Math.ceil(MAX_ATTACHMENT_BYTES * 4 / 3) + 64),
+});
+export type TutorAttachment = z.infer<typeof tutorAttachmentSchema>;
+
 export const tutorRequestSchema = z.object({
   problem: z.string().trim().min(1).max(8000),
+  attachment: tutorAttachmentSchema.optional(),
   context: z.object({ solution: tutorSolutionSchema, stepIndex: z.number().int().min(0), question: z.string().trim().min(1).max(4000), previous: z.array(z.object({ question: z.string(), answer: tutorSolutionSchema })).max(20) }).optional(),
 }).superRefine((value, ctx) => {
   if (value.context && value.context.stepIndex > value.context.solution.steps.length) ctx.addIssue({ code: "custom", message: "Etapa inválida", path: ["context", "stepIndex"] });
