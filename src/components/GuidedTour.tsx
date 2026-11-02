@@ -1,3 +1,4 @@
+import { EV_THEME } from "@/lib/copilot-actions";
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
