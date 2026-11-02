@@ -32,4 +32,4 @@
 - [x] Refinar madeira, superfície apagada e contornos de giz.
 - [x] Acrescentar setas, guias amarelas e calha com apagador e gizes.
 - [x] Verificar aparência e interações sem alterar o modo padrão.
-- [ ] Preserve each module state (inputs, points, 3D, mode) across tab navigation
+- [x] Preserve each module state (inputs, points, 3D, mode) across tab navigation
