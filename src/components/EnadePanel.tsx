@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { GraduationCap, LoaderCircle, ListChecks, Send, CheckCircle2, XCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,14 +21,13 @@ export function EnadePanel({ startToken, onClose }: { startToken: number; onClos
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState<EnadeFeedback | null>(null);
   const [solution, setSolution] = useState<TutorSolution | null>(null);
-  const [token, setToken] = useState(-1);
 
   async function newQuestion() {
     setBusy("gen"); setError(null); setQ(null); setChoice(null); setAnswer(""); setFeedback(null); setSolution(null);
     try { const r = await gen({ data: {} }); if (r.error || !r.question) setError(r.error ?? "Não foi possível gerar a questão."); else setQ(r.question); }
     catch { setError("Não foi possível conectar à IA."); } finally { setBusy(null); }
   }
-  if (token !== startToken) { setToken(startToken); void newQuestion(); }
+  useEffect(() => { void newQuestion(); }, [startToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function submit() {
     if (!q) return; const text = answer.trim() || (choice ? `Alternativa ${choice}` : "");
