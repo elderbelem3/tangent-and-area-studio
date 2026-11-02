@@ -27,3 +27,8 @@
 - [x] Incluir funções e intervalo estruturados na resolução.
 - [x] Transferir funções validadas para o gráfico pela ação do tutor.
 - [x] Testar validação e resolução real com navegação e curvas.
+
+# Lousa realista
+- [ ] Refinar madeira, superfície apagada e contornos de giz.
+- [ ] Acrescentar setas, guias amarelas e calha com apagador e gizes.
+- [ ] Verificar aparência e interações sem alterar o modo padrão.
