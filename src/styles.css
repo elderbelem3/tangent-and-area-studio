@@ -241,12 +241,12 @@
   font-weight: 400;
 }
 .chalkboard .font-display { font-family: var(--font-chalk); }
-.chalkboard p:not(.font-mono) { font-size: 1.0625rem; line-height: 1.55; }
+.chalkboard p:not(.font-mono) { }
 .chalkboard :is(.lab-panel, [role="dialog"]) { border: 2px dashed var(--border); border-radius: 7px; }
-.chalkboard :is(input, textarea) { border: 1px dashed var(--input); border-radius: 4px; color: var(--foreground); font-family: var(--font-chalk); font-size: 15px; }
-.chalkboard main button { font-family: var(--font-chalk); color: var(--foreground); background-color: transparent; border: 1px solid var(--border); border-radius: 3px; font-size: 13px; box-shadow: none; }
+.chalkboard :is(input, textarea) { border: 1px dashed var(--input); border-radius: 4px; color: var(--foreground); font-family: var(--font-chalk); }
+.chalkboard main button { font-family: var(--font-chalk); color: var(--foreground); background-color: transparent; border: 1px solid var(--border); border-radius: 3px; box-shadow: none; }
 .chalkboard main button:hover { background-color: var(--chalk-dust); border-color: var(--foreground); }
-.chalkboard [role="toolbar"] { background: transparent; border: 0; padding: 0; gap: 5px; }
+.chalkboard [role="toolbar"] { background: transparent; border: 0; }
 .chalkboard :is(input, textarea) { background-color: var(--card); }
 .chalkboard .lab-panel { box-shadow: none; background: transparent; }
 .chalkboard :is(.stroke-axis, .chalk-axis line, .recharts-cartesian-axis-line) { stroke-dasharray: 7 3; stroke-linecap: round; }
@@ -303,37 +303,37 @@
 .chalkboard main button.font-mono, .chalkboard main [role="toolbar"] button, .chalkboard main [aria-label*="ímbolos"] button {
   font-family: var(--font-math) !important; font-weight: 600; letter-spacing: 0;
 }
-.chalkboard :is(input, textarea) { font-size: 15px; font-weight: 500; }
-.chalkboard .recharts-cartesian-axis-tick text { font-size: 13px; }
+.chalkboard :is(input, textarea) { font-weight: 500; }
+.chalkboard .recharts-cartesian-axis-tick text { }
 .chalkboard :is(h1, h2, h3, h4, .font-display, figcaption, .chalk-label) { letter-spacing: 0.03em; }
-.chalkboard p:not(.font-mono) { font-size: calc(1.0625rem + 2px); letter-spacing: 0.025em; line-height: 1.6; }
-.chalkboard .chalk-label { font-size: 16px; }
+.chalkboard p:not(.font-mono) { letter-spacing: 0.025em; }
+.chalkboard .chalk-label { }
 .chalkboard { --uv: oklch(0.88 0.13 305); --uv-strong: oklch(0.78 0.2 305); }
 .uv-label { font-size: 15px; font-weight: 700; letter-spacing: 0.03em; fill: oklch(0.93 0.09 305); paint-order: stroke; stroke: oklch(0.16 0.03 300 / 85%); stroke-width: 3px; }
 .chalkboard.blacklight .uv-layer .uv-label, .chalkboard.blacklight text.uv-label { filter: drop-shadow(0 0 2px var(--uv-strong)); }
 .uv-panel :is(h3, p, li, span) { color: oklch(0.92 0.1 305); text-shadow: 0 0 1px oklch(0.97 0.05 305), 0 0 6px var(--uv-strong); }
-.uv-panel :is(h3, ol span, .uv-extra > span) { font-family: var(--font-chalk); letter-spacing: 0.03em; font-size: calc(1em + 2px); }
+.uv-panel :is(h3, ol span, .uv-extra > span) { font-family: var(--font-chalk); letter-spacing: 0.03em; }
 .uv-panel p.font-mono { font-family: var(--font-math, monospace); font-weight: 500; line-height: 1.85; }
 .uv-panel ol > li { line-height: 1.8; }
 .uv-panel ol > li + li { margin-top: 1rem; }
 
 /* Chalkboard legibility v2: bigger scale, mono math, no text shadows */
-html.chalkboard { font-size: 18px; }
+html.chalkboard { }
 .chalkboard *, .chalkboard *::before, .chalkboard *::after { text-shadow: none !important; }
 .chalkboard text { filter: none !important; }
 .chalkboard { --font-math: "Roboto Mono", "JetBrains Mono", ui-monospace, monospace; }
 .chalkboard :is(input, textarea, .font-mono, table, td, th, .recharts-cartesian-axis-tick text, svg text.fill-muted-foreground, .uv-label, .recharts-tooltip-wrapper, [role="toolbar"] button) {
   font-family: var(--font-math) !important; font-weight: 600; color: oklch(0.97 0.01 120);
 }
-.chalkboard .recharts-cartesian-axis-tick text { font-size: 15px !important; fill: oklch(0.95 0.01 120) !important; }
-.chalkboard svg text.fill-muted-foreground { font-size: 15px; fill: oklch(0.95 0.01 120); }
-.chalkboard :is(input, textarea) { font-size: 17px; }
+.chalkboard .recharts-cartesian-axis-tick text { fill: oklch(0.95 0.01 120) !important; }
+.chalkboard svg text.fill-muted-foreground { fill: oklch(0.95 0.01 120); }
+.chalkboard :is(input, textarea) { }
 .chalkboard .uv-label { font-size: 16px; font-weight: 600; letter-spacing: 0; stroke: none; fill: oklch(0.9 0.12 305); }
-.chalkboard .chalk-label { font-size: 17px; }
+.chalkboard .chalk-label { }
 .uv-panel p.font-mono { color: oklch(0.92 0.09 305); }
 .chalkboard.blacklight .uv-layer, .chalkboard .uv-layer { filter: none !important; }
-.chalkboard main button { font-size: 16px; }
-.chalkboard .lab-panel table th { font-size: 15px; }
+.chalkboard main button { }
+.chalkboard .lab-panel table th { }
 
 /* Smart Canvas 3D labels */
 .uv-3d-label { white-space: nowrap; font-family: var(--font-math, ui-monospace, monospace); font-size: 14px; font-weight: 600; color: oklch(0.9 0.12 305); background: oklch(0.16 0.03 300 / 70%); padding: 1px 6px; border-radius: 4px; pointer-events: none; }
