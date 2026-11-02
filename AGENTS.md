@@ -12,3 +12,4 @@
 ## UI architecture
 - Keep CalculusLab visual tokens in src/styles.css and reuse Lab primitives and the shared Button across modules, so all six pages stay consistent without changing calculation logic.
 - Keep learning content as typed course units independent of the Aprenda view, and render its LaTeX through the shared KaTeX MathFormula with MathML output, so academic content stays maintainable and accessible.
+- Share slot-based comparison state, the function editor and Recharts comparison plot between Functions and Derivatives so removal preserves curve identity and colors; keep the existing Plot for Limits and Integrals.

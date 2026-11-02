@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { parseFn, derivative, fmt } from "@/lib/calc";
-import { Plot } from "@/components/Plot";
-import { PageHeader, Panel, Field, ErrorBox, Chip, MathToolbar, Stat, num } from "@/components/Lab";
+import { ComparisonPlot } from "@/components/ComparisonPlot";
+import { FunctionEditor } from "@/components/FunctionEditor";
+import { addComparisonFunction, removeComparisonFunction, FUNCTION_SLOTS, FUNCTION_TEXT_COLORS, type ComparisonFunction } from "@/lib/comparison";
+import { PageHeader, Panel, Field, ErrorBox, Chip, Stat, num } from "@/components/Lab";
 
 export const Route = createFileRoute("/derivadas")({
   head: () => ({
@@ -19,10 +21,12 @@ export const Route = createFileRoute("/derivadas")({
 });
 
 function Derivadas() {
-  const [expr, setExpr] = useState("x^2");
+  const [functions, setFunctions] = useState<ComparisonFunction[]>([{ slot: 0, expression: "x^2" }]);
+  const expr = functions.find((item) => item.slot === 0)?.expression ?? "";
+  const changeExpression = (slot: number, expression: string) => setFunctions((previous) => previous.map((item) => item.slot === slot ? { ...item, expression } : item));
+  const setExpr = (expression: string) => changeExpression(0, expression);
   const [x0S, setX0] = useState("1");
-  const inputRef = useRef<HTMLInputElement>(null);
-  const { fn, error } = useMemo(() => parseFn(expr), [expr]);
+  const { fn } = useMemo(() => parseFn(expr), [expr]);
   const x0 = num(x0S);
   const y0 = fn && x0 !== null ? fn(x0) : NaN;
   const m = fn && x0 !== null ? derivative(fn, x0) : NaN;
@@ -36,13 +40,10 @@ function Derivadas() {
         <div className="space-y-5">
           <Panel>
             <div className="space-y-5">
-              <MathToolbar inputRef={inputRef} value={expr} onChange={setExpr} />
-              <Field ref={inputRef} label="f(x) =" value={expr} onChange={setExpr} />
-              <div className="flex flex-wrap gap-2">
+              <FunctionEditor functions={functions} onChange={changeExpression} onAdd={() => setFunctions(addComparisonFunction)} onRemove={(slot) => setFunctions((previous) => removeComparisonFunction(previous, slot))} mainExtras={<div className="flex flex-wrap gap-2">
                 {["x^2", "sin(x)", "exp(x)", "x^3 - 3x", "log(x)"].map((f) => <Chip key={f} onClick={() => setExpr(f)}>{f}</Chip>)}
-              </div>
+              </div>} />
               <Field label="Ponto x₀" value={x0S} onChange={setX0} />
-              {error && <ErrorBox msg={error} />}
               {x0 === null && <ErrorBox msg="Informe um número válido para x₀." />}
               {fn && x0 !== null && !ok && <ErrorBox msg="A função não é definida ou não é derivável neste ponto (ex.: divisão por zero)." />}
             </div>
@@ -58,11 +59,18 @@ function Derivadas() {
               </div>
             </div>
           )}
+          {functions.length > 1 && x0 !== null && <Panel title="Derivadas das funções">
+            <div className="space-y-3">{functions.filter((item) => item.slot !== 0).map((item) => {
+              const parsed = parseFn(item.expression);
+              const value = parsed.fn ? derivative(parsed.fn, x0) : NaN;
+              return <div key={item.slot} className="flex items-center justify-between gap-3 border-b border-border pb-2 font-mono text-sm"><span className={FUNCTION_TEXT_COLORS[item.slot]}>{FUNCTION_SLOTS[item.slot]}'({fmt(x0)})</span><span>{fmt(value, 5)}</span></div>;
+            })}</div>
+          </Panel>}
         </div>
         <div className="min-w-0 space-y-6">
-          <Panel title="Curva e reta tangente">
-            {fn && x0 !== null ? (
-              <Plot fn={fn} xMin={x0 - 4} xMax={x0 + 4} lines={ok ? [(x) => m * (x - x0) + y0] : []} points={ok ? [{ x: x0, y: y0, label: `(${fmt(x0)}, ${fmt(y0, 3)})` }] : []} />
+          <Panel title="Curvas e retas tangentes">
+            {x0 !== null ? (
+              <ComparisonPlot functions={functions} xMin={x0 - 4} xMax={x0 + 4} tangentAt={x0} />
             ) : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
           </Panel>
           <Panel title="Interpretação geométrica">

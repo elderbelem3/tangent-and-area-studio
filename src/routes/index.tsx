@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { parseFn, fmt } from "@/lib/calc";
-import { Plot } from "@/components/Plot";
-import { PageHeader, Panel, Field, ErrorBox, Chip, MathToolbar, num } from "@/components/Lab";
+import { ComparisonPlot } from "@/components/ComparisonPlot";
+import { FunctionEditor } from "@/components/FunctionEditor";
+import { addComparisonFunction, removeComparisonFunction, type ComparisonFunction } from "@/lib/comparison";
+import { PageHeader, Panel, Field, ErrorBox, Chip, num } from "@/components/Lab";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -27,12 +29,14 @@ const examples = [
 ];
 
 function Funcoes() {
-  const [expr, setExpr] = useState("x^3 - 3x");
+  const [functions, setFunctions] = useState<ComparisonFunction[]>([{ slot: 0, expression: "x^3 - 3x" }]);
+  const expr = functions.find((item) => item.slot === 0)?.expression ?? "";
+  const changeExpression = (slot: number, expression: string) => setFunctions((previous) => previous.map((item) => item.slot === slot ? { ...item, expression } : item));
+  const setExpr = (expression: string) => changeExpression(0, expression);
   const [a, setA] = useState("-3");
   const [b, setB] = useState("3");
   const [step, setStep] = useState("0.5");
-  const inputRef = useRef<HTMLInputElement>(null);
-  const { fn, error } = useMemo(() => parseFn(expr), [expr]);
+  const { fn } = useMemo(() => parseFn(expr), [expr]);
   const xMin = num(a), xMax = num(b), st = num(step);
   const rangeErr = xMin === null || xMax === null ? "Informe números válidos para o intervalo." : xMin >= xMax ? "O início do intervalo deve ser menor que o fim." : null;
   const stepErr = st === null || st <= 0 ? "O passo deve ser um número positivo." : null;
@@ -51,17 +55,14 @@ function Funcoes() {
         <div className="space-y-5">
           <Panel>
             <div className="space-y-5">
-              <MathToolbar inputRef={inputRef} value={expr} onChange={setExpr} />
-              <Field ref={inputRef} label="f(x) =" value={expr} onChange={setExpr} placeholder="ex: x^2, sin(x), exp(x)" />
-              <div className="flex flex-wrap gap-2">
+              <FunctionEditor functions={functions} onChange={changeExpression} onAdd={() => setFunctions(addComparisonFunction)} onRemove={(slot) => setFunctions((previous) => removeComparisonFunction(previous, slot))} mainExtras={<div className="flex flex-wrap gap-2">
                 {examples.map((e) => <Chip key={e.label} onClick={() => setExpr(e.f)}>{e.label}</Chip>)}
-              </div>
+              </div>} />
               <div className="grid grid-cols-3 gap-2">
                 <Field label="x mín" value={a} onChange={setA} />
                 <Field label="x máx" value={b} onChange={setB} />
                 <Field label="passo" value={step} onChange={setStep} />
               </div>
-              {error && <ErrorBox msg={error} />}
               {rangeErr && <ErrorBox msg={rangeErr} />}
               {stepErr && <ErrorBox msg={stepErr} />}
               <p className="text-xs text-muted-foreground">Suporta: + − * / ^, sin, cos, tan, exp, log (ln), sqrt, abs, pi, e.</p>
@@ -80,8 +81,8 @@ function Funcoes() {
             </div>
           </Panel>
         </div>
-        <Panel title={`Gráfico de f(x) = ${expr}`}>
-          {fn && !rangeErr && xMin !== null && xMax !== null ? <Plot fn={fn} xMin={xMin} xMax={xMax} /> : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
+        <Panel title="Gráfico das funções">
+          {!rangeErr && xMin !== null && xMax !== null ? <ComparisonPlot functions={functions} xMin={xMin} xMax={xMax} /> : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
         </Panel>
       </div>
     </>
