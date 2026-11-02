@@ -1,4 +1,4 @@
-import { useId, useMemo } from "react";
+import { useId, useMemo, type ReactNode } from "react";
 import type { Fn } from "@/lib/calc";
 import { findPlotAnnotations } from "@/lib/plot-annotations";
 import { ChalkAnnotation } from "@/components/ChalkAnnotation";
@@ -10,11 +10,13 @@ type Props = {
   points?: { x: number; y: number; label?: string; hollow?: boolean }[];
   lines?: Fn[];
   shade?: [number, number];
+  overlay?: (h: PlotHelpers) => ReactNode;
 };
+export type PlotHelpers = { sx: (x: number) => number; sy: (y: number) => number; xMin: number; xMax: number; yMin: number; yMax: number; fn: Fn };
 
 const W = 640, H = 400, P = 36;
 
-export function Plot({ fn, xMin, xMax, points = [], lines = [], shade }: Props) {
+export function Plot({ fn, xMin, xMax, points = [], lines = [], shade, overlay }: Props) {
   const clipId = useId();
   const annotations = useMemo(() => findPlotAnnotations(fn, xMin, xMax), [fn, xMin, xMax]);
   const N = 600;
@@ -101,6 +103,7 @@ export function Plot({ fn, xMin, xMax, points = [], lines = [], shade }: Props) 
             {p.label && <text x={sx(p.x) + 10} y={sy(p.y) - 10} className="fill-foreground text-[12px] font-semibold">{p.label}</text>}
           </g>
         ))}
+        {overlay?.({ sx, sy, xMin, xMax, yMin, yMax, fn })}
         {annotations.filter((point) => point.y >= yMin && point.y <= yMax).map((point, i) => <ChalkAnnotation key={`annotation-${i}`} cx={sx(point.x)} cy={sy(point.y)} point={point} />)}
       </g>
     </svg>

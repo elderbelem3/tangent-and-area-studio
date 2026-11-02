@@ -3,7 +3,7 @@ import { fmt, integrate, normalize, parseFn } from "@/lib/calc";
 
 export type UvStep = { title: string; lines: string[] };
 
-const show = (s: string) => s.replace(/\blog\(/g, "ln(").replace(/ \* /g, "·");
+const show = (s: string) => s.replace(/\blog\(/g, "ln(").replace(/ \* /g, "·").replace(/ \^ /g, "^");
 const str = (n: MathNode) => show(n.toString());
 const hasX = (n: MathNode) => n.filter((k) => (k as { isSymbolNode?: boolean }).isSymbolNode === true && (k as unknown as { name: string }).name === "x").length > 0;
 const d = (n: MathNode) => simplify(symD(n, "x"));

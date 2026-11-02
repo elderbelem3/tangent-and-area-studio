@@ -20,7 +20,7 @@ describe("uv steps", () => {
   it("integrates x^2 on [0,2] via TFC = 8/3", () => {
     const t = text(integralSteps("x^2", 0, 2));
     expect(t).toContain("Teorema Fundamental");
-    expect(t).toContain("2.66667");
+    expect(t).toContain("2.666667");
   });
   it("uses parts for x*exp(x) and substitution for sin(2x)", () => {
     expect(text(integralSteps("x*exp(x)", 0, 1))).toContain("partes");
