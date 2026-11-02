@@ -107,7 +107,7 @@ export function ErrorBox({ msg }: { msg: string }) {
 export function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border border-primary/15 bg-primary/5 p-5">
-      <p className="text-xs font-medium uppercase text-muted-foreground">{label}</p>
+      <p className="font-mono text-xs font-medium uppercase text-muted-foreground">{label}</p>
       <p className="mt-2 break-all font-mono text-2xl font-semibold text-primary">{value}</p>
     </div>
   );
