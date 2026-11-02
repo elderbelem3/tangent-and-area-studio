@@ -285,3 +285,14 @@
 .uv-panel :is(h3, p, li, span) { color: var(--uv); text-shadow: 0 0 4px var(--uv-strong), 0 0 12px var(--uv-strong); }
 .uv-panel .uv-box { border: 2px dashed color-mix(in oklch, var(--uv) 60%, transparent); border-radius: 7px; padding: 1rem; background: oklch(0.15 0.03 300 / 35%); }
 .chalkboard.blacklight .uv-toggle { color: var(--uv); background: oklch(0.72 0.18 305 / 18%); box-shadow: 0 0 12px var(--uv-strong); }
+/* Quadro limpo sem Luz Negra; anotações de giz só com UV */
+.chalkboard .chalk-annotation, .chalkboard .chalk-guide { display: inline; opacity: 0; transition: opacity 450ms ease; }
+.chalkboard.blacklight .chalk-annotation, .chalkboard.blacklight .chalk-guide { opacity: 1; }
+.chalk-summary { display: none; }
+.chalkboard .chalk-summary { display: grid; grid-template-rows: 1fr; opacity: 1; margin-top: 1.25rem; transition: grid-template-rows 450ms ease, opacity 450ms ease, margin 450ms ease; }
+.chalkboard.blacklight .chalk-summary { grid-template-rows: 0fr; opacity: 0; margin-top: 0; }
+.chalk-summary > div { overflow: hidden; }
+.chalk-summary-box { border: 2px dashed var(--border); border-radius: 7px; padding: 1rem; }
+.chalk-summary :is(h3, p) { color: var(--foreground); text-shadow: 0 0 1px var(--chalk-highlight); }
+.uv-panel .uv-extra { border-top: 1px dashed color-mix(in oklch, var(--uv) 50%, transparent); padding-top: .75rem; }
+.uv-panel ol span, .uv-extra > span { font-family: var(--font-chalk); font-weight: 600; }
