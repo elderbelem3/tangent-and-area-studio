@@ -19,6 +19,6 @@
 - [x] Verificar resolução e perguntas sobre etapas com respostas reais.
 
 # Modo Quadro Negro
-- [ ] Adicionar alternância no cabeçalho e persistência local.
-- [ ] Aplicar tokens, escrita de giz, moldura e anotações aos gráficos.
-- [ ] Verificar alternância, recarregamento e interações em todas as abas.
+- [x] Adicionar alternância no cabeçalho e persistência local.
+- [x] Aplicar tokens, escrita de giz, moldura e anotações aos gráficos.
+- [x] Verificar alternância, recarregamento e interações em todas as abas.
