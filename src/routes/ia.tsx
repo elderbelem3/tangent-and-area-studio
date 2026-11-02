@@ -11,6 +11,9 @@ import { askTutor } from "@/lib/tutor.functions";
 import { tutorSolutionSchema, ATTACHMENT_TYPES, MAX_ATTACHMENT_BYTES, type TutorEntry, type TutorAttachment } from "@/lib/tutor";
 import { z } from "zod";
 import { validateTutorPlot } from "@/lib/tutor-plot";
+import { EnadePanel } from "@/components/EnadePanel";
+import { isEnadeRequest } from "@/lib/enade";
+import { GraduationCap } from "lucide-react";
 
 export const Route = createFileRoute("/ia")({
   head: () => ({ meta: [
@@ -29,6 +32,8 @@ function TutorPage() {
   const navigate = useNavigate();
   const tutor = useServerFn(askTutor);
   const [problem, setProblem] = useState("");
+  const [enade, setEnade] = useState<number | null>(null);
+  const openEnade = () => setEnade((n) => (n ?? 0) + 1);
   const [attachment, setAttachment] = useState<TutorAttachment | null>(null);
   const [attachError, setAttachError] = useState<string | null>(null);
   const [analyzingFile, setAnalyzingFile] = useState(false);
@@ -66,6 +71,8 @@ function TutorPage() {
 
   async function solve() {
     if ((!problem.trim() && !attachment) || busy || questionBusy) return;
+    if (!attachment && isEnadeRequest(problem)) { setProblem(""); openEnade(); return; }
+    setEnade(null);
     setBusy(true); setError(null);
     const file = attachment;
     setAnalyzingFile(!!file);
@@ -98,6 +105,7 @@ function TutorPage() {
     <PageHeader tag="Tutor de Cálculo 1 e 2" title="IA" desc="Do enunciado à conclusão, uma etapa de cada vez." />
     <div className="grid min-w-0 gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
       <div className="min-w-0 space-y-6">
+        <Button type="button" onClick={openEnade} disabled={busy} className="tour-ai w-full gap-2 rounded-full"><GraduationCap className="h-4 w-4" />Gerar Questão do ENADE</Button>
         <Panel title="Seu problema">
           <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void solve(); }}>
             <label className="block text-sm font-medium" htmlFor="tutor-problem">Enunciado ou expressão</label>
@@ -123,11 +131,11 @@ function TutorPage() {
         </Panel>
         <section className="min-w-0">
           <h2 className="mb-4 flex items-center gap-2 font-display text-sm font-semibold"><History className="h-4 w-4 text-primary" />Dúvidas recentes</h2>
-          {entries.length === 0 ? <p className="text-sm text-muted-foreground">Nenhuma dúvida nesta sessão.</p> : <div className="space-y-2">{entries.map((entry) => <Button key={entry.id} variant={entry.id === activeId ? "secondary" : "ghost"} disabled={busy || questionBusy} onClick={() => { setActiveId(entry.id); setProblem(entry.problem); setError(null); }} className="h-auto w-full min-w-0 justify-start whitespace-normal py-3 text-left"><BrainCircuit className="h-4 w-4 shrink-0 text-primary" /><span className="min-w-0 break-words text-sm">{entry.problem}</span></Button>)}</div>}
+          {entries.length === 0 ? <p className="text-sm text-muted-foreground">Nenhuma dúvida nesta sessão.</p> : <div className="space-y-2">{entries.map((entry) => <Button key={entry.id} variant={entry.id === activeId ? "secondary" : "ghost"} disabled={busy || questionBusy} onClick={() => { setEnade(null); setActiveId(entry.id); setProblem(entry.problem); setError(null); }} className="h-auto w-full min-w-0 justify-start whitespace-normal py-3 text-left"><BrainCircuit className="h-4 w-4 shrink-0 text-primary" /><span className="min-w-0 break-words text-sm">{entry.problem}</span></Button>)}</div>}
         </section>
       </div>
       <section className="min-w-0" aria-live="polite" aria-busy={busy}>
-        {busy ? <div className="flex min-h-72 flex-col items-center justify-center gap-4 border-y border-border text-muted-foreground"><LoaderCircle className="h-8 w-8 animate-spin text-primary" /><p className="text-sm">{analyzingFile ? "A IA está a analisar o documento…" : "Analisando o problema e preparando a resolução…"}</p></div> : active ? <>
+        {enade !== null && !busy ? <EnadePanel startToken={enade} onClose={() => setEnade(null)} /> : busy ? <div className="flex min-h-72 flex-col items-center justify-center gap-4 border-y border-border text-muted-foreground"><LoaderCircle className="h-8 w-8 animate-spin text-primary" /><p className="text-sm">{analyzingFile ? "A IA está a analisar o documento…" : "Analisando o problema e preparando a resolução…"}</p></div> : active ? <>
           <div className="mb-5 border-b border-border pb-5"><p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase text-primary"><CheckCheck className="h-4 w-4" />Resolução</p><h2 className="break-words font-display text-xl font-semibold">{active.solution.title}</h2><p className="mt-3 break-words whitespace-pre-wrap text-sm text-muted-foreground">{active.problem}</p></div>
           <TutorSteps solution={active.solution} onQuestion={(index) => { setStepIndex(index); setQuestion(""); setQuestionError(null); }} />
           {plotResult && <div className="mt-5 space-y-3 border-t border-border pt-5">
