@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { parseFn, fmt } from "@/lib/calc";
 import { ComparisonPlot } from "@/components/ComparisonPlot";
 import { FunctionEditor } from "@/components/FunctionEditor";
 import { addComparisonFunction, removeComparisonFunction, type ComparisonFunction } from "@/lib/comparison";
 import { PageHeader, Panel, Field, ErrorBox, Chip, num } from "@/components/Lab";
+import { decodeTutorPlot, tutorPlotFunctions } from "@/lib/tutor-plot";
 
 export const Route = createFileRoute("/")({
+  validateSearch: (search: Record<string, unknown>): { grafico?: string } => typeof search["grafico"] === "string" ? { grafico: search["grafico"] } : {},
   head: () => ({
     meta: [
       { property: "og:type", content: "website" },
@@ -29,13 +31,20 @@ const examples = [
 ];
 
 function Funcoes() {
-  const [functions, setFunctions] = useState<ComparisonFunction[]>([{ slot: 0, expression: "x^3 - 3x" }]);
+  const { grafico } = Route.useSearch();
+  const imported = useMemo(() => grafico === undefined ? null : decodeTutorPlot(grafico), [grafico]);
+  const [functions, setFunctions] = useState<ComparisonFunction[]>(() => imported?.plot ? tutorPlotFunctions(imported.plot) : [{ slot: 0, expression: "x^3 - 3x" }]);
   const expr = functions.find((item) => item.slot === 0)?.expression ?? "";
   const changeExpression = (slot: number, expression: string) => setFunctions((previous) => previous.map((item) => item.slot === slot ? { ...item, expression } : item));
   const setExpr = (expression: string) => changeExpression(0, expression);
-  const [a, setA] = useState("-3");
-  const [b, setB] = useState("3");
+  const [a, setA] = useState(() => String(imported?.plot?.intervalo[0] ?? -3));
+  const [b, setB] = useState(() => String(imported?.plot?.intervalo[1] ?? 3));
   const [step, setStep] = useState("0.5");
+  useEffect(() => {
+    if (!imported?.plot) return;
+    setFunctions(tutorPlotFunctions(imported.plot));
+    setA(String(imported.plot.intervalo[0])); setB(String(imported.plot.intervalo[1]));
+  }, [imported]);
   const { fn } = useMemo(() => parseFn(expr), [expr]);
   const xMin = num(a), xMax = num(b), st = num(step);
   const rangeErr = xMin === null || xMax === null ? "Informe números válidos para o intervalo." : xMin >= xMax ? "O início do intervalo deve ser menor que o fim." : null;
@@ -64,6 +73,7 @@ function Funcoes() {
                 <Field label="passo" value={step} onChange={setStep} />
               </div>
               {rangeErr && <ErrorBox msg={rangeErr} />}
+              {imported?.error && <ErrorBox msg={imported.error} />}
               {stepErr && <ErrorBox msg={stepErr} />}
               <p className="text-xs text-muted-foreground">Suporta: + − * / ^, sin, cos, tan, exp, log (ln), sqrt, abs, pi, e.</p>
             </div>
