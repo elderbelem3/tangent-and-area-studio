@@ -14,6 +14,7 @@ import { useEffect, type ReactNode } from "react";
 import { ChartSpline, MoveHorizontal, TrendingUp, Sigma, BookOpen, GraduationCap, ArrowUpRight, BrainCircuit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import chalkDust from "@/assets/chalk-dust.png.asset.json";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -66,7 +67,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Space+Grotesk:wght@500;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Space+Grotesk:wght@500;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" },
       { rel: "stylesheet", href: appCss },
       { rel: "icon", type: "image/png", href: "/favicon.png" },
     ],
@@ -102,6 +103,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="app-shell min-h-screen bg-background">
+        <img className="chalk-surface" src={chalkDust.url} alt="" aria-hidden="true" />
         <header className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
             <Link to="/" className="flex items-center gap-3 font-display text-2xl font-bold">
@@ -128,6 +130,7 @@ function RootComponent() {
           <span className="font-display font-medium">CalculusLab <span className="mx-2 text-border">/</span> Cálculo 1 e 2</span>
           <Link to="/creditos" className="inline-flex items-center gap-1.5 transition hover:text-primary">UniCatólica do RN<ArrowUpRight className="h-3 w-3" /></Link>
         </footer>
+        <div className="chalk-tray" aria-hidden="true"><span className="chalk-eraser" /><span className="chalk-piece chalk-piece-white" /><span className="chalk-piece chalk-piece-blue" /><span className="chalk-piece chalk-piece-yellow" /><span className="chalk-piece chalk-piece-pink" /><span className="chalk-piece chalk-piece-green" /></div>
       </div>
     </QueryClientProvider>
   );

@@ -58,7 +58,7 @@
   --color-grid: var(--grid);
   --color-axis: var(--axis);
   --color-accent-strong: var(--accent-strong);
-  --font-chalk: "Patrick Hand", cursive;
+  --font-chalk: "Architects Daughter", cursive;
   --shadow-soft: 0 1px 2px oklch(0.2 0.03 250 / 6%), 0 8px 24px -12px oklch(0.2 0.03 250 / 15%);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
@@ -188,9 +188,9 @@
 .chalk-annotation { display: none; pointer-events: none; }
 .chalkboard {
   color-scheme: dark;
-  --background: oklch(0.247 0.015 166);
+  --background: oklch(0.232 0.023 157);
   --foreground: oklch(0.943 0.012 105);
-  --card: oklch(0.296 0.019 165 / 88%);
+  --card: oklch(0.32 0.019 165 / 14%);
   --card-foreground: var(--foreground);
   --popover: oklch(0.296 0.019 165);
   --popover-foreground: var(--foreground);
@@ -203,29 +203,38 @@
   --accent: oklch(0.38 0.025 165);
   --accent-foreground: var(--foreground);
   --accent-strong: oklch(0.8 0.182 151.7);
-  --border: oklch(0.8 0.02 140 / 28%);
+  --border: oklch(1 0 0 / 35%);
   --input: oklch(0.8 0.02 140 / 42%);
   --ring: var(--primary);
   --grid: oklch(0.9 0.012 140 / 9%);
-  --axis: oklch(0.96 0.01 105 / 62%);
+  --axis: oklch(0.96 0.01 105 / 90%);
   --chart-1: oklch(0.754 0.151 232.7);
   --chart-2: oklch(0.852 0.199 91.94);
   --chart-3: oklch(0.8 0.182 151.7);
   --chart-4: oklch(0.725 0.175 349.76);
   --chart-5: oklch(0.82 0.11 305);
   --destructive: oklch(0.78 0.14 25);
-  --wood-frame: oklch(0.43 0.063 62);
-  --wood-edge: oklch(0.29 0.035 62);
+  --wood-frame: oklch(0.38 0.061 57);
+  --wood-edge: oklch(0.286 0.048 52);
+  --wood-highlight: oklch(0.53 0.078 65);
+  --wood-grain: oklch(0.22 0.04 52 / 40%);
+  --chalk-shadow: oklch(0.08 0.008 150 / 65%);
+  --chalk-highlight: oklch(1 0 0 / 45%);
   --chalk-dust: oklch(0.96 0.01 105 / 3%);
-  --chalk-frame-shadow: inset 0 0 0 2px var(--wood-edge), inset 0 0 24px var(--wood-edge);
+  --chalk-frame-shadow: inset 0 0 0 3px var(--wood-edge), inset 0 0 22px var(--chalk-shadow), 0 4px 0 var(--wood-edge), 0 8px 16px var(--chalk-shadow);
   --shadow-soft: 0 4px 18px oklch(0.12 0.01 165 / 24%);
 }
 .app-shell, body, .app-shell > header { transition: background-color 220ms ease, color 220ms ease; }
+.chalk-surface, .chalk-tray, .chalk-axis-arrow, .chalk-guide { display: none; }
 .chalkboard .app-shell {
-  border: 9px solid var(--wood-frame);
+  position: relative;
+  isolation: isolate;
+  border: 16px ridge var(--wood-frame);
   box-shadow: var(--chalk-frame-shadow);
-  background-image: repeating-linear-gradient(2deg, transparent 0 3px, var(--chalk-dust) 4px, transparent 5px 11px);
+  padding-bottom: 36px;
+  background-image: linear-gradient(115deg, var(--chalk-dust), transparent 40%, var(--chalk-dust));
 }
+.chalkboard .chalk-surface { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.6; pointer-events: none; z-index: -1; }
 .chalkboard .app-shell > header { background-color: var(--card); }
 .chalkboard :is(h1, h2, h3, h4, p:not(.font-mono), figcaption, .recharts-text, .chalk-label) {
   font-family: var(--font-chalk);
@@ -233,16 +242,33 @@
 }
 .chalkboard .font-display { font-family: var(--font-chalk); }
 .chalkboard p:not(.font-mono) { font-size: 1.0625rem; line-height: 1.55; }
-.chalkboard :is(.lab-panel, input, textarea, [role="dialog"]) { border-style: dashed; }
+.chalkboard :is(.lab-panel, [role="dialog"]) { border: 2px dashed var(--border); border-radius: 7px; }
+.chalkboard :is(input, textarea) { border: 1px dashed var(--input); border-radius: 4px; color: var(--foreground); font-family: var(--font-chalk); font-size: 15px; }
+.chalkboard main button { font-family: var(--font-chalk); color: var(--foreground); background-color: transparent; border: 1px solid var(--border); border-radius: 3px; font-size: 13px; box-shadow: none; }
+.chalkboard main button:hover { background-color: var(--chalk-dust); border-color: var(--foreground); }
+.chalkboard [role="toolbar"] { background: transparent; border: 0; padding: 0; gap: 5px; }
 .chalkboard :is(input, textarea) { background-color: var(--card); }
-.chalkboard .lab-panel { box-shadow: none; }
+.chalkboard .lab-panel { box-shadow: none; background: transparent; }
 .chalkboard :is(.stroke-axis, .chalk-axis line, .recharts-cartesian-axis-line) { stroke-dasharray: 7 3; stroke-linecap: round; }
+.chalkboard .chalk-axis-drawing line { stroke-dasharray: 9 2; }
+.chalkboard :is(.chalk-axis-arrow, .chalk-guide) { display: inline; }
 .chalkboard .recharts-cartesian-grid line { stroke-dasharray: 2 6; }
-.chalkboard .recharts-line-curve { stroke-linecap: round; stroke-linejoin: round; }
+.chalkboard .recharts-line-curve { stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 2px var(--primary)); }
 .chalkboard .chalk-annotation { display: inline; }
 .chalk-label { font-family: var(--font-chalk); font-size: 14px; }
+.chalkboard .chalk-tray { display: flex; align-items: flex-end; justify-content: flex-end; gap: 20px; position: absolute; bottom: 0; left: 0; right: 0; height: 30px; padding: 0 8% 11px; background: repeating-linear-gradient(1deg, transparent 0 3px, var(--wood-grain) 4px 5px), linear-gradient(var(--wood-highlight), var(--wood-frame) 55%, var(--wood-edge)); border-top: 3px solid var(--wood-edge); box-shadow: 0 -3px 7px var(--chalk-shadow), inset 0 2px 1px var(--wood-highlight); pointer-events: none; }
+.chalk-eraser { flex: 0 0 84px; height: 28px; transform: rotate(-4deg); border-radius: 4px 6px 2px 2px; background: linear-gradient(var(--wood-highlight) 0 35%, var(--wood-edge) 36% 44%, var(--background) 45%); box-shadow: inset 0 2px 1px var(--chalk-highlight), 3px 3px 4px var(--chalk-shadow); border-bottom: 5px solid var(--muted-foreground); margin-right: 28px; }
+.chalk-piece { flex: 0 0 30px; height: 8px; border-radius: 2px 4px 3px 1px; background: var(--piece-color); box-shadow: inset 0 2px 1px var(--chalk-highlight), inset 0 -2px 2px var(--chalk-shadow), 2px 3px 3px var(--chalk-shadow); transform: rotate(6deg); }
+.chalk-piece-white { --piece-color: var(--foreground); }
+.chalk-piece-blue { --piece-color: var(--chart-1); transform: rotate(-6deg); }
+.chalk-piece-yellow { --piece-color: var(--chart-2); }
+.chalk-piece-pink { --piece-color: var(--chart-4); transform: rotate(-10deg); }
+.chalk-piece-green { --piece-color: var(--chart-3); }
 @media (max-width: 640px) {
-  .chalkboard .app-shell { border-width: 5px; }
+  .chalkboard .app-shell { border-width: 9px; }
+  .chalkboard .chalk-tray { gap: 12px; padding-inline: 6%; }
+  .chalk-eraser { flex-basis: 65px; margin-right: 8px; }
+  .chalk-piece { flex-basis: 22px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
