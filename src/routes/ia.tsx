@@ -105,7 +105,7 @@ function TutorPage() {
     <PageHeader tag="Tutor de Cálculo 1 e 2" title="IA" desc="Do enunciado à conclusão, uma etapa de cada vez." />
     <div className="grid min-w-0 gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
       <div className="min-w-0 space-y-6">
-        <Button type="button" onClick={openEnade} disabled={busy} className="tour-ai w-full gap-2 rounded-full"><GraduationCap className="h-4 w-4" />Gerar Questão do ENADE</Button>
+        <Button type="button" onClick={openEnade} disabled={busy} className="tour-ai w-full gap-2 rounded-full" aria-label="Gerar Questão do ENADE"><GraduationCap className="h-4 w-4" />Gerar Questão do ENADE</Button>
         <Panel title="Seu problema">
           <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void solve(); }}>
             <label className="block text-sm font-medium" htmlFor="tutor-problem">Enunciado ou expressão</label>
@@ -118,7 +118,7 @@ function TutorPage() {
               <Button type="button" variant="ghost" size="sm" aria-label="Remover anexo" onClick={() => setAttachment(null)} disabled={busy} className="h-8 w-8 p-0"><X className="h-4 w-4" /></Button>
             </div>}
             {attachError && <ErrorBox msg={attachError} />}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" data-tour="attach-buttons">
               <input ref={fileRef} type="file" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" className="hidden" aria-label="Anexar arquivo" onChange={(e) => { pickFile(e.target.files?.[0]); e.target.value = ""; }} />
               <input ref={imageRef} type="file" accept="image/png,image/jpeg" className="hidden" aria-label="Anexar foto" onChange={(e) => { pickFile(e.target.files?.[0]); e.target.value = ""; }} />
               <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()} disabled={busy} aria-label="Anexar PDF ou imagem"><Paperclip className="h-4 w-4" />PDF</Button>
