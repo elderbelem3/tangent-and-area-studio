@@ -24,6 +24,6 @@
 - [x] Verificar alternância, recarregamento e interações em todas as abas.
 
 # Gráfico a partir do tutor
-- [ ] Incluir funções e intervalo estruturados na resolução.
-- [ ] Transferir funções validadas para o gráfico pela ação do tutor.
-- [ ] Testar validação e resolução real com navegação e curvas.
+- [x] Incluir funções e intervalo estruturados na resolução.
+- [x] Transferir funções validadas para o gráfico pela ação do tutor.
+- [x] Testar validação e resolução real com navegação e curvas.
