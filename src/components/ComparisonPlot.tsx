@@ -8,8 +8,8 @@ import { ChalkAnnotation } from "@/components/ChalkAnnotation";
 import { AnalysisPanels } from "@/components/AnalysisPanels";
 import { ChalkAxis } from "@/components/ChalkAxis";
 
-export function ComparisonPlot({ functions, xMin, xMax, tangentAt }: {
-  functions: ComparisonFunction[]; xMin: number; xMax: number; tangentAt?: number;
+export function ComparisonPlot({ functions, xMin, xMax, tangentAt, analysis = true }: {
+  functions: ComparisonFunction[]; xMin: number; xMax: number; tangentAt?: number; analysis?: boolean;
 }) {
   const [hidden, setHidden] = useState<number[]>([]);
   useEffect(() => {
@@ -70,11 +70,19 @@ export function ComparisonPlot({ functions, xMin, xMax, tangentAt }: {
             <ReferenceLine key={`uvy-${point.slot}-${index}`} segment={[{ x: Math.min(Math.max(0, xMin), xMax), y: point.y }, { x: point.x, y: point.y }]} stroke="var(--uv)" strokeDasharray="2 4" className="uv-layer" />,
             <ReferenceDot key={`uvd-${point.slot}-${index}`} x={point.x} y={point.y} ifOverflow="hidden" shape={(props: { cx?: number; cy?: number }) => props.cx === undefined || props.cy === undefined ? <g /> : <g className="uv-layer"><circle cx={props.cx} cy={props.cy} r={5} fill="var(--uv)" /><text x={props.cx + 8} y={props.cy + 16} className="uv-label">{`(${fmt(point.x, 3)}, ${fmt(point.y, 3)})`}</text></g>} />,
           ])}
+          {tangentAt !== undefined && tangents.filter((item) => item.slot === 0 && Number.isFinite(item.y) && Number.isFinite(item.slope)).flatMap((item) => { const dx = (xMax - xMin) / 8, x1 = tangentAt + dx, y1 = item.y + item.slope * dx, bb = item.y - item.slope * tangentAt; return [
+            <ReferenceLine key="tri-run" segment={[{ x: tangentAt, y: item.y }, { x: x1, y: item.y }]} stroke="var(--uv)" strokeWidth={2.5} className="uv-layer" ifOverflow="hidden" />,
+            <ReferenceLine key="tri-rise" segment={[{ x: x1, y: item.y }, { x: x1, y: y1 }]} stroke="var(--uv)" strokeWidth={2.5} className="uv-layer" ifOverflow="hidden" />,
+            <ReferenceLine key="tri-hyp" segment={[{ x: tangentAt, y: item.y }, { x: x1, y: y1 }]} stroke="var(--uv)" strokeWidth={3} className="uv-layer" ifOverflow="hidden" />,
+            <ReferenceDot key="tri-dx" x={tangentAt + dx / 2} y={item.y} ifOverflow="hidden" shape={(p: { cx?: number; cy?: number }) => p.cx === undefined || p.cy === undefined ? <g /> : <text x={p.cx} y={p.cy + (item.slope >= 0 ? 16 : -8)} textAnchor="middle" className="uv-layer uv-label">{`dx = ${fmt(dx, 3)}`}</text>} />,
+            <ReferenceDot key="tri-dy" x={x1} y={(item.y + y1) / 2} ifOverflow="hidden" shape={(p: { cx?: number; cy?: number }) => p.cx === undefined || p.cy === undefined ? <g /> : <text x={p.cx + 6} y={p.cy} className="uv-layer uv-label">{`dy = ${fmt(y1 - item.y, 3)}`}</text>} />,
+            <ReferenceDot key="tri-eq" x={tangentAt} y={item.y} ifOverflow="hidden" shape={(p: { cx?: number; cy?: number }) => p.cx === undefined || p.cy === undefined ? <g /> : <g className="uv-layer"><circle cx={p.cx} cy={p.cy} r={6} fill="none" stroke="var(--uv)" strokeWidth={2} /><text x={p.cx - 10} y={p.cy - 14} textAnchor="end" className="uv-label">{`y = ${fmt(item.slope, 4)}x ${bb >= 0 ? "+" : "−"} ${fmt(Math.abs(bb), 4)} · dy/dx = ${fmt(item.slope, 4)}`}</text></g>} />,
+          ]; })}
           {yIntercepts.filter((p) => !hidden.includes(p.slot) && p.y >= low && p.y <= high).map((p) => <ReferenceDot key={`uvi-${p.slot}`} x={0} y={p.y} ifOverflow="hidden" shape={(props: { cx?: number; cy?: number }) => props.cx === undefined || props.cy === undefined ? <g /> : <g className="uv-layer"><rect x={props.cx - 4} y={props.cy - 4} width={8} height={8} fill="var(--uv)" transform={`rotate(45 ${props.cx} ${props.cy})`} /><text x={props.cx + 8} y={props.cy - 8} className="uv-label">{`y₀ = ${fmt(p.y, 3)}`}</text></g>} />)}
         </LineChart>
       </ResponsiveContainer>
     </div>
-    <AnalysisPanels functions={functions.filter((f) => !hidden.includes(f.slot))} xMin={xMin} xMax={xMax} />
+    {analysis && <AnalysisPanels functions={functions.filter((f) => !hidden.includes(f.slot))} xMin={xMin} xMax={xMax} />}
     {visible.length === 0 && <p className="mt-3 text-sm text-muted-foreground">Nenhuma função válida visível.</p>}
     {tangentAt !== undefined && <p className="mt-4 border-t border-border pt-4 text-center text-xs text-muted-foreground">Curvas: linhas contínuas · Retas tangentes: linhas tracejadas</p>}
   </div>;

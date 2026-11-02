@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { parseFn, derivative, fmt } from "@/lib/calc";
 import { ComparisonPlot } from "@/components/ComparisonPlot";
+import { UvStepsPanel } from "@/components/UvStepsPanel";
+import { derivativeSteps } from "@/lib/uv-steps";
 import { FunctionEditor } from "@/components/FunctionEditor";
 import { addComparisonFunction, removeComparisonFunction, FUNCTION_SLOTS, FUNCTION_TEXT_COLORS, type ComparisonFunction } from "@/lib/comparison";
 import { PageHeader, Panel, Field, ErrorBox, Chip, Stat, num } from "@/components/Lab";
@@ -70,7 +72,7 @@ function Derivadas() {
         <div className="min-w-0 space-y-6">
           <Panel title="Curvas e retas tangentes">
             {x0 !== null ? (
-              <ComparisonPlot functions={functions} xMin={x0 - 4} xMax={x0 + 4} tangentAt={x0} />
+              <ComparisonPlot functions={functions} xMin={x0 - 4} xMax={x0 + 4} tangentAt={x0} analysis={false} />
             ) : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
           </Panel>
           <Panel title="Interpretação geométrica">

@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { useMemo, useRef, useState } from "react";
 import { parseFn, fmt } from "@/lib/calc";
 import { Plot } from "@/components/Plot";
+import { LimitUvOverlay } from "@/components/UvOverlays";
+import { UvStepsPanel } from "@/components/UvStepsPanel";
+import { limitSteps } from "@/lib/uv-steps";
 import { PageHeader, Panel, Field, ErrorBox, Chip, MathToolbar, Stat, num } from "@/components/Lab";
 
 export const Route = createFileRoute("/limites")({
@@ -52,6 +55,7 @@ function Limites() {
     return { left, right, L1, L2, L, note };
   }, [fn, c, dir]);
 
+  const steps = useMemo(() => (data && c !== null ? limitSteps(expr, c, data.L, data.L1, data.L2) : null), [data, c, expr]);
   const dirLabel = dir === "esq" ? "⁻" : dir === "dir" ? "⁺" : "";
   const span = 3;
 
@@ -87,8 +91,9 @@ function Limites() {
         <div className="min-w-0 space-y-6">
           <Panel title="Gráfico">
             {fn && c !== null && data ? (
-              <Plot fn={fn} xMin={c - span} xMax={c + span} points={Number.isFinite(data.L) ? [{ x: c, y: data.L, label: `(${fmt(c)}, ${fmt(data.L, 3)})`, hollow: Number.isNaN(fn(c)) }] : []} />
+              <Plot fn={fn} xMin={c - span} xMax={c + span} points={Number.isFinite(data.L) ? [{ x: c, y: data.L, label: `(${fmt(c)}, ${fmt(data.L, 3)})`, hollow: Number.isNaN(fn(c)) }] : []} overlay={(h) => <LimitUvOverlay h={h} c={c} L={data.L} />} />
             ) : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
+            {steps && <UvStepsPanel title="Resolução Algébrica do Limite" steps={steps} />}
           </Panel>
           {data && (
             <div className="grid gap-4 md:grid-cols-2">
