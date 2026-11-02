@@ -1,3 +1,4 @@
+import { useModuleState } from "@/lib/module-state";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { parseFn, derivative, fmt } from "@/lib/calc";
@@ -23,11 +24,11 @@ export const Route = createFileRoute("/derivadas")({
 });
 
 function Derivadas() {
-  const [functions, setFunctions] = useState<ComparisonFunction[]>([{ slot: 0, expression: "x^2" }]);
+  const [functions, setFunctions] = useModuleState<ComparisonFunction[]>("derivadas.functions", [{ slot: 0, expression: "x^2" }]);
   const expr = functions.find((item) => item.slot === 0)?.expression ?? "";
   const changeExpression = (slot: number, expression: string) => setFunctions((previous) => previous.map((item) => item.slot === slot ? { ...item, expression } : item));
   const setExpr = (expression: string) => changeExpression(0, expression);
-  const [x0S, setX0] = useState("1");
+  const [x0S, setX0] = useModuleState("derivadas.x0S", "1");
   const { fn } = useMemo(() => parseFn(expr), [expr]);
   const x0 = num(x0S);
   const y0 = fn && x0 !== null ? fn(x0) : NaN;

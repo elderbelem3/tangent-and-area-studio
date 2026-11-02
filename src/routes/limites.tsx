@@ -1,3 +1,4 @@
+import { useModuleState } from "@/lib/module-state";
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { useMemo, useRef, useState } from "react";
@@ -33,9 +34,9 @@ function estimate(vals: number[]): number {
 }
 
 function Limites() {
-  const [expr, setExpr] = useState("sin(x)/x");
-  const [cS, setC] = useState("0");
-  const [dir, setDir] = useState<Dir>("ambos");
+  const [expr, setExpr] = useModuleState("limites.expr", "sin(x)/x");
+  const [cS, setC] = useModuleState("limites.cS", "0");
+  const [dir, setDir] = useModuleState<Dir>("limites.dir", "ambos");
   const inputRef = useRef<HTMLInputElement>(null);
   const { fn, error } = useMemo(() => parseFn(expr), [expr]);
   const c = num(cS);

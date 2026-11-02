@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Presentation, Flashlight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { EV_THEME, type ThemeEventDetail } from "@/lib/copilot-actions";
 import { readTheme, saveTheme, readBlacklight, saveBlacklight, type LabTheme } from "@/lib/theme";
 export function ThemeToggle() {
   const [theme, setTheme] = useState<LabTheme>("standard");
@@ -15,6 +16,15 @@ export function ThemeToggle() {
     root.classList.toggle("dark", theme === "chalkboard");
     root.classList.toggle("blacklight", theme === "chalkboard" && uv);
   }, [theme, uv]);
+  useEffect(() => {
+    const on = (e: Event) => {
+      const d = (e as CustomEvent<ThemeEventDetail>).detail;
+      if (d.chalkboard !== undefined) { const t: LabTheme = d.chalkboard ? "chalkboard" : "standard"; setTheme(t); try { saveTheme(window.localStorage, t); } catch { /* ignore */ } }
+      if (d.blacklight !== undefined) { setUv(d.blacklight); try { saveBlacklight(window.localStorage, d.blacklight); } catch { /* ignore */ } }
+    };
+    window.addEventListener(EV_THEME, on);
+    return () => window.removeEventListener(EV_THEME, on);
+  }, []);
   function toggleTheme() {
     const next = theme === "standard" ? "chalkboard" : "standard";
     setTheme(next);

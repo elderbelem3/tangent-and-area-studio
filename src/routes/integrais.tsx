@@ -1,3 +1,4 @@
+import { useModuleState } from "@/lib/module-state";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { parseFn, integrate, fmt } from "@/lib/calc";
@@ -25,10 +26,10 @@ export const Route = createFileRoute("/integrais")({
 });
 
 function Integrais() {
-  const [expr, setExpr] = useState("x^2");
-  const [aS, setA] = useState("0");
-  const [bS, setB] = useState("2");
-  const [mode, setMode] = useState<"area" | "solido">("area");
+  const [expr, setExpr] = useModuleState("integrais.expr", "x^2");
+  const [aS, setA] = useModuleState("integrais.aS", "0");
+  const [bS, setB] = useModuleState("integrais.bS", "2");
+  const [mode, setMode] = useModuleState<"area" | "solido">("integrais.mode", "area");
   const inputRef = useRef<HTMLInputElement>(null);
   const { fn, error } = useMemo(() => parseFn(expr), [expr]);
   const a = num(aS), b = num(bS);

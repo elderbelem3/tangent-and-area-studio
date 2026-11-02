@@ -1,3 +1,4 @@
+import { useModuleState } from "@/lib/module-state";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { parseFn, fmt } from "@/lib/calc";
@@ -8,6 +9,7 @@ import { PageHeader, Panel, Field, ErrorBox, Chip, num } from "@/components/Lab"
 import { Smart3DView } from "@/components/Smart3DView";
 import { UvStepsPanel } from "@/components/UvStepsPanel";
 import { needs3D, surfaceAnalysis } from "@/lib/smart3d";
+import { EV_FUNCTION } from "@/lib/copilot-actions";
 import { decodeTutorPlot, tutorPlotFunctions } from "@/lib/tutor-plot";
 
 export const Route = createFileRoute("/")({
@@ -39,19 +41,24 @@ const examples = [
 function Funcoes() {
   const { grafico } = Route.useSearch();
   const imported = useMemo(() => grafico === undefined ? null : decodeTutorPlot(grafico), [grafico]);
-  const [functions, setFunctions] = useState<ComparisonFunction[]>(() => imported?.plot ? tutorPlotFunctions(imported.plot) : [{ slot: 0, expression: "x^3 - 3x" }]);
+  const [functions, setFunctions] = useModuleState<ComparisonFunction[]>("funcoes.functions", () => imported?.plot ? tutorPlotFunctions(imported.plot) : [{ slot: 0, expression: "x^3 - 3x" }]);
   const expr = functions.find((item) => item.slot === 0)?.expression ?? "";
   const changeExpression = (slot: number, expression: string) => setFunctions((previous) => previous.map((item) => item.slot === slot ? { ...item, expression } : item));
   const setExpr = (expression: string) => changeExpression(0, expression);
-  const [a, setA] = useState(() => String(imported?.plot?.intervalo[0] ?? -3));
-  const [b, setB] = useState(() => String(imported?.plot?.intervalo[1] ?? 3));
-  const [step, setStep] = useState("0.5");
+  const [a, setA] = useModuleState("funcoes.a", () => String(imported?.plot?.intervalo[0] ?? -3));
+  const [b, setB] = useModuleState("funcoes.b", () => String(imported?.plot?.intervalo[1] ?? 3));
+  const [step, setStep] = useModuleState("funcoes.step", "0.5");
   useEffect(() => {
     if (!imported?.plot) return;
     setFunctions(tutorPlotFunctions(imported.plot));
     setA(String(imported.plot.intervalo[0])); setB(String(imported.plot.intervalo[1]));
   }, [imported]);
   const is3D = needs3D(expr);
+  useEffect(() => {
+    const on = (e: Event) => { const v = (e as CustomEvent<string>).detail; if (typeof v === "string" && v.trim()) setFunctions((prev) => prev.map((item) => item.slot === 0 ? { ...item, expression: v } : item)); };
+    window.addEventListener(EV_FUNCTION, on);
+    return () => window.removeEventListener(EV_FUNCTION, on);
+  }, []);
   const { fn } = useMemo(() => parseFn(expr), [expr]);
   const xMin = num(a), xMax = num(b), st = num(step);
   const rangeErr = xMin === null || xMax === null ? "Informe números válidos para o intervalo." : xMin >= xMax ? "O início do intervalo deve ser menor que o fim." : null;
