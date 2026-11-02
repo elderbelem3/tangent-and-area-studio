@@ -15,3 +15,7 @@ export function useModuleState<T>(key: string, initial: T | (() => T)): [T, Disp
 
 /** Test helper. */
 export function clearModuleState() { store.clear(); }
+
+/** Pre-fills a module input before navigating to it (used by "Testar no Gráfico"). */
+export function setModuleState<T>(key: string, value: T) { store.set(key, value); }
+export function getModuleState<T>(key: string): T | undefined { return store.get(key) as T | undefined; }
