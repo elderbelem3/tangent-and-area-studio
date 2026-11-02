@@ -5,6 +5,9 @@ import { ComparisonPlot } from "@/components/ComparisonPlot";
 import { FunctionEditor } from "@/components/FunctionEditor";
 import { addComparisonFunction, removeComparisonFunction, type ComparisonFunction } from "@/lib/comparison";
 import { PageHeader, Panel, Field, ErrorBox, Chip, num } from "@/components/Lab";
+import { Smart3DView } from "@/components/Smart3DView";
+import { UvStepsPanel } from "@/components/UvStepsPanel";
+import { needs3D, surfaceAnalysis } from "@/lib/smart3d";
 import { decodeTutorPlot, tutorPlotFunctions } from "@/lib/tutor-plot";
 
 export const Route = createFileRoute("/")({
@@ -28,6 +31,9 @@ const examples = [
   { label: "Exponencial", f: "exp(x)" },
   { label: "Cúbica", f: "x^3 - 3x" },
   { label: "Racional", f: "1/x" },
+  { label: "Paraboloide 3D", f: "x^2 + y^2" },
+  { label: "Sela 3D", f: "x^2 - y^2" },
+  { label: "Onda 3D", f: "sin(x)*cos(y)" },
 ];
 
 function Funcoes() {
@@ -45,6 +51,7 @@ function Funcoes() {
     setFunctions(tutorPlotFunctions(imported.plot));
     setA(String(imported.plot.intervalo[0])); setB(String(imported.plot.intervalo[1]));
   }, [imported]);
+  const is3D = needs3D(expr);
   const { fn } = useMemo(() => parseFn(expr), [expr]);
   const xMin = num(a), xMax = num(b), st = num(step);
   const rangeErr = xMin === null || xMax === null ? "Informe números válidos para o intervalo." : xMin >= xMax ? "O início do intervalo deve ser menor que o fim." : null;
@@ -91,10 +98,20 @@ function Funcoes() {
             </div>
           </Panel>
         </div>
-        <Panel title="Gráfico das funções">
-          {!rangeErr && xMin !== null && xMax !== null ? <ComparisonPlot functions={functions} xMin={xMin} xMax={xMax} /> : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
+        <Panel title={is3D ? "Gráfico 3D · f(x, y)" : "Gráfico das funções"}>
+          {is3D ? <Surface3D expression={expr} range={xMin !== null && xMax !== null && !rangeErr ? Math.max(Math.abs(xMin), Math.abs(xMax)) : 3} /> : !rangeErr && xMin !== null && xMax !== null ? <ComparisonPlot functions={functions} xMin={xMin} xMax={xMax} /> : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
         </Panel>
       </div>
     </>
   );
+}
+
+function Surface3D({ expression, range }: { expression: string; range: number }) {
+  const info = useMemo(() => surfaceAnalysis(expression, range), [expression, range]);
+  const scene = useMemo(() => ({ kind: "surface" as const, expression, range, info }), [expression, range, info]);
+  return <>
+    <p className="mb-3 text-sm text-muted-foreground">Detectamos uma função de duas variáveis — exibindo a superfície z = f(x, y) em [−{range}, {range}]².</p>
+    <Smart3DView scene={scene} />
+    <UvStepsPanel title="Análise da Superfície Passo a Passo" steps={info?.steps ?? null} />
+  </>;
 }

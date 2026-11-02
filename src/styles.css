@@ -334,3 +334,8 @@ html.chalkboard { font-size: 18px; }
 .chalkboard.blacklight .uv-layer, .chalkboard .uv-layer { filter: none !important; }
 .chalkboard main button { font-size: 16px; }
 .chalkboard .lab-panel table th { font-size: 15px; }
+
+/* Smart Canvas 3D labels */
+.uv-3d-label { white-space: nowrap; font-family: var(--font-math, ui-monospace, monospace); font-size: 14px; font-weight: 600; color: oklch(0.9 0.12 305); background: oklch(0.16 0.03 300 / 70%); padding: 1px 6px; border-radius: 4px; pointer-events: none; }
+.axis-3d-label { font-family: ui-monospace, monospace; font-size: 14px; font-weight: 600; color: var(--muted-foreground); pointer-events: none; }
+.chalkboard .axis-3d-label { color: oklch(0.95 0.01 120); }

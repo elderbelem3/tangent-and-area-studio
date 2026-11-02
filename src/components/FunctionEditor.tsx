@@ -4,13 +4,15 @@ import { Field, MathToolbar, ErrorBox } from "@/components/Lab";
 import { Button } from "@/components/ui/button";
 import { FUNCTION_SLOTS, FUNCTION_TEXT_COLORS, MAX_FUNCTIONS, type ComparisonFunction } from "@/lib/comparison";
 import { parseFn } from "@/lib/calc";
+import { needs3D, parseFn2 } from "@/lib/smart3d";
 
 function FunctionBlock({ item, onChange, onRemove, children }: {
   item: ComparisonFunction; onChange: (value: string) => void; onRemove: () => void; children?: ReactNode;
 }) {
   const ref = useRef<HTMLInputElement>(null);
-  const error = item.expression.trim() ? parseFn(item.expression).error : null;
-  const name = `${FUNCTION_SLOTS[item.slot]}(x)`;
+  const is3D = item.slot === 0 && needs3D(item.expression);
+  const error = item.expression.trim() ? (is3D ? parseFn2(item.expression).error : parseFn(item.expression).error) : null;
+  const name = `${FUNCTION_SLOTS[item.slot]}(${is3D ? "x, y" : "x"})`;
   return <div className="space-y-3">
     <div className="flex items-center justify-between gap-2">
       <span className={`font-mono text-sm font-semibold ${FUNCTION_TEXT_COLORS[item.slot]}`}>{name}</span>
