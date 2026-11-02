@@ -53,7 +53,7 @@ function Funcoes() {
     setFunctions(tutorPlotFunctions(imported.plot));
     setA(String(imported.plot.intervalo[0])); setB(String(imported.plot.intervalo[1]));
   }, [imported]);
-  const is3D = needs3D(expr);
+  const is3D = functions.some((f) => needs3D(f.expression));
   useEffect(() => {
     const on = (e: Event) => { const v = (e as CustomEvent<string>).detail; if (typeof v === "string" && v.trim()) setFunctions((prev) => prev.map((item) => item.slot === 0 ? { ...item, expression: v } : item)); };
     window.addEventListener(EV_FUNCTION, on);
@@ -106,16 +106,16 @@ function Funcoes() {
           </Panel>
         </div>
         <Panel className="tour-graph" title={is3D ? "Gráfico 3D · f(x, y)" : "Gráfico das funções"}>
-          {is3D ? <Surface3D expression={expr} range={xMin !== null && xMax !== null && !rangeErr ? Math.max(Math.abs(xMin), Math.abs(xMax)) : 3} /> : !rangeErr && xMin !== null && xMax !== null ? <ComparisonPlot functions={functions} xMin={xMin} xMax={xMax} /> : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
+          {is3D ? <Surface3D layers={functions.map((f) => ({ expression: f.expression, slot: f.slot })).filter((l) => l.expression.trim())} expression={expr} range={xMin !== null && xMax !== null && !rangeErr ? Math.max(Math.abs(xMin), Math.abs(xMax)) : 3} /> : !rangeErr && xMin !== null && xMax !== null ? <ComparisonPlot functions={functions} xMin={xMin} xMax={xMax} /> : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
         </Panel>
       </div>
     </>
   );
 }
 
-function Surface3D({ expression, range }: { expression: string; range: number }) {
+function Surface3D({ expression, range, layers }: { expression: string; range: number; layers: { expression: string; slot: number }[] }) {
   const info = useMemo(() => surfaceAnalysis(expression, range), [expression, range]);
-  const scene = useMemo(() => ({ kind: "surface" as const, expression, range, info }), [expression, range, info]);
+  const scene = useMemo(() => ({ kind: "surface" as const, expression, range, info, layers }), [expression, range, info, layers]);
   return <>
     <p className="mb-3 text-sm text-muted-foreground">Detectamos uma função de duas variáveis — exibindo a superfície z = f(x, y) em [−{range}, {range}]².</p>
     <Smart3DView scene={scene} />

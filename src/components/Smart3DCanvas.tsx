@@ -7,13 +7,17 @@ import * as THREE from "three";
 import { Box, Hand } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { fmt, parseFn } from "@/lib/calc";
-import { parseFn2, type SurfaceInfo } from "@/lib/smart3d";
+import { needs3D, parseFn2, type SurfaceInfo } from "@/lib/smart3d";
 import { useLabTheme } from "@/lib/use-lab-theme";
 
 export type Scene3D =
-  | { kind: "surface"; expression: string; range: number; info: SurfaceInfo | null }
+  | { kind: "surface"; expression: string; range: number; info: SurfaceInfo | null; layers?: Layer3D[] }
   | { kind: "solid"; expression: string; a: number; b: number };
 
+export type Layer3D = { expression: string; slot: number };
+/** Distinct per-slot colors (app chart palette / neon chalk palette). */
+const LAYER_COLORS = ["#5b7cfa", "#f59e0b", "#22c55e", "#c084fc", "#f43f5e"];
+const CHALK_COLORS = ["#f1f5ee", "#facc15", "#4ade80", "#f472b6", "#38bdf8"];
 const UV = "#efd2ff";
 const CHALK = "#f1f5ee";
 type V3 = [number, number, number];
@@ -21,14 +25,23 @@ type V3 = [number, number, number];
 /** Math (x, y, z) → three.js (x, z-up, -y). */
 const P = (x: number, y: number, z: number): V3 => [x, z, -y];
 
-function surfaceData(expression: string, R: number) {
+function sampleSurface(fn: (x: number, y: number) => number, R: number, N = 48) {
+  const zs: number[] = [];
+  for (let i = 0; i <= N; i++) for (let j = 0; j <= N; j++) zs.push(fn(-R + 2 * R * i / N, -R + 2 * R * j / N));
+  return zs;
+}
+function zRange(values: number[]) {
+  const finite = values.filter(Number.isFinite).sort((a, b) => a - b);
+  if (!finite.length) return null;
+  return { lo: finite[Math.floor(finite.length * 0.02)]!, hi: finite[Math.floor(finite.length * 0.98)]! };
+}
+function surfaceData(expression: string, R: number, shared?: { lo: number; hi: number } | null) {
   const { fn } = parseFn2(expression);
   if (!fn) return null;
-  const N = 48, zs: number[] = [];
-  for (let i = 0; i <= N; i++) for (let j = 0; j <= N; j++) zs.push(fn(-R + 2 * R * i / N, -R + 2 * R * j / N));
-  const finite = zs.filter(Number.isFinite).sort((a, b) => a - b);
-  if (!finite.length) return null;
-  const lo = finite[Math.floor(finite.length * 0.02)]!, hi = finite[Math.floor(finite.length * 0.98)]!;
+  const N = 48, zs = sampleSurface(fn, R, N);
+  const rg = shared ?? zRange(zs);
+  if (!rg) return null;
+  const { lo, hi } = rg;
   const scale = hi - lo > 1e-9 ? (R * 1.2) / (hi - lo) : 1, mid = (hi + lo) / 2;
   const Z = (z: number) => Number.isFinite(z) ? (Math.max(lo, Math.min(hi, z)) - mid) * scale : 0;
   return { N, R, fn, Z, at: (i: number, j: number) => P(-R + 2 * R * i / N, -R + 2 * R * j / N, Z(zs[i * (N + 1) + j]!)), lo, hi };
@@ -45,7 +58,40 @@ function solidData(expression: string, a: number, b: number) {
   return { fn, lo, hi, N, M, at, scale, xs, cx };
 }
 
-function SurfaceMesh({ d, chalk }: { d: NonNullable<ReturnType<typeof surfaceData>>; chalk: boolean }) {
+/** All user layers share one z scale so surfaces and curves intersect truthfully. */
+function layerScene(layers: Layer3D[], R: number) {
+  const parsed = layers.map((l) => {
+    const is2 = needs3D(l.expression);
+    if (is2) { const { fn } = parseFn2(l.expression); return fn ? { ...l, kind: "surface" as const, fn2: fn } : null; }
+    const { fn } = parseFn(l.expression); return fn ? { ...l, kind: "curve" as const, fn1: fn } : null;
+  }).filter((v): v is NonNullable<typeof v> => v !== null);
+  const all: number[] = [];
+  for (const p of parsed) {
+    if (p.kind === "surface") all.push(...sampleSurface(p.fn2, R, 24));
+    else for (let i = 0; i <= 200; i++) all.push(p.fn1(-R + 2 * R * i / 200));
+  }
+  const rg = zRange(all);
+  if (!rg) return null;
+  const scale = rg.hi - rg.lo > 1e-9 ? (R * 1.2) / (rg.hi - rg.lo) : 1, mid = (rg.hi + rg.lo) / 2;
+  const items = parsed.map((p) => {
+    if (p.kind === "surface") { const d = surfaceData(p.expression, R, rg); return d ? { slot: p.slot, kind: "surface" as const, d } : null; }
+    const segs: V3[][] = []; let cur: V3[] = [];
+    for (let i = 0; i <= 400; i++) {
+      const x = -R + 2 * R * i / 400, z = p.fn1(x);
+      if (Number.isFinite(z) && z >= rg.lo - (rg.hi - rg.lo) && z <= rg.hi + (rg.hi - rg.lo)) cur.push(P(x, 0, (Math.max(rg.lo, Math.min(rg.hi, z)) - mid) * scale));
+      else { if (cur.length > 1) segs.push(cur); cur = []; }
+    }
+    if (cur.length > 1) segs.push(cur);
+    return { slot: p.slot, kind: "curve" as const, segs };
+  }).filter((v): v is NonNullable<typeof v> => v !== null);
+  return { items, primary: items.find((i) => i.kind === "surface" && i.slot === 0) };
+}
+
+function CurveLine({ segs, color }: { segs: V3[][]; color: string }) {
+  return <>{segs.map((pts, k) => <Line key={k} points={pts} color={color} lineWidth={5} />)}</>;
+}
+
+function SurfaceMesh({ d, chalk, color, chalkColor }: { d: NonNullable<ReturnType<typeof surfaceData>>; chalk: boolean; color?: string; chalkColor?: string }) {
   const geo = useMemo(() => {
     const g = new THREE.BufferGeometry(), pos: number[] = [], col: number[] = [], idx: number[] = [];
     const c = new THREE.Color();
@@ -63,8 +109,8 @@ function SurfaceMesh({ d, chalk }: { d: NonNullable<ReturnType<typeof surfaceDat
     for (let j = 0; j <= d.N; j += 4) out.push(Array.from({ length: d.N + 1 }, (_, i) => d.at(i, j)));
     return out;
   }, [d]);
-  if (chalk) return <>{lines.map((pts, k) => <Line key={k} points={pts} color={CHALK} lineWidth={1.4} transparent opacity={0.85} />)}</>;
-  return <mesh geometry={geo} castShadow receiveShadow><meshStandardMaterial vertexColors roughness={0.45} metalness={0.1} side={THREE.DoubleSide} /></mesh>;
+  if (chalk) return <>{lines.map((pts, k) => <Line key={k} points={pts} color={chalkColor ?? CHALK} lineWidth={1.4} transparent opacity={0.85} />)}</>;
+  return <mesh geometry={geo} castShadow receiveShadow>{color ? <meshStandardMaterial color={color} roughness={0.45} metalness={0.1} side={THREE.DoubleSide} transparent opacity={0.88} /> : <meshStandardMaterial vertexColors roughness={0.45} metalness={0.1} side={THREE.DoubleSide} />}</mesh>;
 }
 
 function SolidMesh({ d, chalk }: { d: NonNullable<ReturnType<typeof solidData>>; chalk: boolean }) {
@@ -145,10 +191,12 @@ export default function Smart3DCanvas({ scene }: { scene: Scene3D }) {
   const [interactive, setInteractive] = useModuleState("smart3d.interactive", false);
   useEffect(() => { if (consumePending3D()) setInteractive(true); }, [setInteractive]);
   useEffect(() => { const on = () => { consumePending3D(); setInteractive(true); }; window.addEventListener(EV_3D, on); return () => window.removeEventListener(EV_3D, on); }, []);
-  const surf = useMemo(() => scene.kind === "surface" ? surfaceData(scene.expression, scene.range) : null, [scene]);
+  const multi = useMemo(() => scene.kind === "surface" && scene.layers && scene.layers.length > 1 ? layerScene(scene.layers, scene.range) : null, [scene]);
+  const single = useMemo(() => scene.kind === "surface" && !multi ? surfaceData(scene.expression, scene.range) : null, [scene, multi]);
+  const surf = multi ? (multi.primary?.kind === "surface" ? multi.primary.d : null) : single;
   const solid = useMemo(() => scene.kind === "solid" ? solidData(scene.expression, scene.a, scene.b) : null, [scene]);
   const orbit = chalkboard || interactive;
-  if (!surf && !solid) return <p className="text-muted-foreground">Não foi possível montar o gráfico 3D desta função.</p>;
+  if (!surf && !solid && !multi?.items.length) return <p className="text-muted-foreground">Não foi possível montar o gráfico 3D desta função.</p>;
   return <div className="relative">
     {!chalkboard && <Button type="button" size="sm" variant={interactive ? "default" : "outline"} aria-pressed={interactive} onClick={() => setInteractive((v) => !v)} className="absolute right-3 top-3 z-20 gap-1.5">
       {interactive ? <Hand /> : <Box />}3D
@@ -165,7 +213,10 @@ export default function Smart3DCanvas({ scene }: { scene: Scene3D }) {
           <gridHelper key={dark ? "d" : "l"} args={dark ? [8, 16, "#475569", "#334155"] : [8, 16, "#cbd5e1", "#e2e8f0"]} position={[0, -2.6, 0]} />
         </>}
         <Axes chalk={chalkboard} dark={dark} L={3} />
-        {surf && <SurfaceMesh d={surf} chalk={chalkboard} />}
+        {multi ? multi.items.map((it) => it.kind === "surface"
+          ? <SurfaceMesh key={it.slot} d={it.d} chalk={chalkboard} color={LAYER_COLORS[it.slot]} chalkColor={CHALK_COLORS[it.slot]} />
+          : <CurveLine key={it.slot} segs={it.segs} color={(chalkboard ? CHALK_COLORS : LAYER_COLORS)[it.slot]!} />)
+          : surf && <SurfaceMesh d={surf} chalk={chalkboard} />}
         {solid && <SolidMesh d={solid} chalk={chalkboard} />}
         {chalkboard && blacklight && surf && scene.kind === "surface" && <SurfaceUv d={surf} info={scene.info} />}
         {chalkboard && blacklight && solid && <SolidUv d={solid} />}
