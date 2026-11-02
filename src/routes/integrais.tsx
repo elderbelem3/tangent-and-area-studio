@@ -71,7 +71,7 @@ function Integrais() {
         <div className="min-w-0 space-y-6">
           <Panel title={mode === "solido" ? "Sólido de revolução (3D)" : "Área sob a curva"}>
             {valid && mode === "solido" && !bad ? <><Smart3DView scene={{ kind: "solid", expression: expr, a: a!, b: b! }} /><UvStepsPanel title="Volume pelo Método dos Discos" steps={solid?.steps ?? null} /></> : valid ? <Plot fn={fn} xMin={lo - pad} xMax={hi + pad} shade={[a, b]} overlay={(h) => <IntegralUvOverlay h={h} a={a} b={b} value={value} />} /> : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
-            {valid && !bad && <UvStepsPanel title="Antiderivada e Teorema Fundamental" steps={integralSteps(expr, a, b)} />}
+            {valid && !bad && mode === "area" && <UvStepsPanel title="Antiderivada e Teorema Fundamental" steps={integralSteps(expr, a, b)} />}
           </Panel>
           <Panel title="Integral como área acumulada">
             <div className="space-y-2 text-sm leading-relaxed text-muted-foreground">
