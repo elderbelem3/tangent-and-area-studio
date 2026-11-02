@@ -339,3 +339,20 @@ html.chalkboard { font-size: 18px; }
 .uv-3d-label { white-space: nowrap; font-family: var(--font-math, ui-monospace, monospace); font-size: 14px; font-weight: 600; color: oklch(0.9 0.12 305); background: oklch(0.16 0.03 300 / 70%); padding: 1px 6px; border-radius: 4px; pointer-events: none; }
 .axis-3d-label { font-family: ui-monospace, monospace; font-size: 14px; font-weight: 600; color: var(--muted-foreground); pointer-events: none; }
 .chalkboard .axis-3d-label { color: oklch(0.95 0.01 120); }
+
+/* Guided tour */
+@keyframes help-pulse { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--primary) 45%, transparent); } 50% { box-shadow: 0 0 0 8px color-mix(in oklch, var(--primary) 0%, transparent); } }
+.help-pulse { animation: help-pulse 2.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .help-pulse { animation: none; } }
+.tour-root { position: fixed; inset: 0; z-index: 100; }
+.tour-blocker { position: absolute; inset: 0; }
+.tour-spotlight { position: fixed; border-radius: 12px; box-shadow: 0 0 0 9999px oklch(0.12 0.02 260 / 72%); outline: 2px solid var(--primary); transition: all 350ms ease; pointer-events: none; }
+.tour-bubble { position: fixed; z-index: 101; border-radius: 14px; border: 1px solid var(--border); background: var(--card); color: var(--foreground); padding: 1rem 1.1rem; box-shadow: 0 18px 50px oklch(0 0 0 / 35%); transition: top 350ms ease, left 350ms ease; animation: tour-in 300ms ease; }
+@keyframes tour-in { from { opacity: 0; transform: translateY(6px); } }
+.tour-count { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--primary); }
+.tour-title { margin-top: .25rem; font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; }
+.tour-text { margin: .4rem 0 .8rem; font-size: .95rem; line-height: 1.5; color: var(--muted-foreground); }
+.tour-dots { display: flex; gap: 6px; margin-bottom: .8rem; }
+.tour-dots span { height: 6px; width: 6px; border-radius: 999px; background: var(--border); transition: width 250ms; }
+.tour-dots span.on { width: 18px; background: var(--primary); }
+.tour-bubble { overflow: hidden; } .chalkboard .tour-bubble { background: oklch(0.2 0.02 160); }

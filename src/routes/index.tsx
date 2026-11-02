@@ -98,7 +98,7 @@ function Funcoes() {
             </div>
           </Panel>
         </div>
-        <Panel title={is3D ? "Gráfico 3D · f(x, y)" : "Gráfico das funções"}>
+        <Panel className="tour-graph" title={is3D ? "Gráfico 3D · f(x, y)" : "Gráfico das funções"}>
           {is3D ? <Surface3D expression={expr} range={xMin !== null && xMax !== null && !rangeErr ? Math.max(Math.abs(xMin), Math.abs(xMax)) : 3} /> : !rangeErr && xMin !== null && xMax !== null ? <ComparisonPlot functions={functions} xMin={xMin} xMax={xMax} /> : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
         </Panel>
       </div>
