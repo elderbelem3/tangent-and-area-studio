@@ -85,7 +85,7 @@ function GuidedTour({ onClose }: { onClose: () => void }) {
       <h3 className="tour-title">{step.title}</h3>
       <p className="tour-text">{step.text}</p>
       <div className="tour-dots" aria-hidden="true">{STEPS.map((_, i) => <span key={i} className={i === index ? "on" : ""} />)}</div>
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <Button type="button" variant="ghost" size="sm" onClick={onClose} className="text-muted-foreground"><X className="h-4 w-4" />Pular Tutorial</Button>
         <div className="flex gap-2">
           <Button type="button" variant="outline" size="sm" onClick={prev} disabled={index === 0}><ChevronLeft className="h-4 w-4" />Anterior</Button>
