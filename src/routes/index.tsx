@@ -8,7 +8,7 @@ import { PageHeader, Panel, Field, ErrorBox, Chip, num } from "@/components/Lab"
 import { decodeTutorPlot, tutorPlotFunctions } from "@/lib/tutor-plot";
 
 export const Route = createFileRoute("/")({
-  validateSearch: (search: Record<string, unknown>): { grafico?: string } => typeof search.grafico === "string" ? { grafico: search.grafico } : {},
+  validateSearch: (search: Record<string, unknown>): { grafico?: string } => typeof search["grafico"] === "string" ? { grafico: search["grafico"] } : {},
   head: () => ({
     meta: [
       { property: "og:type", content: "website" },
