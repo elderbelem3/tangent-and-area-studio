@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Environment, Html, Lightformer, Line, OrbitControls } from "@react-three/drei";
+import { Environment, Lightformer, Line, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { Box, Hand } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -38,9 +38,9 @@ function solidData(expression: string, a: number, b: number) {
   const lo = Math.min(a, b), hi = Math.max(a, b), N = 60, M = 48;
   let rMax = 0;
   for (let i = 0; i <= N; i++) { const r = Math.abs(fn(lo + (hi - lo) * i / N)); if (Number.isFinite(r)) rMax = Math.max(rMax, r); }
-  const span = hi - lo || 1, scale = 4 / Math.max(span, rMax * 2, 1e-6), cx = (lo + hi) / 2;
-  const at = (x: number, t: number): V3 => { const r = Math.abs(fn(x)) * scale; const R = Number.isFinite(r) ? r : 0; return [(x - cx) * scale, R * Math.sin(t), R * Math.cos(t)]; };
-  return { fn, lo, hi, N, M, at, scale, cx };
+  const span = hi - lo || 1, xs = 4.4 / span, scale = 1.9 / Math.max(rMax, 1e-6), cx = (lo + hi) / 2;
+  const at = (x: number, t: number): V3 => { const r = Math.abs(fn(x)) * scale; const R = Number.isFinite(r) ? r : 0; return [(x - cx) * xs, R * Math.sin(t), R * Math.cos(t)]; };
+  return { fn, lo, hi, N, M, at, scale, xs, cx };
 }
 
 function SurfaceMesh({ d, chalk }: { d: NonNullable<ReturnType<typeof surfaceData>>; chalk: boolean }) {
@@ -82,22 +82,33 @@ function SolidMesh({ d, chalk }: { d: NonNullable<ReturnType<typeof solidData>>;
   return <mesh geometry={geo} castShadow><meshPhysicalMaterial color="#5b7cfa" roughness={0.3} metalness={0.15} clearcoat={0.6} side={THREE.DoubleSide} /></mesh>;
 }
 
+function makeLabel(text: string, color: string, bg: string | null) {
+  const c = document.createElement("canvas"), ctx = c.getContext("2d")!, font = "600 44px 'Roboto Mono', ui-monospace, monospace";
+  ctx.font = font; const w = Math.ceil(ctx.measureText(text).width) + 28; c.width = w; c.height = 64;
+  ctx.font = font; if (bg) { ctx.fillStyle = bg; ctx.beginPath(); ctx.roundRect(0, 0, w, 64, 10); ctx.fill(); }
+  ctx.fillStyle = color; ctx.textBaseline = "middle"; ctx.fillText(text, 14, 34);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return { t, aspect: w / 64 };
+}
+function TextSprite({ position, text, color = UV, bg = "rgba(30,16,44,0.75)", size = 0.32 }: { position: V3; text: string; color?: string; bg?: string | null; size?: number }) {
+  const l = useMemo(() => makeLabel(text, color, bg), [text, color, bg]);
+  return <sprite position={position} scale={[size * l.aspect, size, 1]} renderOrder={10}><spriteMaterial map={l.t} transparent depthTest={false} /></sprite>;
+}
 function Label({ position, children }: { position: V3; children: string }) {
-  return <Html position={position} center zIndexRange={[10, 0]}><span className="uv-3d-label">{children}</span></Html>;
+  return <TextSprite position={position} text={children} />;
 }
 
 function SolidUv({ d }: { d: NonNullable<ReturnType<typeof solidData>> }) {
   const m = (d.lo + d.hi) / 2, ring = (x: number) => Array.from({ length: 65 }, (_, j) => d.at(x, (2 * Math.PI * j) / 64));
-  const r = Math.abs(d.fn(m)) * d.scale, cx = (m - d.cx) * d.scale;
+  const r = Math.abs(d.fn(m)) * d.scale, cx = (m - d.cx) * d.xs;
   return <group>
     <mesh position={[cx, 0, 0]} rotation={[0, Math.PI / 2, 0]}><circleGeometry args={[Math.max(r, 0.001), 64]} /><meshBasicMaterial color={UV} transparent opacity={0.35} side={THREE.DoubleSide} depthWrite={false} /></mesh>
     <Line points={ring(m)} color={UV} lineWidth={3.5} />
     <Line points={[[cx, 0, 0], [cx, 0, r]]} color={UV} lineWidth={3} />
     <Line points={ring(d.lo)} color={UV} lineWidth={2.5} dashed dashSize={0.12} gapSize={0.08} />
     <Line points={ring(d.hi)} color={UV} lineWidth={2.5} dashed dashSize={0.12} gapSize={0.08} />
-    <Label position={[cx, 0.15, r + 0.35]}>{`disco r = ${fmt(Math.abs(d.fn(m)), 3)}`}</Label>
-    <Label position={[(d.lo - d.cx) * d.scale, -0.4, 0]}>{`x = ${fmt(d.lo, 3)}`}</Label>
-    <Label position={[(d.hi - d.cx) * d.scale, -0.4, 0]}>{`x = ${fmt(d.hi, 3)}`}</Label>
+    <Label position={[cx, r + 0.45, 0]}>{`disco r = ${fmt(Math.abs(d.fn(m)), 3)}`}</Label>
+    <Label position={[(d.lo - d.cx) * d.xs, -0.5, 0.6]}>{`x = ${fmt(d.lo, 3)}`}</Label>
+    <Label position={[(d.hi - d.cx) * d.xs, -0.5, 0.6]}>{`x = ${fmt(d.hi, 3)}`}</Label>
   </group>;
 }
 
@@ -121,9 +132,9 @@ function Axes({ chalk, L }: { chalk: boolean; L: number }) {
     <Line points={[[-L, 0, 0], [L, 0, 0]]} color={color} lineWidth={1.2} />
     <Line points={[[0, -L, 0], [0, L, 0]]} color={color} lineWidth={1.2} />
     <Line points={[[0, 0, L], [0, 0, -L]]} color={color} lineWidth={1.2} />
-    <Html position={[L + 0.2, 0, 0]} center><span className="axis-3d-label">x</span></Html>
-    <Html position={[0, L + 0.2, 0]} center><span className="axis-3d-label">{chalk ? "z" : "z"}</span></Html>
-    <Html position={[0, 0, -L - 0.2]} center><span className="axis-3d-label">y</span></Html>
+    <TextSprite position={[L + 0.25, 0, 0]} text="x" color={color} bg={null} size={0.4} />
+    <TextSprite position={[0, L + 0.25, 0]} text="z" color={color} bg={null} size={0.4} />
+    <TextSprite position={[0, 0, -L - 0.25]} text="y" color={color} bg={null} size={0.4} />
   </group>;
 }
 
