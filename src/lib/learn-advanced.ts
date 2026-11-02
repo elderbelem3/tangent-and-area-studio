@@ -53,7 +53,7 @@ export const CALC2_EXTRA: LearnModule = {
       theorem: { title: "Teste da comparação", text: "Se 0 ≤ f(x) ≤ g(x) para x ≥ a e ∫g converge, então ∫f converge; se ∫f diverge, ∫g também diverge." },
       example: {
         problem: "Decida se ∫₁^∞ 1/x² dx converge e calcule seu valor.",
-        steps: ["Escreva como limite: lim_{t→∞} ∫₁ᵗ x⁻² dx.", "A antiderivada é −1/x, logo ∫₁ᵗ x⁻² dx = 1 − 1/t.", "Quando t → ∞, 1/t → 0.", "O limite é finito: a integral converge."],
+        steps: ["Escreva como limite: o limite, quando t → ∞, de ∫₁ᵗ x⁻² dx.", "A antiderivada é −1/x, logo ∫₁ᵗ x⁻² dx = 1 − 1/t.", "Quando t → ∞, 1/t → 0.", "O limite é finito: a integral converge."],
         answer: "\\int_1^{\\infty}\\frac{dx}{x^2}=1",
       },
       warning: "∫₋₁¹ 1/x² dx não vale −2: o integrando explode em x = 0 e a integral diverge.",
