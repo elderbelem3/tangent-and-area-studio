@@ -296,3 +296,23 @@
 .chalk-summary :is(h3, p) { color: var(--foreground); text-shadow: 0 0 1px var(--chalk-highlight); }
 .uv-panel .uv-extra { border-top: 1px dashed color-mix(in oklch, var(--uv) 50%, transparent); padding-top: .75rem; }
 .uv-panel ol span, .uv-extra > span { font-family: var(--font-chalk); font-weight: 600; }
+
+/* Chalkboard legibility: math data in clean mono, context text in chalk */
+.chalkboard { --font-math: "JetBrains Mono", "Fira Code", "Roboto Mono", monospace; }
+.chalkboard :is(input, textarea, .font-mono, table, td, th, .recharts-cartesian-axis-tick text, .recharts-cartesian-axis-tick-value, svg text.fill-muted-foreground),
+.chalkboard main button.font-mono, .chalkboard main [role="toolbar"] button, .chalkboard main [aria-label*="ímbolos"] button {
+  font-family: var(--font-math) !important; font-weight: 600; letter-spacing: 0;
+}
+.chalkboard :is(input, textarea) { font-size: 15px; font-weight: 500; }
+.chalkboard .recharts-cartesian-axis-tick text { font-size: 13px; }
+.chalkboard :is(h1, h2, h3, h4, .font-display, figcaption, .chalk-label) { letter-spacing: 0.03em; }
+.chalkboard p:not(.font-mono) { font-size: calc(1.0625rem + 2px); letter-spacing: 0.025em; line-height: 1.6; }
+.chalkboard .chalk-label { font-size: 16px; }
+.chalkboard { --uv: oklch(0.88 0.13 305); --uv-strong: oklch(0.78 0.2 305); }
+.uv-label { font-size: 15px; font-weight: 700; letter-spacing: 0.03em; fill: oklch(0.93 0.09 305); paint-order: stroke; stroke: oklch(0.16 0.03 300 / 85%); stroke-width: 3px; }
+.chalkboard.blacklight .uv-layer .uv-label, .chalkboard.blacklight text.uv-label { filter: drop-shadow(0 0 2px var(--uv-strong)); }
+.uv-panel :is(h3, p, li, span) { color: oklch(0.92 0.1 305); text-shadow: 0 0 1px oklch(0.97 0.05 305), 0 0 6px var(--uv-strong); }
+.uv-panel :is(h3, ol span, .uv-extra > span) { font-family: var(--font-chalk); letter-spacing: 0.03em; font-size: calc(1em + 2px); }
+.uv-panel p.font-mono { font-family: var(--font-math, monospace); font-weight: 500; line-height: 1.85; }
+.uv-panel ol > li { line-height: 1.8; }
+.uv-panel ol > li + li { margin-top: 1rem; }

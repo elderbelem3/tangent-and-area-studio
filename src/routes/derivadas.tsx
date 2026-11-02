@@ -55,9 +55,9 @@ function Derivadas() {
               <Stat label="f'(x₀)" value={fmt(m, 5)} />
               <Stat label="f(x₀)" value={fmt(y0, 5)} />
               <div className="col-span-2 rounded-xl bg-secondary p-4">
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">Reta tangente</p>
+                <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">Reta tangente</p>
                 <p className="mt-1 font-mono text-lg">y = {fmt(m, 4)}x {b >= 0 ? "+" : "−"} {fmt(Math.abs(b), 4)}</p>
-                <p className="mt-1 text-sm text-muted-foreground">Inclinação: {fmt(m, 4)} ({m > 1e-6 ? "crescente" : m < -1e-6 ? "decrescente" : "ponto crítico"})</p>
+                <p className="mt-1 font-mono text-sm text-muted-foreground">Inclinação: {fmt(m, 4)} ({m > 1e-6 ? "crescente" : m < -1e-6 ? "decrescente" : "ponto crítico"})</p>
               </div>
             </div>
           )}

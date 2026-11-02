@@ -107,7 +107,7 @@ export function ErrorBox({ msg }: { msg: string }) {
 export function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border border-primary/15 bg-primary/5 p-5">
-      <p className="text-xs font-medium uppercase text-muted-foreground">{label}</p>
+      <p className="font-mono text-xs font-medium uppercase text-muted-foreground">{label}</p>
       <p className="mt-2 break-all font-mono text-2xl font-semibold text-primary">{value}</p>
     </div>
   );
@@ -115,7 +115,7 @@ export function Stat({ label, value }: { label: string; value: string }) {
 
 export function Chip({ onClick, children }: { onClick: () => void; children: ReactNode }) {
   return (
-    <Button variant="outline" size="sm" onClick={onClick} className="h-8 rounded-md border-border bg-background px-2.5 text-xs text-muted-foreground hover:border-primary/30 hover:text-primary">
+    <Button variant="outline" size="sm" onClick={onClick} className="h-8 rounded-md font-mono border-border bg-background px-2.5 text-xs text-muted-foreground hover:border-primary/30 hover:text-primary">
       {children}<ArrowUpRight className="!size-3 opacity-50" />
     </Button>
   );
