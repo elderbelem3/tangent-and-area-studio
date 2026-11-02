@@ -12,3 +12,8 @@
 - [ ] Adicionar gestão de até cinco funções em Funções e Derivadas.
 - [ ] Comparar curvas com Recharts, cores distintas e legenda interativa.
 - [ ] Verificar limite, exclusão, reinserção e gráficos nos dois módulos.
+
+# Tutor IA
+- [ ] Criar aba IA com entrada de problema, resolução numerada e histórico da sessão.
+- [ ] Conectar tutor de Cálculo e dúvidas contextualizadas por etapa.
+- [ ] Verificar resolução e perguntas sobre etapas com respostas reais.
