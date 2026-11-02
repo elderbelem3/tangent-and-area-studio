@@ -273,3 +273,15 @@
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+/* Luz Negra (sub-modo do Quadro Negro) */
+.chalkboard { --uv: oklch(0.81 0.12 305); --uv-strong: oklch(0.72 0.18 305); }
+.uv-layer, .uv-panel { display: none; }
+.chalkboard .uv-layer { display: inline; opacity: 0; transition: opacity 450ms ease; }
+.chalkboard.blacklight .uv-layer { opacity: 1; filter: drop-shadow(0 0 3px var(--uv)) drop-shadow(0 0 8px var(--uv-strong)); }
+.uv-label { font-family: var(--font-chalk); font-size: 12px; fill: var(--uv); }
+.chalkboard .uv-panel { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 450ms ease, opacity 450ms ease, margin 450ms ease; }
+.chalkboard.blacklight .uv-panel { grid-template-rows: 1fr; opacity: 1; margin-top: 1.25rem; }
+.uv-panel > div { overflow: hidden; }
+.uv-panel :is(h3, p, li, span) { color: var(--uv); text-shadow: 0 0 4px var(--uv-strong), 0 0 12px var(--uv-strong); }
+.uv-panel .uv-box { border: 2px dashed color-mix(in oklch, var(--uv) 60%, transparent); border-radius: 7px; padding: 1rem; background: oklch(0.15 0.03 300 / 35%); }
+.chalkboard.blacklight .uv-toggle { color: var(--uv); background: oklch(0.72 0.18 305 / 18%); box-shadow: 0 0 12px var(--uv-strong); }
