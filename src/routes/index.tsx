@@ -8,6 +8,7 @@ import { PageHeader, Panel, Field, ErrorBox, Chip, num } from "@/components/Lab"
 import { Smart3DView } from "@/components/Smart3DView";
 import { UvStepsPanel } from "@/components/UvStepsPanel";
 import { needs3D, surfaceAnalysis } from "@/lib/smart3d";
+import { EV_FUNCTION } from "@/lib/copilot-actions";
 import { decodeTutorPlot, tutorPlotFunctions } from "@/lib/tutor-plot";
 
 export const Route = createFileRoute("/")({
@@ -52,6 +53,11 @@ function Funcoes() {
     setA(String(imported.plot.intervalo[0])); setB(String(imported.plot.intervalo[1]));
   }, [imported]);
   const is3D = needs3D(expr);
+  useEffect(() => {
+    const on = (e: Event) => { const v = (e as CustomEvent<string>).detail; if (typeof v === "string" && v.trim()) setFunctions((prev) => prev.map((item) => item.slot === 0 ? { ...item, expression: v } : item)); };
+    window.addEventListener(EV_FUNCTION, on);
+    return () => window.removeEventListener(EV_FUNCTION, on);
+  }, []);
   const { fn } = useMemo(() => parseFn(expr), [expr]);
   const xMin = num(a), xMax = num(b), st = num(step);
   const rangeErr = xMin === null || xMax === null ? "Informe números válidos para o intervalo." : xMin >= xMax ? "O início do intervalo deve ser menor que o fim." : null;
