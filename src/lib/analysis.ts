@@ -18,11 +18,11 @@ function zeros(g: Fn, a: number, b: number): number[] {
   for (let i = 0; i < n; i++) {
     let l = a + i * h, r = l + h, fl = g(l); const fr = g(r);
     if (!Number.isFinite(fl) || !Number.isFinite(fr)) continue;
-    if (fl === 0) { out.push(l); continue; }
+    if (fl === 0) { if (!out.some((p) => Math.abs(p - l) < h * 1.5)) out.push(l); continue; }
     if (fl * fr >= 0) continue;
     for (let j = 0; j < 50; j++) { const m = (l + r) / 2, fm = g(m); if (fl * fm <= 0) r = m; else { l = m; fl = fm; } }
     const x = (l + r) / 2;
-    if (Math.abs(g(x)) < 1e-4 && !out.some((p) => Math.abs(p - x) < h)) out.push(x);
+    if (Math.abs(g(x)) < 1e-4 && !out.some((p) => Math.abs(p - x) < h * 1.5)) out.push(x);
   }
   return out;
 }
