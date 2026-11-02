@@ -3,6 +3,8 @@ import { CartesianGrid, Line, LineChart, ReferenceLine, ReferenceDot, Responsive
 import { Button } from "@/components/ui/button";
 import { derivative, fmt, parseFn } from "@/lib/calc";
 import { FUNCTION_BG_COLORS, FUNCTION_SLOTS, type ComparisonFunction } from "@/lib/comparison";
+import { findPlotAnnotations } from "@/lib/plot-annotations";
+import { ChalkAnnotation } from "@/components/ChalkAnnotation";
 
 export function ComparisonPlot({ functions, xMin, xMax, tangentAt }: {
   functions: ComparisonFunction[]; xMin: number; xMax: number; tangentAt?: number;
@@ -12,6 +14,7 @@ export function ComparisonPlot({ functions, xMin, xMax, tangentAt }: {
     setHidden((previous) => previous.filter((slot) => functions.some((item) => item.slot === slot)));
   }, [functions]);
   const curves = useMemo(() => functions.map((item) => ({ ...item, ...parseFn(item.expression) })), [functions]);
+  const annotations = useMemo(() => curves.flatMap((item) => item.fn ? findPlotAnnotations(item.fn, xMin, xMax).map((point) => ({ ...point, slot: item.slot })) : []), [curves, xMin, xMax]);
   const visible = curves.filter((item) => item.fn && !hidden.includes(item.slot));
   const samples = Array.from({ length: 601 }, (_, i) => xMin + (xMax - xMin) * i / 600);
   const values = visible.flatMap((item) => samples.map((x) => item.fn?.(x) ?? NaN)).filter(Number.isFinite).sort((a, b) => a - b);
@@ -51,12 +54,13 @@ export function ComparisonPlot({ functions, xMin, xMax, tangentAt }: {
           <CartesianGrid stroke="var(--grid)" />
           <XAxis type="number" dataKey="x" domain={[xMin, xMax]} tickFormatter={(value: number) => fmt(value, 2)} stroke="var(--axis)" tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
           <YAxis type="number" domain={[low, high]} allowDataOverflow tickFormatter={(value: number) => fmt(value, 2)} width={56} stroke="var(--axis)" tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
-          <ReferenceLine y={0} stroke="var(--axis)" />
-          {xMin <= 0 && xMax >= 0 && <ReferenceLine x={0} stroke="var(--axis)" />}
+          <ReferenceLine y={0} stroke="var(--axis)" className="chalk-axis" />
+          {xMin <= 0 && xMax >= 0 && <ReferenceLine x={0} stroke="var(--axis)" className="chalk-axis" />}
           <Tooltip content={({ active, payload, label }) => active && payload?.length ? <div className="max-w-64 rounded-lg border border-border bg-card p-3 text-xs shadow-soft"><p className="mb-2 font-mono">x = {fmt(Number(label), 4)}</p>{payload.map((entry) => <p key={String(entry.dataKey)} className="font-mono">{entry.name}: {fmt(Number(entry.value), 5)}</p>)}</div> : null} />
           {tangents.map((item) => <Line key={`curve${item.slot}`} dataKey={`curve${item.slot}`} name={`${FUNCTION_SLOTS[item.slot]}(x)`} stroke={`var(--chart-${item.slot + 1})`} strokeWidth={2.5} dot={false} connectNulls={false} isAnimationActive={false} />)}
           {tangentAt !== undefined && tangents.filter((item) => Number.isFinite(item.y) && Number.isFinite(item.slope)).map((item) => <Line key={`tangent${item.slot}`} dataKey={`tangent${item.slot}`} name={`Tangente ${FUNCTION_SLOTS[item.slot]}`} stroke={`var(--chart-${item.slot + 1})`} strokeWidth={1.5} strokeDasharray="6 4" dot={false} isAnimationActive={false} />)}
           {tangentAt !== undefined && tangents.filter((item) => Number.isFinite(item.y)).map((item) => <ReferenceDot key={item.slot} x={tangentAt} y={item.y} r={4} fill={`var(--chart-${item.slot + 1})`} stroke="var(--card)" />)}
+          {annotations.filter((point) => !hidden.includes(point.slot) && point.y >= low && point.y <= high).map((point, index) => <ReferenceDot key={`annotation-${point.slot}-${index}`} x={point.x} y={point.y} ifOverflow="hidden" shape={(props: { cx?: number; cy?: number }) => <ChalkAnnotation {...props} point={point} color={`var(--chart-${point.slot + 1})`} />} />)}
         </LineChart>
       </ResponsiveContainer>
     </div>

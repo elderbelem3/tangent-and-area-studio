@@ -13,6 +13,7 @@ import { useEffect, type ReactNode } from "react";
 
 import { ChartSpline, MoveHorizontal, TrendingUp, Sigma, BookOpen, GraduationCap, ArrowUpRight, BrainCircuit } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -65,7 +66,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Space+Grotesk:wght@500;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" },
       { rel: "stylesheet", href: appCss },
       { rel: "icon", type: "image/png", href: "/favicon.png" },
     ],
@@ -100,7 +101,7 @@ function RootComponent() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-background">
+      <div className="app-shell min-h-screen bg-background">
         <header className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
             <Link to="/" className="flex items-center gap-3 font-display text-2xl font-bold">
@@ -109,13 +110,16 @@ function RootComponent() {
             </Link>
             <span className="hidden items-center gap-2 text-xs font-medium text-muted-foreground sm:flex"><GraduationCap className="h-4 w-4" />Cálculo Diferencial e Integral</span>
           </div>
-          <nav className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4 sm:px-7" aria-label="Módulos">
+          <div className="mx-auto flex max-w-7xl items-center px-4 sm:px-7">
+          <nav className="flex min-w-0 flex-1 gap-1 overflow-x-auto" aria-label="Módulos">
             {nav.map((n) => (
               <Button key={n.to} asChild variant="ghost" className="h-12 shrink-0 rounded-none border-b-2 border-transparent px-4 text-muted-foreground hover:bg-muted/60 hover:text-foreground">
                 <Link to={n.to} activeOptions={{ exact: true }} activeProps={{ className: "border-primary bg-primary/5 !text-primary" }}><n.icon className="h-4 w-4" />{n.label}</Link>
               </Button>
             ))}
           </nav>
+          <ThemeToggle />
+          </div>
         </header>
         <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 md:py-10">
           <div key={pathname} className="module-enter"><Outlet /></div>
