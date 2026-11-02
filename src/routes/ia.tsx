@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { BrainCircuit, Sparkles, LoaderCircle, History, Send, CheckCheck } from "lucide-react";
+import { BrainCircuit, Sparkles, LoaderCircle, History, Send, CheckCheck, ChartSpline } from "lucide-react";
 import { PageHeader, Panel, ErrorBox } from "@/components/Lab";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +10,7 @@ import { TutorSteps, TutorStepContent } from "@/components/TutorSteps";
 import { askTutor } from "@/lib/tutor.functions";
 import { tutorSolutionSchema, type TutorEntry } from "@/lib/tutor";
 import { z } from "zod";
+import { validateTutorPlot } from "@/lib/tutor-plot";
 
 export const Route = createFileRoute("/ia")({
   head: () => ({ meta: [
@@ -25,6 +26,7 @@ const sessionSchema = z.array(z.object({ id: z.string(), problem: z.string(), so
 const SESSION_KEY = "calculuslab-tutor-session";
 
 function TutorPage() {
+  const navigate = useNavigate();
   const tutor = useServerFn(askTutor);
   const [problem, setProblem] = useState("");
   const [entries, setEntries] = useState<TutorEntry[]>([]);
@@ -43,6 +45,7 @@ function TutorPage() {
   }, []);
   useEffect(() => { if (ready) { try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(entries)); } catch { /* Keep in-memory session usable. */ } } }, [entries, ready]);
   const active = entries.find((entry) => entry.id === activeId);
+  const plotResult = active?.solution.funcoes?.length ? validateTutorPlot(active.solution) : null;
   const selectedStep = active && stepIndex !== null ? [...active.solution.steps, active.solution.conclusion][stepIndex] : undefined;
   const questions = active && stepIndex !== null ? active.questions[String(stepIndex)] ?? [] : [];
 
@@ -93,6 +96,10 @@ function TutorPage() {
         {busy ? <div className="flex min-h-72 flex-col items-center justify-center gap-4 border-y border-border text-muted-foreground"><LoaderCircle className="h-8 w-8 animate-spin text-primary" /><p className="text-sm">Analisando o problema e preparando a resolução…</p></div> : active ? <>
           <div className="mb-5 border-b border-border pb-5"><p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase text-primary"><CheckCheck className="h-4 w-4" />Resolução</p><h2 className="break-words font-display text-xl font-semibold">{active.solution.title}</h2><p className="mt-3 break-words whitespace-pre-wrap text-sm text-muted-foreground">{active.problem}</p></div>
           <TutorSteps solution={active.solution} onQuestion={(index) => { setStepIndex(index); setQuestion(""); setQuestionError(null); }} />
+          {plotResult && <div className="mt-5 space-y-3 border-t border-border pt-5">
+            <Button disabled={!plotResult.plot} onClick={() => { if (plotResult.plot) void navigate({ to: "/", search: { grafico: JSON.stringify(plotResult.plot) } }); }}><ChartSpline className="h-4 w-4" />Plotar no Gráfico</Button>
+            {plotResult.error && <ErrorBox msg={plotResult.error} />}
+          </div>}
           <p className="mt-4 text-xs text-muted-foreground">Respostas de IA podem conter erros. Confira as hipóteses e os resultados.</p>
         </> : <div className="flex min-h-80 flex-col items-center justify-center gap-4 border-y border-border text-center"><BrainCircuit className="h-12 w-12 text-primary/60" /><h2 className="font-display text-xl font-semibold">Sua resolução</h2><p className="text-sm text-muted-foreground">Aguardando um problema de Cálculo.</p></div>}
       </section>

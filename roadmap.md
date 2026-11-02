@@ -22,3 +22,8 @@
 - [x] Adicionar alternância no cabeçalho e persistência local.
 - [x] Aplicar tokens, escrita de giz, moldura e anotações aos gráficos.
 - [x] Verificar alternância, recarregamento e interações em todas as abas.
+
+# Gráfico a partir do tutor
+- [ ] Incluir funções e intervalo estruturados na resolução.
+- [ ] Transferir funções validadas para o gráfico pela ação do tutor.
+- [ ] Testar validação e resolução real com navegação e curvas.
