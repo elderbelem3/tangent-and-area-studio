@@ -7,7 +7,7 @@ describe("analyzeFunction", () => {
     expect(a.critical[0]!.kind).toBe("Máximo local"); expect(a.critical[1]!.kind).toBe("Mínimo local");
   });
   it("finds inflection at 0 and limits", () => {
-    expect(a.inflections.map((p) => Math.round(p.x))).toEqual([0]);
+    expect(a.inflections).toHaveLength(1); expect(a.inflections[0]!.x).toBeCloseTo(0, 3);
     expect(a.limitPos).toBe("+∞"); expect(a.limitNeg).toBe("−∞");
   });
 });
