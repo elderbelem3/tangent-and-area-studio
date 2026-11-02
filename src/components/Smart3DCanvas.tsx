@@ -12,7 +12,7 @@ export type Scene3D =
   | { kind: "surface"; expression: string; range: number; info: SurfaceInfo | null }
   | { kind: "solid"; expression: string; a: number; b: number };
 
-const UV = "#d8a8ff";
+const UV = "#efd2ff";
 const CHALK = "#f1f5ee";
 type V3 = [number, number, number];
 
@@ -101,7 +101,7 @@ function SolidUv({ d }: { d: NonNullable<ReturnType<typeof solidData>> }) {
   const m = (d.lo + d.hi) / 2, ring = (x: number) => Array.from({ length: 65 }, (_, j) => d.at(x, (2 * Math.PI * j) / 64));
   const r = Math.abs(d.fn(m)) * d.scale, cx = (m - d.cx) * d.xs;
   return <group>
-    <mesh position={[cx, 0, 0]} rotation={[0, Math.PI / 2, 0]}><circleGeometry args={[Math.max(r, 0.001), 64]} /><meshBasicMaterial color={UV} transparent opacity={0.35} side={THREE.DoubleSide} depthWrite={false} /></mesh>
+    <mesh position={[cx, 0, 0]} rotation={[0, Math.PI / 2, 0]}><circleGeometry args={[Math.max(r, 0.001), 64]} /><meshBasicMaterial color={UV} transparent opacity={0.5} side={THREE.DoubleSide} depthWrite={false} /></mesh>
     <Line points={ring(m)} color={UV} lineWidth={3.5} />
     <Line points={[[cx, 0, 0], [cx, 0, r]]} color={UV} lineWidth={3} />
     <Line points={ring(d.lo)} color={UV} lineWidth={2.5} dashed dashSize={0.12} gapSize={0.08} />
