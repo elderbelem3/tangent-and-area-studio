@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { parseFn, derivative, fmt } from "@/lib/calc";
 import { ComparisonPlot } from "@/components/ComparisonPlot";
+import { UvStepsPanel } from "@/components/UvStepsPanel";
+import { derivativeSteps } from "@/lib/uv-steps";
 import { FunctionEditor } from "@/components/FunctionEditor";
 import { addComparisonFunction, removeComparisonFunction, FUNCTION_SLOTS, FUNCTION_TEXT_COLORS, type ComparisonFunction } from "@/lib/comparison";
 import { PageHeader, Panel, Field, ErrorBox, Chip, Stat, num } from "@/components/Lab";
@@ -70,8 +72,9 @@ function Derivadas() {
         <div className="min-w-0 space-y-6">
           <Panel title="Curvas e retas tangentes">
             {x0 !== null ? (
-              <ComparisonPlot functions={functions} xMin={x0 - 4} xMax={x0 + 4} tangentAt={x0} />
+              <ComparisonPlot functions={functions} xMin={x0 - 4} xMax={x0 + 4} tangentAt={x0} analysis={false} />
             ) : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
+            {ok && x0 !== null && <UvStepsPanel title="Regras de Derivação Passo a Passo" steps={(() => { const s = derivativeSteps(expr); return s && [...s, { title: "Aplicação no ponto", lines: [`f′(${fmt(x0)}) = ${fmt(m, 5)} · f(${fmt(x0)}) = ${fmt(y0, 5)}`, `Reta tangente: y = ${fmt(m, 4)}x ${b >= 0 ? "+" : "−"} ${fmt(Math.abs(b), 4)}`] }]; })()} />}
           </Panel>
           <Panel title="Interpretação geométrica">
             <div className="space-y-2 text-sm leading-relaxed text-muted-foreground">

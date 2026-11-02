@@ -2,6 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { parseFn, integrate, fmt } from "@/lib/calc";
 import { Plot } from "@/components/Plot";
+import { IntegralUvOverlay } from "@/components/UvOverlays";
+import { UvStepsPanel } from "@/components/UvStepsPanel";
+import { integralSteps } from "@/lib/uv-steps";
 import { PageHeader, Panel, Field, ErrorBox, Chip, MathToolbar, Stat, num } from "@/components/Lab";
 
 export const Route = createFileRoute("/integrais")({
@@ -56,7 +59,8 @@ function Integrais() {
         </div>
         <div className="min-w-0 space-y-6">
           <Panel title="Área sob a curva">
-            {valid ? <Plot fn={fn} xMin={lo - pad} xMax={hi + pad} shade={[a, b]} /> : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
+            {valid ? <Plot fn={fn} xMin={lo - pad} xMax={hi + pad} shade={[a, b]} overlay={(h) => <IntegralUvOverlay h={h} a={a} b={b} value={value} />} /> : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
+            {valid && !bad && <UvStepsPanel title="Antiderivada e Teorema Fundamental" steps={integralSteps(expr, a, b)} />}
           </Panel>
           <Panel title="Integral como área acumulada">
             <div className="space-y-2 text-sm leading-relaxed text-muted-foreground">
