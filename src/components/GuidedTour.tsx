@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { CircleHelp, ChevronLeft, ChevronRight, Sparkles, X } from "lucide-react";
+import { CircleHelp, ChevronDown, ChevronLeft, ChevronRight, Sparkles, Route as RouteIcon, X } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { HelpChat } from "@/components/HelpChat";
 import { Button } from "@/components/ui/button";
 
@@ -26,9 +27,21 @@ export function HelpButton() {
   const [open, setOpen] = useState(false);
   const [chat, setChat] = useState(false);
   return <>
-    <Button type="button" size="sm" onClick={() => setOpen(true)} className="help-pulse h-9 gap-1.5 rounded-full px-3.5" aria-label="Como usar o CalculusLab">
-      <CircleHelp className="h-4 w-4" /><span>Como Usar</span>
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button type="button" size="sm" className="help-pulse h-9 gap-1.5 rounded-full px-3.5" aria-label="Como usar o CalculusLab">
+          <CircleHelp className="h-4 w-4" /><span>Como Usar</span><ChevronDown className="h-3.5 w-3.5 opacity-80" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-72 p-1.5">
+        <DropdownMenuItem onSelect={() => { setChat(false); setOpen(true); }} className="items-start gap-3 p-2.5">
+          <RouteIcon className="mt-0.5 h-4 w-4 text-primary" /><span><span className="block font-semibold">Tour Guiado</span><span className="block text-xs text-muted-foreground">Passo a passo iluminando cada ferramenta</span></span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => setChat(true)} className="items-start gap-3 p-2.5">
+          <Sparkles className="mt-0.5 h-4 w-4 text-primary" /><span><span className="block font-semibold">Ajuda com IA</span><span className="block text-xs text-muted-foreground">Copiloto que explica e demonstra ao vivo</span></span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
     {open && <GuidedTour onClose={() => setOpen(false)} onAskAi={() => { setOpen(false); setChat(true); }} />}
     {chat && <HelpChat onClose={() => setChat(false)} />}
   </>;

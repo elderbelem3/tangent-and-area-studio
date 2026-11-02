@@ -361,3 +361,6 @@ html.chalkboard { font-size: 18px; }
 .help-chat { position: fixed; right: 1rem; bottom: 1rem; z-index: 90; display: flex; flex-direction: column; width: min(360px, calc(100vw - 2rem)); height: min(480px, calc(100vh - 6rem)); border: 1px solid var(--border); border-radius: 16px; background: var(--card); color: var(--foreground); box-shadow: 0 18px 50px oklch(0 0 0 / 30%); animation: tour-in 280ms ease; }
 .tour-ai { background: linear-gradient(90deg, var(--primary), oklch(0.62 0.2 300)); color: var(--primary-foreground); box-shadow: 0 0 0 0 oklch(0.62 0.2 300 / 50%); animation: help-pulse 2.2s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .tour-ai { animation: none; } }
+/* Copilot side panel */
+.help-chat { top: 0; right: 0; bottom: 0; height: 100vh; width: min(380px, 100vw); border-radius: 0; border-width: 0 0 0 1px; animation: copilot-in 300ms ease; }
+@keyframes copilot-in { from { transform: translateX(24px); opacity: 0; } }
