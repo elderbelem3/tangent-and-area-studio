@@ -74,6 +74,7 @@ function Derivadas() {
             {x0 !== null ? (
               <ComparisonPlot functions={functions} xMin={x0 - 4} xMax={x0 + 4} tangentAt={x0} analysis={false} />
             ) : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
+            {ok && x0 !== null && <UvStepsPanel title="Regras de Derivação Passo a Passo" steps={(() => { const s = derivativeSteps(expr); return s && [...s, { title: "Aplicação no ponto", lines: [`f′(${fmt(x0)}) = ${fmt(m, 5)} · f(${fmt(x0)}) = ${fmt(y0, 5)}`, `Reta tangente: y = ${fmt(m, 4)}x ${b >= 0 ? "+" : "−"} ${fmt(Math.abs(b), 4)}`] }]; })()} />}
           </Panel>
           <Panel title="Interpretação geométrica">
             <div className="space-y-2 text-sm leading-relaxed text-muted-foreground">
