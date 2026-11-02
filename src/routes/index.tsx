@@ -115,9 +115,12 @@ function Funcoes() {
 
 function Surface3D({ expression, range, layers }: { expression: string; range: number; layers: { expression: string; slot: number }[] }) {
   const info = useMemo(() => surfaceAnalysis(expression, range), [expression, range]);
-  const scene = useMemo(() => ({ kind: "surface" as const, expression, range, info, layers }), [expression, range, info, layers]);
+  const layerKey = JSON.stringify(layers);
+  const stable = useMemo(() => layers, [layerKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  const scene = useMemo(() => ({ kind: "surface" as const, expression, range, info, layers: stable }), [expression, range, info, stable]);
   return <>
     <p className="mb-3 text-sm text-muted-foreground">Detectamos uma função de duas variáveis — exibindo a superfície z = f(x, y) em [−{range}, {range}]².</p>
+    {stable.length > 1 && <div className="mb-3 flex flex-wrap gap-2">{stable.map((l) => <span key={l.slot} className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 font-mono text-xs"><span className={`h-2.5 w-2.5 rounded-full ${FUNCTION_BG_COLORS[l.slot]}`} />{FUNCTION_SLOTS[l.slot]}{needs3D(l.expression) ? "(x, y)" : "(x)"} = {l.expression}</span>)}</div>}
     <Smart3DView scene={scene} />
     <UvStepsPanel title="Análise da Superfície Passo a Passo" steps={info?.steps ?? null} />
   </>;
