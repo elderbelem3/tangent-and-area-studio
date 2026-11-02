@@ -14,5 +14,5 @@
 - Keep learning content as typed course units independent of the Aprenda view, and render its LaTeX through the shared KaTeX MathFormula with MathML output, so academic content stays maintainable and accessible.
 - Share slot-based comparison state, the function editor and Recharts comparison plot between Functions and Derivatives so removal preserves curve identity and colors; keep the existing Plot for Limits and Integrals.
 - Keep the calculus tutor's AI calls inside a TanStack server function using the Gateway SDK with validated structured output; store its explicitly session-only history in sessionStorage and use shared KaTeX rendering for formulas.
-- Apply the optional chalkboard theme through root CSS tokens and a hydration-safe header toggle; share numerical visual annotations across both plot implementations without using them for calculation results.
+- Apply the optional chalkboard theme through root CSS tokens and a hydration-safe header toggle; keep decorative texture/tray theme-only and use shared SVG axis/annotation primitives without changing calculation results.
 - Transfer tutor graph suggestions through a validated Functions search parameter; verify expressions with the shared mathjs parser and keep legacy session solutions readable when graph fields are absent.
