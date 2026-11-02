@@ -25,3 +25,10 @@ describe("Blacklight preference", () => {
     expect(readBlacklight(store)).toBe(false); saveBlacklight(store, true); expect(readBlacklight(store)).toBe(true);
   });
 });
+import { describe as d2, it as i2, expect as e2 } from "vitest";
+d2("dark theme", () => {
+  i2("persists dark mode as its own state", () => {
+    const m = new Map<string, string>(); const st = { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v) };
+    saveTheme(st, "dark"); e2(readTheme(st)).toBe("dark");
+  });
+});
