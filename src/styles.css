@@ -331,3 +331,6 @@ html.chalkboard { font-size: 18px; }
 .chalkboard .uv-label { font-size: 16px; font-weight: 600; letter-spacing: 0; stroke: none; fill: oklch(0.9 0.12 305); }
 .chalkboard .chalk-label { font-size: 17px; }
 .uv-panel p.font-mono { color: oklch(0.92 0.09 305); }
+.chalkboard.blacklight .uv-layer, .chalkboard .uv-layer { filter: none !important; }
+.chalkboard main button { font-size: 16px; }
+.chalkboard .lab-panel table th { font-size: 15px; }
