@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { parseFn, fmt } from "@/lib/calc";
 import { ComparisonPlot } from "@/components/ComparisonPlot";
 import { FunctionEditor } from "@/components/FunctionEditor";
-import { addComparisonFunction, removeComparisonFunction, type ComparisonFunction } from "@/lib/comparison";
+import { addComparisonFunction, FUNCTION_BG_COLORS, FUNCTION_SLOTS, removeComparisonFunction, type ComparisonFunction } from "@/lib/comparison";
 import { PageHeader, Panel, Field, ErrorBox, Chip, num } from "@/components/Lab";
 import { Smart3DView } from "@/components/Smart3DView";
 import { UvStepsPanel } from "@/components/UvStepsPanel";
