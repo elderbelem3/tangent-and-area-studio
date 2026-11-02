@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const tutorStepSchema = z.object({ title: z.string(), explanation: z.string(), formula: z.string() });
+export const tutorStepSchema = z.object({ title: z.string(), explanation: z.string(), formula: z.string(), dica: z.string().optional(), intermediario: z.string().optional() });
 export const tutorSolutionSchema = z.object({ title: z.string(), steps: z.array(tutorStepSchema).min(1), conclusion: tutorStepSchema, funcoes: z.array(z.string()).max(5).optional(), intervalo: z.tuple([z.number().finite(), z.number().finite()]).optional() });
 export type TutorSolution = z.infer<typeof tutorSolutionSchema>;
 export type TutorStep = z.infer<typeof tutorStepSchema>;
@@ -29,8 +29,8 @@ export const TUTOR_OUTPUT_SCHEMA = {
   type: "object", additionalProperties: false,
   properties: {
     title: { type: "string" },
-    steps: { type: "array", items: { type: "object", additionalProperties: false, properties: { title: { type: "string" }, explanation: { type: "string" }, formula: { type: "string" } }, required: ["title", "explanation", "formula"] } },
-    conclusion: { type: "object", additionalProperties: false, properties: { title: { type: "string" }, explanation: { type: "string" }, formula: { type: "string" } }, required: ["title", "explanation", "formula"] },
+    steps: { type: "array", items: { type: "object", additionalProperties: false, properties: { title: { type: "string" }, explanation: { type: "string" }, formula: { type: "string" }, dica: { type: "string" }, intermediario: { type: "string" } }, required: ["title", "explanation", "formula", "dica", "intermediario"] } },
+    conclusion: { type: "object", additionalProperties: false, properties: { title: { type: "string" }, explanation: { type: "string" }, formula: { type: "string" }, dica: { type: "string" }, intermediario: { type: "string" } }, required: ["title", "explanation", "formula", "dica", "intermediario"] },
     funcoes: { type: "array", maxItems: 5, items: { type: "string" } },
     intervalo: { type: "array", minItems: 2, maxItems: 2, items: { type: "number" } },
   }, required: ["title", "steps", "conclusion", "funcoes", "intervalo"],

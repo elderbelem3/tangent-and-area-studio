@@ -7,6 +7,8 @@ export const enadeQuestionSchema = z.object({
   formula: z.string(),
   alternativas: z.array(z.object({ letra: z.enum(["A", "B", "C", "D", "E"]), texto: z.string() })).length(5),
   correta: z.enum(["A", "B", "C", "D", "E"]),
+  dica: z.string().optional(),
+  gabarito: z.string().optional(),
 });
 export type EnadeQuestion = z.infer<typeof enadeQuestionSchema>;
 export const enadeFeedbackSchema = z.object({ acertou: z.boolean(), feedback: z.string(), formula: z.string() });
@@ -28,7 +30,8 @@ export const ENADE_QUESTION_SCHEMA = {
     tema: { type: "string" }, contexto: { type: "string" }, enunciado: { type: "string" }, formula: { type: "string" },
     alternativas: { type: "array", minItems: 5, maxItems: 5, items: { type: "object", additionalProperties: false, properties: { letra: { type: "string", enum: ["A", "B", "C", "D", "E"] }, texto: { type: "string" } }, required: ["letra", "texto"] } },
     correta: { type: "string", enum: ["A", "B", "C", "D", "E"] },
-  }, required: ["tema", "contexto", "enunciado", "formula", "alternativas", "correta"],
+    dica: { type: "string" }, gabarito: { type: "string" },
+  }, required: ["tema", "contexto", "enunciado", "formula", "alternativas", "correta", "dica", "gabarito"],
 };
 export const ENADE_FEEDBACK_SCHEMA = {
   type: "object", additionalProperties: false,
