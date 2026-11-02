@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { EV_3D } from "@/lib/copilot-actions";
+import { EV_3D, consumePending3D } from "@/lib/copilot-actions";
 import { Canvas } from "@react-three/fiber";
 import { Environment, Lightformer, Line, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
@@ -141,8 +141,8 @@ function Axes({ chalk, L }: { chalk: boolean; L: number }) {
 
 export default function Smart3DCanvas({ scene }: { scene: Scene3D }) {
   const { chalkboard, blacklight } = useLabTheme();
-  const [interactive, setInteractive] = useState(false);
-  useEffect(() => { const on = () => setInteractive(true); window.addEventListener(EV_3D, on); return () => window.removeEventListener(EV_3D, on); }, []);
+  const [interactive, setInteractive] = useState(() => consumePending3D());
+  useEffect(() => { const on = () => { consumePending3D(); setInteractive(true); }; window.addEventListener(EV_3D, on); return () => window.removeEventListener(EV_3D, on); }, []);
   const surf = useMemo(() => scene.kind === "surface" ? surfaceData(scene.expression, scene.range) : null, [scene]);
   const solid = useMemo(() => scene.kind === "solid" ? solidData(scene.expression, scene.a, scene.b) : null, [scene]);
   const orbit = chalkboard || interactive;

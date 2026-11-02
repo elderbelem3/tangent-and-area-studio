@@ -18,3 +18,8 @@ export function onOff(value: string): boolean | undefined {
   const v = value.trim().toLowerCase();
   return v === "on" || v === "true" ? true : v === "off" || v === "false" ? false : undefined;
 }
+
+let pending3D = false;
+/** Request 3D interaction; a canvas mounting later picks it up via consumePending3D. */
+export function request3D() { pending3D = true; if (typeof window !== "undefined") window.dispatchEvent(new Event(EV_3D)); }
+export function consumePending3D() { const v = pending3D; pending3D = false; return v; }
