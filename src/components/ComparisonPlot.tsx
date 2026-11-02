@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CartesianGrid, Line, LineChart, ReferenceLine, ReferenceDot, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
 import { derivative, fmt, parseFn } from "@/lib/calc";
@@ -8,6 +8,9 @@ export function ComparisonPlot({ functions, xMin, xMax, tangentAt }: {
   functions: ComparisonFunction[]; xMin: number; xMax: number; tangentAt?: number;
 }) {
   const [hidden, setHidden] = useState<number[]>([]);
+  useEffect(() => {
+    setHidden((previous) => previous.filter((slot) => functions.some((item) => item.slot === slot)));
+  }, [functions]);
   const curves = useMemo(() => functions.map((item) => ({ ...item, ...parseFn(item.expression) })), [functions]);
   const visible = curves.filter((item) => item.fn && !hidden.includes(item.slot));
   const samples = Array.from({ length: 601 }, (_, i) => xMin + (xMax - xMin) * i / 600);

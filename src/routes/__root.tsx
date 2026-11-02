@@ -11,7 +11,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
-import { ChartSpline, MoveHorizontal, TrendingUp, Sigma, BookOpen, GraduationCap, ArrowUpRight } from "lucide-react";
+import { ChartSpline, MoveHorizontal, TrendingUp, Sigma, BookOpen, GraduationCap, ArrowUpRight, BrainCircuit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -91,6 +91,7 @@ const nav = [
   { to: "/derivadas", label: "Derivadas", icon: TrendingUp },
   { to: "/integrais", label: "Integrais", icon: Sigma },
   { to: "/aprenda", label: "Aprenda", icon: BookOpen },
+  { to: "/ia", label: "IA", icon: BrainCircuit },
   { to: "/creditos", label: "Créditos", icon: GraduationCap },
 ] as const;
 
