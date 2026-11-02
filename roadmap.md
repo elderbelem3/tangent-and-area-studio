@@ -17,3 +17,8 @@
 - [x] Criar aba IA com entrada de problema, resolução numerada e histórico da sessão.
 - [x] Conectar tutor de Cálculo e dúvidas contextualizadas por etapa.
 - [x] Verificar resolução e perguntas sobre etapas com respostas reais.
+
+# Modo Quadro Negro
+- [x] Adicionar alternância no cabeçalho e persistência local.
+- [x] Aplicar tokens, escrita de giz, moldura e anotações aos gráficos.
+- [x] Verificar alternância, recarregamento e interações em todas as abas.

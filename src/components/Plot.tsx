@@ -1,5 +1,7 @@
-import { useId } from "react";
+import { useId, useMemo } from "react";
 import type { Fn } from "@/lib/calc";
+import { findPlotAnnotations } from "@/lib/plot-annotations";
+import { ChalkAnnotation } from "@/components/ChalkAnnotation";
 
 type Props = {
   fn: Fn;
@@ -14,6 +16,7 @@ const W = 640, H = 400, P = 36;
 
 export function Plot({ fn, xMin, xMax, points = [], lines = [], shade }: Props) {
   const clipId = useId();
+  const annotations = useMemo(() => findPlotAnnotations(fn, xMin, xMax), [fn, xMin, xMax]);
   const N = 600;
   const xs = Array.from({ length: N + 1 }, (_, i) => xMin + ((xMax - xMin) * i) / N);
   const ys = xs.map(fn).filter((y) => Number.isFinite(y));
@@ -98,6 +101,7 @@ export function Plot({ fn, xMin, xMax, points = [], lines = [], shade }: Props) 
             {p.label && <text x={sx(p.x) + 10} y={sy(p.y) - 10} className="fill-foreground text-[12px] font-semibold">{p.label}</text>}
           </g>
         ))}
+        {annotations.filter((point) => point.y >= yMin && point.y <= yMax).map((point, i) => <ChalkAnnotation key={`annotation-${i}`} cx={sx(point.x)} cy={sy(point.y)} point={point} />)}
       </g>
     </svg>
     <div className="mt-4 flex flex-wrap items-center justify-center gap-5 border-t border-border pt-4 text-xs text-muted-foreground"><span className="inline-flex items-center gap-2"><span className="h-0.5 w-5 bg-primary" />f(x)</span>{lines.length > 0 && <span className="inline-flex items-center gap-2"><span className="h-0.5 w-5 bg-accent-strong" />Reta tangente</span>}{shade && <span className="inline-flex items-center gap-2"><span className="h-3 w-3 rounded-sm bg-primary/25" />Área integrada</span>}</div>
