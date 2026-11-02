@@ -7,22 +7,23 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { HelpChat } from "@/components/HelpChat";
 import { Button } from "@/components/ui/button";
 
-type Step = { selector: string; title: string; text: string; route?: "/" | "/limites" | "/derivadas" | "/integrais"; before?: () => void };
+type Step = { selector: string; title: string; text: string; route?: "/" | "/limites" | "/derivadas" | "/integrais" | "/ia"; before?: () => void };
 
-const PARAMS = "main .grid.gap-6 > :first-child";
 /** Each module step declares its route; the tour switches tabs before showing the bubble. */
 export const STEPS: Step[] = [
-  { route: "/", selector: "main .grid.gap-6", title: "Funções", text: "O básico e o avançado. Adicione f(x,y) = x² - y² para gerar uma superfície 3D, e sobreponha com g(x) = sin(x) para ver a curva 2D cruzando o plano espacial." },
-  { route: "/limites", selector: PARAMS, title: "Limites", text: "Analise descontinuidades. Insira f(x) = sin(x)/x e defina X tendendo a 0. A tabela lateral mostrará a aproximação numérica exata." },
-  { route: "/derivadas", selector: PARAMS, title: "Derivadas", text: "Visualize taxas de variação. Insira f(x) = x² e altere o Ponto X0 para ver a reta tangente deslizando e calculando a inclinação em tempo real." },
-  { route: "/integrais", selector: PARAMS, title: "Integrais", text: "Calcule áreas e volumes. Use f(x) = sqrt(x), defina o intervalo [0, 4] e ative a rotação para visualizar o Sólido de Revolução gerado." },
-  { selector: 'button[aria-label="Tema"]', title: "Seletor de Temas", text: "Personalize a interface: Claro (padrão), Escuro (foco moderno e confortável) ou Quadro Negro (esboço geométrico a giz)." },
+  { selector: 'nav[aria-label="Módulos"]', title: "Abas Principais", text: "Navegue pelos módulos de Funções, Limites, Derivadas e Integrais de acordo com a sua necessidade." },
   {
-    selector: ".uv-toggle", title: "Luz Negra (UV)", text: "A visão de detetive. Acenda para sobrepor o passo a passo da resolução matemática diretamente na malha de giz.",
+    route: "/", selector: "main .grid.gap-6 > :first-child", title: "Múltiplas Funções 2D/3D",
+    text: "Digite equações, adicione várias funções simultaneamente e misture gráficos 2D com superfícies 3D no mesmo espaço.",
+  },
+  { selector: 'button[aria-label="Tema"]', title: "Seletor de Temas", text: "Personalize o seu ambiente de estudo com o Modo Claro, o Modo Escuro moderno ou o imersivo Modo Quadro Negro." },
+  {
+    selector: ".uv-toggle", title: "Luz Negra e IA", text: "Ative a Luz Negra para revelar segredos na lousa e acesse a aba de IA para tirar dúvidas com o nosso assistente inteligente.",
     // The UV button only exists in chalkboard mode: switch it on so it can be shown.
     before: () => { if (!document.querySelector(".uv-toggle")) window.dispatchEvent(new CustomEvent(EV_THEME, { detail: { chalkboard: true } })); },
   },
-  { selector: 'button[aria-label="Como usar o CalculusLab"]', title: "Copiloto IA", text: "Ficou confuso? Peça para a IA e ela assume o controle, digitando e clicando na interface para te ensinar na prática!" },
+  { route: "/ia", selector: '[data-tour="attach-buttons"]', title: "Upload Multimodal na IA", text: "Envie PDFs, listas de exercícios ou fotos de rascunhos de provas diretamente no chat para a IA analisar e resolver passo a passo." },
+  { route: "/ia", selector: 'button[aria-label="Gerar Questão do ENADE"]', title: "Simulador ENADE", text: "Treine para o exame! Clique em 'Questões do ENADE' para gerar e resolver simulados de nível universitário adaptados para a sua faculdade." },
 ];
 
 type Rect = { top: number; left: number; width: number; height: number };
