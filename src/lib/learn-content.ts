@@ -975,3 +975,7 @@ export const LEARN: LearnModule[] = [
     ]
   }
 ];
+
+import { CALC1_EXTRA, CALC2_EXTRA } from "@/lib/learn-advanced";
+LEARN.find((m) => m.id === "derivadas")?.topics.push(...CALC1_EXTRA);
+LEARN.push(CALC2_EXTRA);

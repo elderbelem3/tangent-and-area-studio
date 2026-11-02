@@ -1,3 +1,6 @@
+import { useNavigate } from "@tanstack/react-router";
+import { Play } from "lucide-react";
+import { GRAPH_TESTS, applyGraphTest, type GraphTest } from "@/lib/learn-tests";
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -20,6 +23,13 @@ export const Route = createFileRoute("/aprenda")({
   }),
   component: Aprenda,
 });
+
+function TestButton({ test }: { test: GraphTest }) {
+  const navigate = useNavigate();
+  return <Button type="button" size="sm" className="mt-4 gap-2" onClick={() => void navigate({ to: applyGraphTest(test) })}>
+    <Play className="h-4 w-4" />Testar no Gráfico<span className="font-mono text-xs opacity-80">{test.expression} · {test.module}</span>
+  </Button>;
+}
 
 function Aprenda() {
   const [active, setActive] = useState(LEARN[0]?.id ?? "");
@@ -105,6 +115,7 @@ function Aprenda() {
                       ))}
                     </ol>
                     <div className="mt-4 min-w-0 rounded-lg bg-primary/5 px-4 py-3 text-primary"><p className="text-xs font-semibold">Resultado</p><MathFormula formula={t.example.answer} /></div>
+                    {GRAPH_TESTS[t.id] && <TestButton test={GRAPH_TESTS[t.id]!} />}
                   </div>
                   {t.warning && <p className="flex items-start gap-2 text-sm text-muted-foreground"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /><span>{t.warning}</span></p>}
                   <aside className="border-l-4 border-accent-strong bg-accent-strong/5 p-4 text-sm">
