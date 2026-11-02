@@ -1,3 +1,4 @@
+import { EV_THEME } from "@/lib/copilot-actions";
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
@@ -12,11 +13,11 @@ const STEPS: Step[] = [
   { selector: 'nav[aria-label="Módulos"]', title: "Abas dos módulos", text: "Navegue pelos módulos de Funções, Limites, Derivadas e Integrais." },
   { selector: "main input", title: "Campo da função", text: "Digite a sua equação aqui (ex: x^2 ou sin(x)) para atualizar o gráfico na hora." },
   { selector: ".tour-graph", title: "Gráfico inteligente", text: "O gráfico inteligente adapta-se sozinho. Tente digitar f(x,y) para ver as superfícies 3D!" },
-  { selector: 'button[aria-label="Modo Quadro Negro"]', title: "Modo Quadro Negro", text: "Ative a lousa para um ambiente sem distrações." },
+  { selector: 'button[aria-label="Tema"]', title: "Temas", text: "Escolha Claro, Escuro ou Quadro Negro. Ative a lousa para um ambiente sem distrações." },
   {
     selector: ".uv-toggle", title: "Luz Negra (UV)", text: "Visão Detetive: Acenda a Luz Negra para revelar raízes, limites e cálculos ocultos na lousa!",
     // The UV button only exists in chalkboard mode: switch it on so it can be shown.
-    before: () => { if (!document.querySelector(".uv-toggle")) document.querySelector<HTMLButtonElement>('button[aria-label="Modo Quadro Negro"]')?.click(); },
+    before: () => { if (!document.querySelector(".uv-toggle")) window.dispatchEvent(new CustomEvent(EV_THEME, { detail: { chalkboard: true } })); },
   },
 ];
 

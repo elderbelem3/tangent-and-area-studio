@@ -128,8 +128,8 @@ function SurfaceUv({ d, info }: { d: NonNullable<ReturnType<typeof surfaceData>>
   </group>;
 }
 
-function Axes({ chalk, L }: { chalk: boolean; L: number }) {
-  const color = chalk ? CHALK : "#64748b";
+function Axes({ chalk, dark, L }: { chalk: boolean; dark?: boolean; L: number }) {
+  const color = chalk ? CHALK : dark ? "#94a3b8" : "#64748b";
   return <group>
     <Line points={[[-L, 0, 0], [L, 0, 0]]} color={color} lineWidth={1.2} />
     <Line points={[[0, -L, 0], [0, L, 0]]} color={color} lineWidth={1.2} />
@@ -141,7 +141,7 @@ function Axes({ chalk, L }: { chalk: boolean; L: number }) {
 }
 
 export default function Smart3DCanvas({ scene }: { scene: Scene3D }) {
-  const { chalkboard, blacklight } = useLabTheme();
+  const { chalkboard, blacklight, dark } = useLabTheme();
   const [interactive, setInteractive] = useModuleState("smart3d.interactive", false);
   useEffect(() => { if (consumePending3D()) setInteractive(true); }, [setInteractive]);
   useEffect(() => { const on = () => { consumePending3D(); setInteractive(true); }; window.addEventListener(EV_3D, on); return () => window.removeEventListener(EV_3D, on); }, []);
@@ -162,9 +162,9 @@ export default function Smart3DCanvas({ scene }: { scene: Scene3D }) {
             <Lightformer intensity={2} position={[0, 5, 0]} scale={[10, 10, 1]} />
             <Lightformer intensity={1} color="#a5b8ff" position={[-5, 1, -1]} rotation-y={Math.PI / 2} scale={[20, 1, 1]} />
           </Environment>
-          <gridHelper args={[8, 16, "#cbd5e1", "#e2e8f0"]} position={[0, -2.6, 0]} />
+          <gridHelper key={dark ? "d" : "l"} args={dark ? [8, 16, "#475569", "#334155"] : [8, 16, "#cbd5e1", "#e2e8f0"]} position={[0, -2.6, 0]} />
         </>}
-        <Axes chalk={chalkboard} L={3} />
+        <Axes chalk={chalkboard} dark={dark} L={3} />
         {surf && <SurfaceMesh d={surf} chalk={chalkboard} />}
         {solid && <SolidMesh d={solid} chalk={chalkboard} />}
         {chalkboard && blacklight && surf && scene.kind === "surface" && <SurfaceUv d={surf} info={scene.info} />}
