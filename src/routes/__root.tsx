@@ -14,6 +14,7 @@ import { useEffect, type ReactNode } from "react";
 import { ChartSpline, MoveHorizontal, TrendingUp, Sigma, BookOpen, GraduationCap, ArrowUpRight, BrainCircuit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { HelpButton } from "@/components/GuidedTour";
 import chalkDust from "@/assets/chalk-dust.png.asset.json";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -106,10 +107,13 @@ function RootComponent() {
         <img className="chalk-surface" src={chalkDust.url} alt="" aria-hidden="true" />
         <header className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
+            <div className="flex items-center gap-3">
             <Link to="/" className="flex items-center gap-3 font-display text-2xl font-bold">
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary font-mono text-2xl text-primary-foreground">∫</span>
               <span>Calculus<span className="text-primary">Lab</span></span>
             </Link>
+            <HelpButton />
+            </div>
             <span className="hidden items-center gap-2 text-xs font-medium text-muted-foreground sm:flex"><GraduationCap className="h-4 w-4" />Cálculo Diferencial e Integral</span>
           </div>
           <div className="mx-auto flex max-w-7xl items-center px-4 sm:px-7">
