@@ -316,4 +316,3 @@
 .uv-panel p.font-mono { font-family: var(--font-math, monospace); font-weight: 500; line-height: 1.85; }
 .uv-panel ol > li { line-height: 1.8; }
 .uv-panel ol > li + li { margin-top: 1rem; }
-.chalkboard main :is([class*="rounded-full"], [class*="chip"]) { font-family: var(--font-math) !important; font-weight: 600; }

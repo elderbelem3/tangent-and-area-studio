@@ -115,7 +115,7 @@ export function Stat({ label, value }: { label: string; value: string }) {
 
 export function Chip({ onClick, children }: { onClick: () => void; children: ReactNode }) {
   return (
-    <Button variant="outline" size="sm" onClick={onClick} className="h-8 rounded-md border-border bg-background px-2.5 text-xs text-muted-foreground hover:border-primary/30 hover:text-primary">
+    <Button variant="outline" size="sm" onClick={onClick} className="h-8 rounded-md font-mono border-border bg-background px-2.5 text-xs text-muted-foreground hover:border-primary/30 hover:text-primary">
       {children}<ArrowUpRight className="!size-3 opacity-50" />
     </Button>
   );
