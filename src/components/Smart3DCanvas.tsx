@@ -139,7 +139,7 @@ export default function Smart3DCanvas({ scene }: { scene: Scene3D }) {
       {interactive ? <Hand /> : <Box />}3D
     </Button>}
     <div className={`smart-3d h-[380px] w-full overflow-hidden rounded-lg sm:h-[440px] ${chalkboard ? "" : "bg-gradient-to-b from-secondary to-card"}`} data-scene-ready="true">
-      <Canvas key={chalkboard ? "chalk" : "real"} camera={{ position: [6, 4.5, 6], fov: 42 }} dpr={[1, 2]} gl={{ alpha: true, antialias: true }} shadows={!chalkboard}>
+      <Canvas camera={{ position: [6, 4.5, 6], fov: 42 }} dpr={[1, 2]} gl={{ alpha: true, antialias: true }} shadows>
         {!chalkboard && <>
           <ambientLight intensity={0.35} />
           <directionalLight position={[5, 8, 4]} intensity={1.6} castShadow />
