@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { CircleHelp, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { CircleHelp, ChevronLeft, ChevronRight, Sparkles, X } from "lucide-react";
+import { HelpChat } from "@/components/HelpChat";
 import { Button } from "@/components/ui/button";
 
 type Step = { selector: string; title: string; text: string; before?: () => void };
@@ -23,15 +24,17 @@ const PAD = 8;
 
 export function HelpButton() {
   const [open, setOpen] = useState(false);
+  const [chat, setChat] = useState(false);
   return <>
     <Button type="button" size="sm" onClick={() => setOpen(true)} className="help-pulse h-9 gap-1.5 rounded-full px-3.5" aria-label="Como usar o CalculusLab">
       <CircleHelp className="h-4 w-4" /><span>Como Usar</span>
     </Button>
-    {open && <GuidedTour onClose={() => setOpen(false)} />}
+    {open && <GuidedTour onClose={() => setOpen(false)} onAskAi={() => { setOpen(false); setChat(true); }} />}
+    {chat && <HelpChat onClose={() => setChat(false)} />}
   </>;
 }
 
-function GuidedTour({ onClose }: { onClose: () => void }) {
+function GuidedTour({ onClose, onAskAi }: { onClose: () => void; onAskAi: () => void }) {
   const [index, setIndex] = useState(0);
   const [rect, setRect] = useState<Rect | null>(null);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -85,6 +88,7 @@ function GuidedTour({ onClose }: { onClose: () => void }) {
       <h3 className="tour-title">{step.title}</h3>
       <p className="tour-text">{step.text}</p>
       <div className="tour-dots" aria-hidden="true">{STEPS.map((_, i) => <span key={i} className={i === index ? "on" : ""} />)}</div>
+      {index === STEPS.length - 1 && <Button type="button" onClick={onAskAi} className="tour-ai mb-3 w-full gap-2"><Sparkles className="h-4 w-4" />Ainda com dúvidas? Pergunte à IA</Button>}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Button type="button" variant="ghost" size="sm" onClick={onClose} className="text-muted-foreground"><X className="h-4 w-4" />Pular Tutorial</Button>
         <div className="flex gap-2">
