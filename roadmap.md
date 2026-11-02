@@ -29,6 +29,6 @@
 - [x] Testar validação e resolução real com navegação e curvas.
 
 # Lousa realista
-- [ ] Refinar madeira, superfície apagada e contornos de giz.
-- [ ] Acrescentar setas, guias amarelas e calha com apagador e gizes.
-- [ ] Verificar aparência e interações sem alterar o modo padrão.
+- [x] Refinar madeira, superfície apagada e contornos de giz.
+- [x] Acrescentar setas, guias amarelas e calha com apagador e gizes.
+- [x] Verificar aparência e interações sem alterar o modo padrão.
