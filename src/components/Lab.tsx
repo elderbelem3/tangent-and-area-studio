@@ -1,4 +1,4 @@
-import { forwardRef, type ReactNode, type RefObject } from "react";
+import { forwardRef, useState, type ReactNode, type RefObject } from "react";
 import { AlertTriangle, ChartSpline, Table2, BookOpen, SlidersHorizontal, ArrowUpRight, Eraser } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -42,55 +42,77 @@ export const Field = forwardRef<HTMLInputElement, { label: string; value: string
   }
 );
 
-const MATH_KEYS: { label: string; insert: string }[] = [
-  { label: "x^y", insert: "^" },
-  { label: "√", insert: "sqrt()" },
-  { label: "eˣ", insert: "exp()" },
-  { label: "|x|", insert: "abs()" },
-  { label: "sin", insert: "sin()" },
-  { label: "cos", insert: "cos()" },
-  { label: "tan", insert: "tan()" },
-  { label: "π", insert: "pi" },
-  { label: "e", insert: "e" },
-  { label: "x", insert: "x" },
-  { label: "≤", insert: "<=" },
-  { label: "≥", insert: ">=" },
-  { label: "∞", insert: "infinity" },
+type MathKey = { label: string; insert: string; hint: string };
+const fnKey = (label: string, name: string, hint: string): MathKey => ({ label, insert: `${name}()`, hint });
+
+export const MATH_GROUPS: { id: string; label: string; keys: MathKey[] }[] = [
+  { id: "basic", label: "Básicas", keys: [
+    { label: "+", insert: "+", hint: "Soma" }, { label: "−", insert: "-", hint: "Subtração" },
+    { label: "×", insert: "*", hint: "Multiplicação" }, { label: "÷", insert: "/", hint: "Divisão" },
+    { label: "( )", insert: "()", hint: "Parênteses" }, { label: "a/b", insert: "()/()", hint: "Fração" },
+    { label: "x", insert: "x", hint: "Variável x" }, { label: "y", insert: "y", hint: "Variável y (3D)" },
+  ] },
+  { id: "pow", label: "Potências", keys: [
+    { label: "x²", insert: "^2", hint: "Ao quadrado" }, { label: "xʸ", insert: "^()", hint: "Potência: digite o expoente" },
+    fnKey("√x", "sqrt", "Raiz quadrada"), fnKey("∛x", "cbrt", "Raiz cúbica"),
+    fnKey("eˣ", "exp", "Exponencial"), fnKey("ln", "log", "Logaritmo natural"),
+    fnKey("log₁₀", "log10", "Logaritmo base 10"), fnKey("|x|", "abs", "Módulo"),
+  ] },
+  { id: "trig", label: "Trigonometria", keys: [
+    fnKey("sin", "sin", "Seno"), fnKey("cos", "cos", "Cosseno"), fnKey("tan", "tan", "Tangente"), fnKey("sec", "sec", "Secante"),
+    fnKey("asin", "asin", "Arco seno"), fnKey("acos", "acos", "Arco cosseno"), fnKey("atan", "atan", "Arco tangente"), fnKey("csc", "csc", "Cossecante"),
+  ] },
+  { id: "const", label: "Constantes", keys: [
+    { label: "π", insert: "pi", hint: "Pi" }, { label: "e", insert: "e", hint: "Número de Euler" },
+    { label: "∞", insert: "infinity", hint: "Infinito" }, { label: "−∞", insert: "-infinity", hint: "Menos infinito" },
+    { label: "≤", insert: "<=", hint: "Menor ou igual" }, { label: "≥", insert: ">=", hint: "Maior ou igual" },
+    { label: "x⁻¹", insert: "^(-1)", hint: "Inverso" }, { label: "1/x", insert: "1/()", hint: "Recíproco" },
+  ] },
 ];
 
-/** Virtual math keyboard: inserts symbols at the cursor of the given input. */
+/** Cursor position after inserting a template: inside the first empty "()". */
+export function templateCursor(insert: string): number {
+  const i = insert.indexOf("()");
+  return i >= 0 ? i + 1 : insert.length;
+}
+
+/** Scientific-calculator keyboard: inserts full templates and places the cursor inside them. */
 export function MathToolbar({ inputRef, value, onChange }: { inputRef: RefObject<HTMLInputElement | null>; value: string; onChange: (v: string) => void }) {
+  const [tab, setTab] = useState(MATH_GROUPS[0].id);
+  const group = MATH_GROUPS.find((g) => g.id === tab) ?? MATH_GROUPS[0];
   const insertAtCursor = (text: string) => {
     const el = inputRef.current;
     const start = el?.selectionStart ?? value.length;
     const end = el?.selectionEnd ?? value.length;
-    const next = value.slice(0, start) + text + value.slice(end);
-    onChange(next);
-    // Place the cursor inside the parentheses for functions, else after the text
-    const inner = text.endsWith("()");
-    const pos = start + text.length - (inner ? 1 : 0);
-    requestAnimationFrame(() => {
-      el?.focus();
-      el?.setSelectionRange(pos, pos);
-    });
+    const selected = value.slice(start, end);
+    let piece = text, pos = start + templateCursor(text);
+    // Wrap a selection inside the template, e.g. select "x+1" → sqrt(x+1)
+    if (selected && text.includes("()")) { const i = text.indexOf("()") + 1; piece = text.slice(0, i) + selected + text.slice(i); pos = start + piece.length; }
+    onChange(value.slice(0, start) + piece + value.slice(end));
+    requestAnimationFrame(() => { el?.focus(); el?.setSelectionRange(pos, pos); });
   };
   return (
-    <div className="grid grid-cols-7 gap-1 rounded-lg border border-border bg-muted/60 p-1.5" role="toolbar" aria-label="Teclado de símbolos matemáticos">
-      {MATH_KEYS.map((k) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          title={k.insert}
-          aria-label={k.label}
-          key={k.label}
-          type="button"
-          onClick={() => insertAtCursor(k.insert)}
-          className="h-9 min-w-0 px-1 font-mono text-xs hover:bg-card hover:text-primary"
-        >
-          {k.label}
-        </Button>
-      ))}
-      <Button variant="ghost" size="sm" title="Limpar função" aria-label="Limpar função" disabled={!value} onClick={() => { onChange(""); inputRef.current?.focus(); }} className="h-9 min-w-0 px-1 text-muted-foreground"><Eraser /></Button>
+    <div className="rounded-xl border border-border bg-muted/50 p-2" aria-label="Teclado de símbolos matemáticos">
+      <div className="mb-2 flex items-center gap-1" role="tablist">
+        <div className="grid flex-1 grid-cols-4 gap-1 rounded-lg bg-background/70 p-0.5">
+          {MATH_GROUPS.map((g) => (
+            <button key={g.id} type="button" role="tab" aria-selected={g.id === tab} onClick={() => setTab(g.id)}
+              className={`truncate rounded-md px-1 py-1.5 text-[11px] font-semibold transition ${g.id === tab ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
+              {g.label}
+            </button>
+          ))}
+        </div>
+        <Button variant="ghost" size="icon" type="button" title="Limpar função" aria-label="Limpar função" disabled={!value} onClick={() => { onChange(""); inputRef.current?.focus(); }} className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"><Eraser /></Button>
+      </div>
+      <div className="grid grid-cols-4 gap-1.5" role="toolbar" aria-label={group.label}>
+        {group.keys.map((k) => (
+          <Button variant="outline" size="sm" type="button" key={k.label} title={`${k.hint} · ${k.insert}`} aria-label={k.label}
+            onMouseDown={(e) => e.preventDefault()} onClick={() => insertAtCursor(k.insert)}
+            className="h-10 min-w-0 border-border bg-card px-1 font-mono text-sm hover:border-primary/40 hover:text-primary active:scale-95">
+            {k.label}
+          </Button>
+        ))}
+      </div>
     </div>
   );
 }
