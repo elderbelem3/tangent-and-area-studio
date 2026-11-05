@@ -78,8 +78,8 @@ export function templateCursor(insert: string): number {
 
 /** Scientific-calculator keyboard: inserts full templates and places the cursor inside them. */
 export function MathToolbar({ inputRef, value, onChange }: { inputRef: RefObject<HTMLInputElement | null>; value: string; onChange: (v: string) => void }) {
-  const [tab, setTab] = useState(MATH_GROUPS[0].id);
-  const group = MATH_GROUPS.find((g) => g.id === tab) ?? MATH_GROUPS[0];
+  const [tab, setTab] = useState("basic");
+  const group = MATH_GROUPS.find((g) => g.id === tab) ?? MATH_GROUPS[0]!;
   const insertAtCursor = (text: string) => {
     const el = inputRef.current;
     const start = el?.selectionStart ?? value.length;
