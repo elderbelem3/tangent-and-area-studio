@@ -1,5 +1,5 @@
 import { parse } from "mathjs";
-import { normalize } from "@/lib/calc";
+import { normalize, normalizeLogarithms } from "@/lib/calc";
 
 /** Functions use ordinary empty parentheses; powers and fractions retain structured placeholders. */
 export function templateToLatex(insert: string): string {
@@ -33,7 +33,7 @@ export function asciiToMathjs(ascii: string): string {
     .replace(/root\(3\)\(/g, "cbrt(");
   // |a| → abs(a) for simple, non-nested pairs
   for (let i = 0; i < 5 && /\|[^|]+\|/.test(s); i++) s = s.replace(/\|([^|]+)\|/, "abs($1)");
-  return s.replace(/\b(log10|log|sin|cos|tan|sec|csc|asin|acos|atan|sqrt|cbrt|exp|abs)\s+\(/g, "$1(").replace(/\s+/g, " ").trim();
+  return normalizeLogarithms(s).replace(/\b(log10|log|sin|cos|tan|sec|csc|asin|acos|atan|sqrt|cbrt|exp|abs)\s+\(/g, "$1(").replace(/\s+/g, " ").trim();
 }
 
 /** Plain expression → LaTeX for loading external values (examples, copilot, tutor) into the block editor. */
