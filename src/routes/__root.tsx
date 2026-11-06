@@ -119,7 +119,7 @@ function RootComponent() {
             </div>
             <span className="hidden items-center gap-2 text-xs font-medium text-muted-foreground sm:flex"><GraduationCap className="h-4 w-4" />Cálculo Diferencial e Integral</span>
           </div>
-          <div className="mx-auto flex max-w-7xl items-center px-4 sm:px-7">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center px-4 sm:px-7">
           <nav className="flex min-w-0 flex-1 gap-1 overflow-x-auto" aria-label="Módulos">
             {nav.map((n) => (
               <Button key={n.to} asChild variant="ghost" className="h-12 shrink-0 rounded-none border-b-2 border-transparent px-4 text-muted-foreground hover:bg-muted/60 hover:text-foreground">

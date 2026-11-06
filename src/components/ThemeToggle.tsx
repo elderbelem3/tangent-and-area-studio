@@ -41,7 +41,7 @@ export function ThemeToggle() {
   }
   const current = THEMES.find((t) => t.value === theme) ?? THEMES[0];
   const Icon = current.icon;
-  return <TooltipProvider delayDuration={200}><div className="flex shrink-0 items-center">
+  return <TooltipProvider delayDuration={200}><div className={`flex shrink-0 items-center gap-2 ${theme === "chalkboard" ? "w-full justify-end border-t border-border py-2 sm:w-auto sm:border-t-0 sm:py-0" : ""}`}>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button type="button" variant="ghost" aria-label="Tema" className="h-12 shrink-0 rounded-none px-3 text-muted-foreground">
@@ -55,9 +55,9 @@ export function ThemeToggle() {
       </DropdownMenuContent>
     </DropdownMenu>
     {theme === "chalkboard" && <Tooltip><TooltipTrigger asChild>
-      <Button type="button" variant="ghost" size="sm" aria-label="Luz Negra" aria-pressed={uv} onClick={toggleUv} className="uv-toggle h-9 w-9 shrink-0 rounded-full p-0 text-muted-foreground">
-        <Flashlight className="h-4 w-4" />
+      <Button type="button" variant="outline" size="sm" aria-label="Luz Negra" aria-pressed={uv} onClick={toggleUv} className="uv-toggle h-11 shrink-0 gap-2 rounded-lg px-3 font-semibold">
+        <Flashlight className="h-5 w-5" /><span>Luz Negra</span><span className="font-mono text-xs">{uv ? "ON" : "UV"}</span>
       </Button>
-    </TooltipTrigger><TooltipContent>Luz Negra (visão analítica)</TooltipContent></Tooltip>}
+    </TooltipTrigger><TooltipContent>{uv ? "Desativar Luz Negra" : "Ativar Luz Negra / Revelar Segredos"}</TooltipContent></Tooltip>}
   </div></TooltipProvider>;
 }
