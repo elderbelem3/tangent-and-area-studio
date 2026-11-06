@@ -41,7 +41,7 @@ export function invertFunction(expression: string): InverseResult {
         case "*": right = `(${right}) / (${other})`; text = `Divida por ${other}`; break;
         case "/": right = xLeft ? `(${right}) * (${other})` : `(${other}) / (${right})`; text = xLeft ? `Multiplique por ${other}` : `Inverta a fração`; break;
         case "^":
-          if (xLeft) { right = other === "2" ? `sqrt(${right})` : `(${right})^(1/(${other}))`; text = other === "2" ? "Tire a raiz quadrada (ramo principal)" : `Tire a raiz de índice ${other}`; }
+          if (xLeft) { right = other === "2" ? `sqrt(${right})` : other === "3" ? `cbrt(${right})` : /^\d+$/.test(other) ? `nthRoot(${right}, ${other})` : `(${right})^(1/(${other}))`; text = other === "2" ? "Tire a raiz quadrada (ramo principal)" : `Tire a raiz de índice ${other}`; }
           else { right = other === "e" ? `log(${right})` : `log(${right}, ${other})`; text = "Aplique o logaritmo"; }
           break;
         default: return { inverse: null, steps, error: `Operação "${op.op}" não suportada.` };
