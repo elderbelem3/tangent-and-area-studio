@@ -67,7 +67,7 @@ export function ThemeToggle() {
       <Button type="button" variant="outline" size="sm" aria-label="Luz Negra" aria-describedby={descriptionId} aria-pressed={uv} onPointerDown={(event) => { touchHint.current = event.pointerType === "touch"; }} onClick={() => { toggleUv(); if (touchHint.current) setUvHint(true); }} className="uv-toggle h-11 shrink-0 gap-2 rounded-lg px-3 font-semibold">
         <Flashlight className="h-5 w-5" /><span>Luz Negra</span><span className="font-mono text-xs">{uv ? "ON" : "UV"}</span>
       </Button>
-    </TooltipTrigger><TooltipContent className="max-w-64 text-sm leading-relaxed" side="bottom">
+    </TooltipTrigger><TooltipContent className="max-w-64 border border-border bg-popover text-popover-foreground text-sm leading-relaxed" side="bottom" sideOffset={48}>
       <p className="font-semibold">{uv ? "Luz Negra ativa · toque para desativar" : "Ativar Luz Negra / Revelar Segredos"}</p>
       <p className="mt-1">A visão analítica da lousa revela notas, detalhes dos gráficos e passos ocultos, além dos colaboradores secretos na aba Créditos.</p>
     </TooltipContent></Tooltip>
