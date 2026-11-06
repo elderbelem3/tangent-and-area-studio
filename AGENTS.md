@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## UI architecture
+- Detect real constants structurally through the shared calculus helper before analytic root searches; represent no isolated roots or stationary points and explain the identically-zero case separately to avoid enumerating continua.
 - Share mathematical completion candidates between plain and MathLive fields; replace only the cursor-adjacent token and keep inserted expressions parser-compatible.
 - Share curve-count-aware bounded sampling and discontinuity checks across both 2D renderers; render independent SVG paths or curve-specific Recharts null separators preserving restart points, coalesce gestures per frame, and settle expensive analysis after gestures to avoid false pole connections and lag without changing calculus results.
 - Optimize tab navigation with TanStack route preloading and bounded pure-render caches rather than frozen router contexts; keep inactive charts unmounted to preserve routing, sizing and graph-transfer behavior.
