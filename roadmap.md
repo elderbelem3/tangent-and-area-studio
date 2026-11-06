@@ -1,5 +1,5 @@
 # Refinamento visual
-- [ ] Tratar constantes na análise UV e nas regras de derivação sem enumerar raízes ou pontos críticos; verificar testes e interface.
+- [x] Tratar constantes na análise UV e nas regras de derivação sem enumerar raízes ou pontos críticos; verificar testes e interface.
 - [x] Ajustar foco nativo, alvos de toque e layout móvel; verificar digitação, teclado científico e gestos 2D (teclado do sistema em aparelhos físicos ainda não verificado).
 - [x] Separar explicitamente trechos descontínuos nos dois gráficos 2D e verificar cortes por altura visível e polos racionais.
 - [x] Reduzir trabalho do zoom/pan 2D com orçamento de amostras e atualizações por quadro; verificar descontinuidades e desempenho.
