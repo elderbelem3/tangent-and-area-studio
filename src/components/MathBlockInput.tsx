@@ -30,7 +30,7 @@ function focusField(el: MathfieldLike | null) {
   if (sink && el.shadowRoot?.activeElement !== sink) sink.focus({ preventScroll: true });
 }
 
-export type MathBlockHandle = { insertTemplate: (insert: string) => void; clear: () => void; focus: () => void };
+export type MathBlockHandle = { insertTemplate: (insert: string) => void; clear: () => void; focus: () => void; deleteBackward: () => void };
 
 /** Structured equation editor (MathLive): visual blocks with placeholder boxes, translated to mathjs syntax. */
 export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value: string; onChange: (v: string) => void }>(
@@ -128,7 +128,17 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
         }, { capture: true });
         el.addEventListener("blur", dismiss);
         host.current.appendChild(el);
-        el.shadowRoot?.querySelector("[part=keyboard-sink]")?.setAttribute("inputmode", "text");
+        const sink = el.shadowRoot?.querySelector<HTMLElement>("[part=keyboard-sink]");
+        sink?.setAttribute("inputmode", "text");
+        // Phone keyboards send Backspace as beforeinput (keyCode 229) on the emptied
+        // sink, which MathLive ignores; perform the deletion ourselves.
+        sink?.addEventListener("beforeinput", (event) => {
+          const type = (event as InputEvent).inputType;
+          if (type !== "deleteContentBackward" && type !== "deleteContentForward" && type !== "deleteWordBackward") return;
+          event.preventDefault();
+          el.executeCommand(type === "deleteContentForward" ? "deleteForward" : "deleteBackward");
+          el.dispatchEvent(new Event("input"));
+        }, { capture: true });
         // Configure once connected: the default log shortcut adds a subscript
         // box, which would nest a second subscript when the user types _.
         el.inlineShortcuts = { ...el.inlineShortcuts, log: "\\operatorname{log}" };
@@ -157,6 +167,7 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
       },
       clear: () => { const el = mf.current; if (!el) return; el.setValue(""); lastEmitted.current = ""; onChangeRef.current(""); focusField(el); },
       focus: () => focusField(mf.current),
+      deleteBackward: () => { const el = mf.current; if (!el) return; focusField(el); el.executeCommand("deleteBackward"); el.dispatchEvent(new Event("input")); },
     }), []);
 
     return <div className="block min-w-0">
