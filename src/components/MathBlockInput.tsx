@@ -39,9 +39,6 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
         MathfieldElement.fontsDirectory = "https://cdn.jsdelivr.net/npm/mathlive@0.111.4/fonts/";
         MathfieldElement.soundsDirectory = null;
         const el = new MathfieldElement() as unknown as MathfieldLike;
-        // MathLive's default "log" shortcut already adds a subscript box;
-        // a subsequent typed underscore would nest a second subscript.
-        el.inlineShortcuts = { ...el.inlineShortcuts, log: "\\operatorname{log}" };
         el.setAttribute("math-virtual-keyboard-policy", "manual");
         el.setAttribute("smart-superscript", "true");
         el.setAttribute("aria-label", label);
@@ -52,6 +49,9 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
           onChangeRef.current(out);
         });
         host.current.appendChild(el);
+        // Configure once connected: the default log shortcut adds a subscript
+        // box, which would nest a second subscript when the user types _.
+        el.inlineShortcuts = { ...el.inlineShortcuts, log: "\\operatorname{log}" };
         try { el.menuItems = []; } catch { /* older versions */ }
         mf.current = el;
         setReady(true);
