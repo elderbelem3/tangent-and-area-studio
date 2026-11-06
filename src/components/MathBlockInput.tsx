@@ -7,6 +7,7 @@ type MathfieldLike = HTMLElement & {
   value: string;
   getValue: { (format: string): string; (start: number, end: number, format: string): string };
   position: number;
+  lastOffset: number;
   selection: { ranges: [number, number][] };
   setValue: (v: string, opts?: Record<string, unknown>) => void;
   insert: (latex: string, opts?: Record<string, unknown>) => boolean;
@@ -75,9 +76,12 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
           const end = el.position;
           const prefix = asciiToMathjs(el.getValue(0, end, "ascii-math")).replace(/x\^\(\(\)\)$/, "x^");
           const context = mathSuggestions(prefix);
-          if (prefix.endsWith("x^") && context && /x\^\{\\placeholder\{\}\}$/.test(el.value)) {
-            suggestionRef.current = { items: context.suggestions, start: Math.max(0, end - 2), end: end + 1, active: 0 };
-            setSuggestions(context.suggestions); setActive(0); return;
+          if (/x\^\{\\placeholder\{\}\}$/.test(el.value)) {
+            const powerContext = mathSuggestions("x^");
+            if (powerContext) {
+              suggestionRef.current = { items: powerContext.suggestions, start: Math.max(0, el.lastOffset - 3), end: el.lastOffset, active: 0 };
+              setSuggestions(powerContext.suggestions); setActive(0); return;
+            }
           }
           if (!context) { dismiss(); return; }
           let start = end;
