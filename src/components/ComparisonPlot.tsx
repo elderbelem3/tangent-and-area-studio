@@ -52,7 +52,7 @@ export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax
   const data = useMemo(() => {
     const sampled = tangents.map((item) => ({ key: `curve${item.slot}`, points: item.fn ? sampleCurve(item.fn, samples, low, high) : [] }));
     return curveChartRows(samples, sampled).map((row) => {
-    const x = row.x ?? 0;
+    const x = row["x"] ?? 0;
     for (const item of tangents) {
       row[`tangent${item.slot}`] = tangentAt !== undefined && Number.isFinite(item.y) && Number.isFinite(item.slope) ? item.y + item.slope * (x - tangentAt) : null;
     }
