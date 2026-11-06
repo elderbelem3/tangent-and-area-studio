@@ -1,20 +1,15 @@
 import { parse } from "mathjs";
 import { normalize } from "@/lib/calc";
 
-/** Keyboard template (plain syntax) → structured LaTeX block with placeholders (#0 = selection/first box, #? = next box). */
+/** Functions use ordinary empty parentheses; powers and fractions retain structured placeholders. */
 export function templateToLatex(insert: string): string {
   const fn = insert.match(/^([a-z0-9]+)\(\)$/);
   if (fn) {
-    const name = fn[1]!;
-    if (name === "sqrt") return "\\sqrt{#0}";
-    if (name === "cbrt") return "\\sqrt[3]{#0}";
-    if (name === "exp") return "e^{#0}";
-    if (name === "abs") return "\\left|#0\\right|";
-    if (name === "log") return "\\ln\\left(#0\\right)";
-    if (name === "log10") return "\\log_{10}\\left(#0\\right)";
-    if (["sin", "cos", "tan", "sec", "csc"].includes(name)) return `\\${name}\\left(#0\\right)`;
-    if (["asin", "acos", "atan"].includes(name)) return `\\arc${name.slice(1)}\\left(#0\\right)`;
-    return `\\operatorname{${name}}\\left(#0\\right)`;
+    const name = fn[1];
+    if (name === "log" || name === "ln") return "\\ln\\left(\\right)";
+    if (name && ["sin", "cos", "tan", "sec", "csc"].includes(name)) return `\\${name}\\left(\\right)`;
+    if (name && ["asin", "acos", "atan"].includes(name)) return `\\arc${name.slice(1)}\\left(\\right)`;
+    return `\\operatorname{${name}}\\left(\\right)`;
   }
   const map: Record<string, string> = {
     "^()": "^{#0}", "^2": "^2", "^(-1)": "^{-1}", "()": "\\left(#0\\right)", "()/()": "\\frac{#0}{#?}",

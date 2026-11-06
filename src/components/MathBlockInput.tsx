@@ -66,7 +66,9 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
       insertTemplate: (insert) => {
         const el = mf.current; if (!el) return;
         focusField(el);
-        el.insert(templateToLatex(insert), { selectionMode: "placeholder", format: "latex" });
+        const isFunction = /^[a-z0-9]+\(\)$/.test(insert);
+        el.insert(templateToLatex(insert), { selectionMode: isFunction ? "after" : "placeholder", format: "latex" });
+        if (isFunction) el.executeCommand("moveToPreviousChar");
         el.dispatchEvent(new Event("input"));
       },
       clear: () => { const el = mf.current; if (!el) return; el.setValue(""); lastEmitted.current = ""; onChangeRef.current(""); focusField(el); },
