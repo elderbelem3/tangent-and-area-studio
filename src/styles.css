@@ -386,6 +386,49 @@
 .blacklight .ia-uv-scope .uv-ink-green { color: oklch(0.88 0.2 145); }
 .blacklight .ia-uv-scope .uv-ink-purple { color: oklch(0.85 0.17 305); }
 
+/* Créditos secretos: bloco invisível e sem ocupar espaço até a Luz Negra acender. */
+.uv-secret { display: none; }
+.blacklight .uv-secret {
+  display: block;
+  margin-top: 1.5rem;
+  border: 2px dashed oklch(0.78 0.2 305);
+  border-radius: 12px;
+  padding: 1.1rem 1.25rem;
+  background: oklch(0.15 0.045 300 / 60%);
+  box-shadow: 0 0 20px oklch(0.62 0.2 305 / 38%), inset 0 0 26px oklch(0.62 0.2 305 / 18%);
+  animation: uv-flicker 2.8s ease-in-out both;
+}
+.uv-secret-label {
+  display: block;
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: oklch(0.85 0.14 230);
+}
+.uv-secret-name {
+  display: block;
+  margin-top: .45rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: oklch(0.9 0.16 305);
+  text-shadow: 0 0 6px oklch(0.78 0.2 305), 0 0 18px oklch(0.7 0.22 305);
+}
+.uv-secret-note { display: block; margin-top: .5rem; font-size: .8rem; color: oklch(0.82 0.1 230); }
+.uv-secret-hint { display: inline-flex; align-items: center; gap: .4rem; }
+.uv-secret-hint svg { color: oklch(0.78 0.2 305); }
+@keyframes uv-flicker {
+  0% { opacity: 0; }
+  18% { opacity: 1; }
+  26% { opacity: .45; }
+  34% { opacity: 1; }
+  42% { opacity: .6; }
+  52%, 100% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .blacklight .uv-secret { animation: none; } }
+
 /* Structured block equation editor */
 .math-block-field { display: block; width: 100%; min-height: 2.5rem; font-size: 1.15rem; background: transparent; color: var(--foreground); border: 0; outline: none; --caret-color: var(--primary); --selection-background-color: color-mix(in oklab, var(--primary) 25%, transparent); --placeholder-color: var(--muted-foreground); --contains-highlight-background-color: color-mix(in oklab, var(--primary) 10%, transparent); }
 .math-block-field::part(virtual-keyboard-toggle), .math-block-field::part(menu-toggle) { display: none; }
