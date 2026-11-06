@@ -55,6 +55,7 @@ export const Field = forwardRef<HTMLInputElement, { label: string; value: string
         <div className="relative">
         <input
           ref={input}
+          aria-label={label}
           value={value}
           placeholder={placeholder}
           onChange={(e) => { onChange(e.target.value); suggest(e.target); }}
