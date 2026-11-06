@@ -41,15 +41,6 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
           lastEmitted.current = out;
           onChangeRef.current(out);
         });
-        // + − * after a filled exponent/root/fraction box: leave the block and continue on the baseline.
-        el.addEventListener("keydown", (e) => {
-          const ke = e as KeyboardEvent;
-          if (!["+", "-", "*"].includes(ke.key)) return;
-          const before = el.getValue("latex");
-          const ascii = el.getValue("ascii-math");
-          if (!ascii || !/[)}]$/.test(before) === false) return;
-          void before;
-        });
         host.current.appendChild(el);
         mf.current = el;
         setReady(true);

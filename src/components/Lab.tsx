@@ -77,10 +77,12 @@ export function templateCursor(insert: string): number {
 }
 
 /** Scientific-calculator keyboard: inserts full templates and places the cursor inside them. */
-export function MathToolbar({ inputRef, value, onChange }: { inputRef: RefObject<HTMLInputElement | null>; value: string; onChange: (v: string) => void }) {
+export function MathToolbar({ inputRef, value, onChange, onInsert, onClear }: { inputRef?: RefObject<HTMLInputElement | null>; value: string; onChange: (v: string) => void; onInsert?: (template: string) => void; onClear?: () => void }) {
   const [tab, setTab] = useState("basic");
   const group = MATH_GROUPS.find((g) => g.id === tab) ?? MATH_GROUPS[0]!;
   const insertAtCursor = (text: string) => {
+    if (onInsert) { onInsert(text); return; }
+    if (!inputRef) return;
     const el = inputRef.current;
     const start = el?.selectionStart ?? value.length;
     const end = el?.selectionEnd ?? value.length;
@@ -102,7 +104,7 @@ export function MathToolbar({ inputRef, value, onChange }: { inputRef: RefObject
             </button>
           ))}
         </div>
-        <Button variant="ghost" size="icon" type="button" title="Limpar função" aria-label="Limpar função" disabled={!value} onClick={() => { onChange(""); inputRef.current?.focus(); }} className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"><Eraser /></Button>
+        <Button variant="ghost" size="icon" type="button" title="Limpar função" aria-label="Limpar função" disabled={!value} onClick={() => { if (onClear) { onClear(); return; } onChange(""); inputRef?.current?.focus(); }} className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"><Eraser /></Button>
       </div>
       <div className="grid grid-cols-4 gap-1.5" role="toolbar" aria-label={group.label}>
         {group.keys.map((k) => (
