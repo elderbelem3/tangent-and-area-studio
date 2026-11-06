@@ -11,6 +11,7 @@ import { axisTicks, axisLabel } from "@/lib/plot-viewport";
 import { PlotControls, PlotCrosshair } from "@/components/PlotNavigation";
 import { ChalkAxis } from "@/components/ChalkAxis";
 import { useModuleState } from "@/lib/module-state";
+import { plotSamples, sampleCurve } from "@/lib/plot-sampling";
 
 export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax, tangentAt, analysis = true }: {
   functions: ComparisonFunction[]; xMin: number; xMax: number; tangentAt?: number; analysis?: boolean;
@@ -37,7 +38,7 @@ export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax
   const navigation = usePlotViewport({ xMin: initialXMin, xMax: initialXMax, yMin: low, yMax: high }, functions.map((f) => `${f.slot}:${f.expression}`).join("|") + hidden.join(","));
   const { xMin, xMax, yMin: viewLow, yMax: viewHigh } = navigation.domain;
   low = viewLow; high = viewHigh;
-  const samples = useMemo(() => Array.from({ length: 601 }, (_, i) => xMin + (xMax - xMin) * i / 600), [xMin, xMax]);
+  const samples = useMemo(() => plotSamples(xMin, xMax, initialXMax - initialXMin), [xMin, xMax, initialXMin, initialXMax]);
   const annotations = useMemo(() => curves.flatMap((item) => item.fn ? findPlotAnnotations(item.fn, xMin, xMax).map((point) => ({ ...point, slot: item.slot })) : []), [curves, xMin, xMax]);
   const yIntercepts = xMin <= 0 && xMax >= 0 ? curves.map((item) => ({ slot: item.slot, y: item.fn?.(0) ?? NaN })).filter((p) => Number.isFinite(p.y)) : [];
 
@@ -46,16 +47,18 @@ export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax
     const slope = tangentAt !== undefined && item.fn ? derivative(item.fn, tangentAt) : NaN;
     return { ...item, y, slope };
   }), [visible, tangentAt]);
-  const data = useMemo(() => samples.map((x, index) => {
+  const data = useMemo(() => {
+    const sampled = tangents.map((item) => ({ item, points: item.fn ? sampleCurve(item.fn, samples, low, high) : [] }));
+    return samples.map((x, index) => {
     const row: Record<string, number | null> = { x };
-    for (const item of tangents) {
-      const y = item.fn?.(x) ?? NaN;
-      const previous = index > 0 ? item.fn?.(samples[index - 1] ?? x) ?? NaN : y;
-      row[`curve${item.slot}`] = Number.isFinite(y) && Math.abs(y - previous) < (high - low) * 2 && y >= low - (high - low) * 3 && y <= high + (high - low) * 3 ? y : null;
+    for (const { item, points } of sampled) {
+      const point = points[index];
+      row[`curve${item.slot}`] = point && !point.breakBefore ? point.y : null;
       row[`tangent${item.slot}`] = tangentAt !== undefined && Number.isFinite(item.y) && Number.isFinite(item.slope) ? item.y + item.slope * (x - tangentAt) : null;
     }
     return row;
-  }), [samples, tangents, low, high, tangentAt]);
+    });
+  }, [samples, tangents, low, high, tangentAt]);
   const analysisFunctions = useMemo(() => functions.filter((f) => !hidden.includes(f.slot)), [functions, hidden]);
   return <div className="min-w-0">
     <div className="mb-5 flex flex-wrap gap-2" role="group" aria-label="Legenda interativa das funções">
