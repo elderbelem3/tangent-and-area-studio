@@ -1,4 +1,5 @@
 # Refinamento visual
+- [x] Corrigir domínio e intervalos de monotonia, derivabilidade, limites e integrais apontados no relatório; padronizar fórmulas principais e verificar casos pendentes e preservação dos parâmetros. Integrais impróprias gerais continuam exigindo análise de convergência separada, sem retornar números não verificados.
 - [x] Tratar constantes na análise UV e nas regras de derivação sem enumerar raízes ou pontos críticos; verificar testes e interface.
 - [x] Ajustar foco nativo, alvos de toque e layout móvel; verificar digitação, teclado científico e gestos 2D (teclado do sistema em aparelhos físicos ainda não verificado).
 - [x] Separar explicitamente trechos descontínuos nos dois gráficos 2D e verificar cortes por altura visível e polos racionais.

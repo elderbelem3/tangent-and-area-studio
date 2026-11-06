@@ -5,6 +5,8 @@ import { parseFn, derivative, fmt } from "@/lib/calc";
 import { ComparisonPlot } from "@/components/ComparisonPlot";
 import { UvStepsPanel } from "@/components/UvStepsPanel";
 import { derivativeSteps } from "@/lib/uv-steps";
+import { tangentExpression } from "@/lib/math-format";
+import { MathExpression } from "@/components/MathExpression";
 import { derivativeExamples } from "@/lib/study-examples";
 import { FunctionEditor } from "@/components/FunctionEditor";
 import { addComparisonFunction, removeComparisonFunction, FUNCTION_SLOTS, FUNCTION_TEXT_COLORS, type ComparisonFunction } from "@/lib/comparison";
@@ -58,7 +60,7 @@ function Derivadas() {
               <Stat label="f(x₀)" value={fmt(y0, 5)} />
               <div className="col-span-2 rounded-xl bg-secondary p-4">
                 <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">Reta tangente</p>
-                <p className="mt-1 font-mono text-lg">y = {fmt(m, 4)}x {b >= 0 ? "+" : "−"} {fmt(Math.abs(b), 4)}</p>
+                <MathExpression expression={tangentExpression(m, b)} prefix="y = " />
                 <p className="mt-1 font-mono text-sm text-muted-foreground">Inclinação: {fmt(m, 4)} ({m > 1e-6 ? "crescente" : m < -1e-6 ? "decrescente" : "ponto crítico"})</p>
               </div>
             </div>
@@ -76,7 +78,7 @@ function Derivadas() {
             {x0 !== null ? (
               <ComparisonPlot functions={functions} xMin={x0 - 4} xMax={x0 + 4} tangentAt={x0} analysis={false} />
             ) : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
-            {ok && x0 !== null && <UvStepsPanel title="Regras de Derivação Passo a Passo" steps={(() => { const s = derivativeSteps(expr); return s && [...s, { title: "Aplicação no ponto", lines: [`f′(${fmt(x0)}) = ${fmt(m, 5)} · f(${fmt(x0)}) = ${fmt(y0, 5)}`, `Reta tangente: y = ${fmt(m, 4)}x ${b >= 0 ? "+" : "−"} ${fmt(Math.abs(b), 4)}`] }]; })()} />}
+            {x0 !== null && fn && <UvStepsPanel title="Regras de Derivação Passo a Passo" steps={(() => { const s = derivativeSteps(expr); return s && [...s, { title: "Aplicação no ponto", lines: ok ? [`f′(${fmt(x0)}) = ${fmt(m, 5)} · f(${fmt(x0)}) = ${fmt(y0, 5)}`, `Reta tangente: y = ${tangentExpression(m, b)}`] : [`A função não é definida ou não é derivável em x = ${fmt(x0)}. Não existe reta tangente com inclinação finita neste ponto.`] }]; })()} />}
           </Panel>
           <Panel title="Interpretação geométrica">
             <div className="space-y-2 text-sm leading-relaxed text-muted-foreground">

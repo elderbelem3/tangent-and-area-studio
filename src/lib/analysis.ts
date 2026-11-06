@@ -1,8 +1,9 @@
 import { derivative as symDerivative, parse, simplify } from "mathjs";
 import { constantValue, fmt, normalize, parseFn, type Fn } from "@/lib/calc";
 import { findPlotAnnotations } from "@/lib/plot-annotations";
+import { realDomain } from "@/lib/domain";
 
-export type SignInterval = { from: number; to: number; sign: "+" | "−" };
+export type SignInterval = { from: number; to: number; sign: "+" | "−" | "0" };
 export type FunctionAnalysis = {
   expression: string; d1: string | null; d2: string | null;
   roots: number[]; critical: { x: number; y: number; kind: string }[];
@@ -34,16 +35,6 @@ function limitText(fn: Fn, sign: 1 | -1): string {
   if (Math.abs(b - a) < 1e-3 * Math.max(1, Math.abs(b))) return fmt(b, 4);
   return "não existe (oscila)";
 }
-function domainText(fn: Fn, xMin: number, xMax: number): string {
-  const holes: string[] = []; const n = 1200; let prev = true; let start = xMin;
-  for (let i = 0; i <= n; i++) {
-    const x = xMin + (xMax - xMin) * i / n, ok = Number.isFinite(fn(x));
-    if (ok !== prev) { if (!ok) start = x; else holes.push(Math.abs(x - start) < (xMax - xMin) / n * 1.5 ? `x ≈ ${fmt(start, 3)}` : `[${fmt(start, 3)}, ${fmt(x, 3)}]`); prev = ok; }
-  }
-  if (!prev) holes.push(`[${fmt(start, 3)}, ${fmt(xMax, 3)}]`);
-  return holes.length ? `ℝ exceto ${holes.join(", ")} (no intervalo observado)` : `ℝ (sem restrições no intervalo [${fmt(xMin, 2)}, ${fmt(xMax, 2)}])`;
-}
-
 export function analyzeFunction(expression: string, xMin: number, xMax: number): FunctionAnalysis | null {
   const { fn } = parseFn(expression); if (!fn) return null;
   const value = constantValue(expression);
@@ -57,20 +48,22 @@ export function analyzeFunction(expression: string, xMin: number, xMax: number):
   const f1 = (d1 && parseFn(d1).fn) || ((x: number) => (fn(x + 1e-5) - fn(x - 1e-5)) / 2e-5);
   const f2 = (d2 && parseFn(d2).fn) || ((x: number) => (f1(x + 1e-4) - f1(x - 1e-4)) / 2e-4);
   const ann = findPlotAnnotations(fn, xMin, xMax);
-  const crit = zeros(f1, xMin, xMax).sort((a, b) => a - b);
-  const bounds = [xMin, ...crit, xMax];
+  const domain = realDomain(expression, xMin, xMax);
+  const derivativeDomain = d1 ? realDomain(d1, xMin, xMax) : domain;
+  const crit = (d1 && constantValue(d1) === 0 ? [] : zeros(f1, xMin, xMax)).filter((x) => domain.contains(x) && derivativeDomain.contains(x)).sort((a, b) => a - b);
+  const bounds = [...new Set([xMin, ...crit, ...domain.boundaries, ...derivativeDomain.boundaries, xMax])].sort((a, b) => a - b);
   const signs: SignInterval[] = [];
-  for (let i = 0; i < bounds.length - 1; i++) { const a = bounds[i], b = bounds[i + 1]; if (a === undefined || b === undefined) continue; const v = f1((a + b) / 2); if (Number.isFinite(v)) signs.push({ from: a, to: b, sign: v >= 0 ? "+" : "−" }); }
+  for (let i = 0; i < bounds.length - 1; i++) { const a = bounds[i], b = bounds[i + 1]; if (a === undefined || b === undefined) continue; const mid = (a + b) / 2; if (!domain.contains(mid) || !derivativeDomain.contains(mid)) continue; const v = f1(mid); if (Number.isFinite(v)) signs.push({ from: a, to: b, sign: v > 0 ? "+" : v < 0 ? "−" : "0" }); }
   const critical = crit.map((x) => {
     const before = f1(x - 1e-3), after = f1(x + 1e-3);
     const kind = before > 0 && after < 0 ? "Máximo local" : before < 0 && after > 0 ? "Mínimo local" : "Ponto crítico (sem troca de sinal)";
     return { x, y: fn(x), kind };
   });
-  const inflections = zeros(f2, xMin, xMax).filter((x) => Math.sign(f2(x - 1e-3)) !== Math.sign(f2(x + 1e-3))).map((x) => ({ x, y: fn(x) }));
+  const inflections = (d2 && constantValue(d2) === 0 ? [] : zeros(f2, xMin, xMax)).filter((x) => domain.contains(x) && Number.isFinite(fn(x)) && Math.sign(f2(x - 1e-3)) !== Math.sign(f2(x + 1e-3))).map((x) => ({ x, y: fn(x) }));
   return {
     expression, constantValue: null, d1, d2,
     roots: ann.filter((a) => a.kind === "Raiz").map((a) => a.x).sort((a, b) => a - b),
     critical, signs, inflections,
-    domain: domainText(fn, xMin, xMax), limitPos: limitText(fn, 1), limitNeg: limitText(fn, -1),
+    domain: domain.text, limitPos: limitText(fn, 1), limitNeg: limitText(fn, -1),
   };
 }

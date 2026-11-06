@@ -5,7 +5,7 @@ import { parseFn, integrate, fmt } from "@/lib/calc";
 import { Plot } from "@/components/Plot";
 import { IntegralUvOverlay } from "@/components/UvOverlays";
 import { UvStepsPanel } from "@/components/UvStepsPanel";
-import { integralSteps } from "@/lib/uv-steps";
+import { definiteIntegral } from "@/lib/uv-steps";
 import { Smart3DView } from "@/components/Smart3DView";
 import { solidSteps } from "@/lib/smart3d";
 import { integralExamples } from "@/lib/study-examples";
@@ -35,7 +35,8 @@ function Integrais() {
   const { fn, error } = useMemo(() => parseFn(expr), [expr]);
   const a = num(aS), b = num(bS);
   const valid = fn && a !== null && b !== null;
-  const value = valid ? integrate(fn, a, b) : NaN;
+  const result = useMemo(() => valid ? definiteIntegral(expr, a, b) : null, [valid, expr, a, b]);
+  const value = result?.value ?? NaN;
   const bad = valid && !Number.isFinite(value);
   const lo = valid ? Math.min(a, b) : 0, hi = valid ? Math.max(a, b) : 1;
   const solid = valid && mode === "solido" ? solidSteps(expr, a, b) : null;
@@ -65,22 +66,23 @@ function Integrais() {
               </div>
               {error && <ErrorBox msg={error} />}
               {(a === null || b === null) && <ErrorBox msg="Informe números válidos para a e b." />}
-              {bad && <ErrorBox msg="A função não é definida em todo o intervalo (ex.: divisão por zero). A integral não converge numericamente." />}
+              {bad && <ErrorBox msg={result?.error ?? "Não foi possível estabelecer uma integral finita no intervalo."} />}
             </div>
           </Panel>
           {valid && !bad && (mode === "solido" && solid ? <Stat label={`V = π ∫ de ${fmt(a)} a ${fmt(b)} f(x)² dx`} value={fmt(solid.volume, 6)} /> : <Stat label={`∫ de ${fmt(a)} a ${fmt(b)} f(x) dx`} value={fmt(value, 6)} />)}
         </div>
         <div className="min-w-0 space-y-6">
           <Panel title={mode === "solido" ? "Sólido de revolução (3D)" : "Área sob a curva"}>
-            {valid && mode === "solido" && !bad ? <><Smart3DView scene={{ kind: "solid", expression: expr, a: a!, b: b! }} /><UvStepsPanel title="Volume pelo Método dos Discos" steps={solid?.steps ?? null} /></> : valid ? <Plot fn={fn} xMin={lo - pad} xMax={hi + pad} shade={[a, b]} overlay={(h) => <IntegralUvOverlay h={h} a={a} b={b} value={value} />} /> : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
-            {valid && !bad && mode === "area" && <UvStepsPanel title="Antiderivada e Teorema Fundamental" steps={integralSteps(expr, a, b)} />}
+            {valid && mode === "solido" && !bad ? <><Smart3DView scene={{ kind: "solid", expression: expr, a, b }} /><UvStepsPanel title="Volume pelo Método dos Discos" steps={solid?.steps ?? null} /></> : valid ? <Plot fn={fn} xMin={lo - pad} xMax={hi + pad} {...(bad ? {} : { shade: [a, b] as [number, number], overlay: (h: import("@/components/Plot").PlotHelpers) => <IntegralUvOverlay h={h} a={a} b={b} value={value} /> })} /> : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
+            {valid && !bad && mode === "area" && <UvStepsPanel title="Antiderivada e Teorema Fundamental" steps={result?.steps ?? null} />}
           </Panel>
           <Panel title="Integral como área acumulada">
             <div className="space-y-2 text-sm leading-relaxed text-muted-foreground">
               <p>Divida [a, b] em n retângulos de largura Δx. A soma de Riemann <span className="font-mono text-foreground">Σ f(xᵢ)·Δx</span> aproxima a área sob a curva.</p>
               <p>Quando n → ∞ (Δx → 0), a soma converge para a <strong className="text-foreground">integral definida</strong>:</p>
               <p className="rounded-lg bg-secondary p-3 text-center font-mono text-foreground">∫ₐᵇ f(x) dx = lim n→∞ Σ f(xᵢ)·Δx</p>
-              <p>Regiões abaixo do eixo x contribuem com área <strong className="text-foreground">negativa</strong>. Pelo Teorema Fundamental do Cálculo, se F' = f, então a integral vale F(b) − F(a). Aqui, o valor é calculado pela regra de Simpson.</p>
+              <p>Regiões abaixo do eixo x contribuem com área <strong className="text-foreground">negativa</strong>. Pelo Teorema Fundamental do Cálculo, em um intervalo de continuidade, se F' = f, então a integral vale F(b) − F(a).</p>
+              {result?.method && !bad && <p>Método utilizado: {result.method === "primitiva" ? "primitiva e Teorema Fundamental do Cálculo — F(b) − F(a)." : "aproximação numérica pela regra de Simpson."}</p>}
             </div>
           </Panel>
         </div>

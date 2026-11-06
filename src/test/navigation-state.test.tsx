@@ -7,9 +7,21 @@ function ModuleInput({ module }: { module: string }) {
   return <input aria-label="module value" value={value} onChange={(event) => setValue(event.target.value)} />;
 }
 
+function ParameterModule() {
+  const [expression, setExpression] = useModuleState("report.expression", "x^2");
+  const [point, setPoint] = useModuleState("report.point", "1");
+  return <><input aria-label="expression" value={expression} onChange={(e) => setExpression(e.target.value)} /><input aria-label="point" value={point} onChange={(e) => setPoint(e.target.value)} /></>;
+}
+
 afterEach(() => { cleanup(); clearModuleState(); });
 
 describe("Tab state preservation", () => {
+  it("preserves the chosen point when the expression changes", () => {
+    render(<ParameterModule />);
+    fireEvent.change(screen.getByLabelText("point"), { target: { value: "2" } });
+    fireEvent.change(screen.getByLabelText("expression"), { target: { value: "x^3-3x" } });
+    expect(screen.getByLabelText("point")).toHaveValue("2");
+  });
   it("keeps a typed expression across tab remounts", () => {
     const first = render(<ModuleInput module="functions" />);
     fireEvent.change(screen.getByLabelText("module value"), { target: { value: "x^2 - 4x - 5" } });

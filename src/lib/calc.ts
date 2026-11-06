@@ -57,7 +57,14 @@ export function parseFn(expr: string): { fn: Fn | null; error: string | null } {
 }
 
 export function derivative(f: Fn, x: number, h = 1e-5): number {
-  return (f(x + h) - f(x - h)) / (2 * h);
+  const y = f(x);
+  if (!Number.isFinite(y)) return NaN;
+  const left = (y - f(x - h)) / h, right = (f(x + h) - y) / h;
+  const halfLeft = (y - f(x - h / 2)) / (h / 2), halfRight = (f(x + h / 2) - y) / (h / 2);
+  const gap = Math.abs(left - right), halfGap = Math.abs(halfLeft - halfRight);
+  // Smooth one-sided slopes converge together; a corner (|x|) keeps a nonzero gap.
+  if (![left, right, halfLeft, halfRight].every(Number.isFinite) || (halfGap > 1e-4 * Math.max(1, Math.abs(halfLeft), Math.abs(halfRight)) && halfGap > gap * 0.8)) return NaN;
+  return (halfLeft + halfRight) / 2;
 }
 
 /** Composite Simpson's rule */

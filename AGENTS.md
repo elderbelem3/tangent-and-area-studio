@@ -10,6 +10,8 @@
 <!-- LOVABLE:END -->
 
 ## UI architecture
+- Share structural domain restrictions in lib/domain across analysis, limits and integration; split monotonicity at domain boundaries and reject unverified improper integrals so off-grid poles cannot produce ordinary integral values.
+- Use the shared mathjs-to-KaTeX expression formatter for analytic formulas, and keep definite integral values and their displayed method in one result so explanations match the calculation.
 - Detect real constants structurally through the shared calculus helper before analytic root searches; represent no isolated roots or stationary points and explain the identically-zero case separately to avoid enumerating continua.
 - Share mathematical completion candidates between plain and MathLive fields; replace only the cursor-adjacent token and keep inserted expressions parser-compatible.
 - Share curve-count-aware bounded sampling and discontinuity checks across both 2D renderers; render independent SVG paths or curve-specific Recharts null separators preserving restart points, coalesce gestures per frame, and settle expensive analysis after gestures to avoid false pole connections and lag without changing calculus results.

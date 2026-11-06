@@ -1,7 +1,10 @@
 import { derivative as symD, parse, rationalize, simplify, type MathNode } from "mathjs";
 import { constantValue, fmt, integrate, normalize, parseFn } from "@/lib/calc";
+import { realDomain } from "@/lib/domain";
+import { evaluateLimit, oscillationAt } from "@/lib/limits";
+import { expressionLatex } from "@/lib/math-format";
 
-export type UvStep = { title: string; lines: string[] };
+export type UvStep = { title: string; lines: string[]; formulas?: string[] };
 
 const show = (s: string) => s.replace(/\blog\(/g, "ln(").replace(/ \* /g, "·").replace(/ \^ /g, "^");
 const str = (n: MathNode) => show(n.toString());
@@ -22,11 +25,11 @@ function ruleOf(n0: MathNode): { rule: string; lines: string[] } {
     if ((o.op === "+" || o.op === "-") && o.args.length === 2) return { rule: "Regra da soma/diferença", lines: [`d/dx [${str(u!)} ${o.op} ${str(v!)}] = d/dx[${str(u!)}] ${o.op} d/dx[${str(v!)}]`, `= (${str(d(u!))}) ${o.op} (${str(d(v!))})`] };
     if (o.op === "-" && o.args.length === 1) return { rule: "Multiplicação por −1", lines: [`d/dx [−${str(u!)}] = −(${str(d(u!))})`] };
     if (o.op === "*") {
-      if (!hasX(u!) || !hasX(v!)) { const [k, g] = hasX(u!) ? [v!, u!] : [u!, v!]; return { rule: "Regra da constante", lines: [`d/dx [${str(k)}·g] = ${str(k)}·g′, com g = ${str(g)}`, `g′ = ${str(d(g))}`] }; }
+      if (u && v && (!hasX(u) || !hasX(v))) { const [k, g] = hasX(u) ? [v, u] : [u, v]; return { rule: "Regra do múltiplo constante", lines: [`d/dx [${str(k)}·g] = ${str(k)}·g′, com g = ${str(g)}`, `g′ = ${str(d(g))}`] }; }
       return { rule: "Regra do Produto", lines: [`u = ${str(u!)}  ⇒  u′ = ${str(d(u!))}`, `v = ${str(v!)}  ⇒  v′ = ${str(d(v!))}`, "(u·v)′ = u′·v + u·v′", `= (${str(d(u!))})·(${str(v!)}) + (${str(u!)})·(${str(d(v!))})`] };
     }
     if (o.op === "/") {
-      if (!hasX(v!)) return { rule: "Regra da constante", lines: [`d/dx [g/${str(v!)}] = g′/${str(v!)}, g′ = ${str(d(u!))}`] };
+      if (u && v && !hasX(v)) return { rule: "Regra do múltiplo constante", lines: [`d/dx [g/${str(v)}] = g′/${str(v)}, g′ = ${str(d(u))}`] };
       return { rule: "Regra do Quociente", lines: [`u = ${str(u!)}  ⇒  u′ = ${str(d(u!))}`, `v = ${str(v!)}  ⇒  v′ = ${str(d(v!))}`, "(u/v)′ = (u′·v − u·v′) / v²", `= [(${str(d(u!))})·(${str(v!)}) − (${str(u!)})·(${str(d(v!))})] / (${str(v!)})²`] };
     }
     if (o.op === "^") {
@@ -40,7 +43,7 @@ function ruleOf(n0: MathNode): { rule: string; lines: string[] } {
   if (n.type === "FunctionNode") {
     const o = asOp(n), name = (n as unknown as { fn: { name: string } }).fn.name, g = o.args[0]!;
     const outer: Record<string, string> = { sin: "cos(u)", cos: "−sin(u)", tan: "sec²(u)", exp: "exp(u)", log: "1/u", sqrt: "1/(2√u)", abs: "u/|u|" };
-    const base = `d/du [${name === "log" ? "ln" : name}(u)] = ${outer[name] ?? "f′(u)"}`;
+    const base = `d/du [${name === "log" ? "ln" : name}(u)] = ${outer[name] ?? "f′(u)"}${name === "abs" ? ", para u ≠ 0; em u = 0, comparar as derivadas laterais" : ""}`;
     if (strip(g).type === "SymbolNode") return { rule: "Derivada elementar", lines: [base.replace(/u/g, "x")] };
     return { rule: "Regra da Cadeia", lines: [`u = g(x) = ${str(g)}  ⇒  g′(x) = ${str(d(g))}`, base, `d/dx [f(g(x))] = f′(g(x))·g′(x)`] };
   }
@@ -62,7 +65,9 @@ export function derivativeSteps(expression: string): UvStep[] | null {
     if (sub.type === "OperatorNode" && ["+", "-"].includes(asOp(sub).op)) {
       steps.push({ title: "Passo 3 — Derivar cada termo", lines: asOp(sub).args.map((a) => { const r = ruleOf(a); return `${str(a)} → ${r.rule}: ${str(d(a))}`; }) });
     }
-    steps.push({ title: `Passo ${steps.length + 1} — Simplificar`, lines: [`f′(x) = ${str(d(node))}`] });
+    steps.push({ title: `Passo ${steps.length + 1} — Simplificar`, lines: [], formulas: [`f'(x) = ${expressionLatex(d(node).toString())}`] });
+    const originalDomain = realDomain(expression, -10, 10), derivativeDomain = realDomain(d(node).toString(), -10, 10);
+    steps.push({ title: "Validade e domínio", lines: [`Domínio de f: ${originalDomain.text}.`, `A fórmula de f′ vale onde está definida: ${derivativeDomain.text}.`, ...(expression.includes("abs") ? ["Nos zeros do argumento de abs, compare as derivadas laterais. Para abs(x), f′(0) não existe: a inclinação à esquerda é −1 e à direita é 1."] : [])] });
     return steps;
   } catch { return null; }
 }
@@ -81,7 +86,10 @@ export function limitSteps(expression: string, c: number, L: number, L1: number,
   const node = strip(parse(normalize(expression)));
   const steps: UvStep[] = [];
   const direct = fn(c);
-  steps.push({ title: "Passo 1 — Substituição direta", lines: [`f(${fmt(c)}) = ${str(node).replace(/\bx\b/g, `(${fmt(c)})`)}`, Number.isFinite(direct) ? `= ${fmt(direct, 6)}` : "→ expressão indefinida neste ponto"] });
+  const substituted = node.transform((n) => n.type === "SymbolNode" && n.toString() === "x" ? parse(String(c)) : n);
+  steps.push({ title: "Passo 1 — Substituição direta", lines: [Number.isFinite(direct) ? `f(${fmt(c)}) = ${fmt(direct, 6)}` : "→ expressão indefinida neste ponto"], formulas: [`f(${fmt(c)}) = ${expressionLatex(substituted.toString())}`] });
+  const oscillation = oscillationAt(expression, c);
+  if (oscillation) return [...steps, { title: "Análise de oscilação", lines: [oscillation] }, { title: "Conclusão", lines: ["Nenhum dos limites laterais existe; o limite bilateral não existe."] }];
   if (Number.isFinite(direct) && Math.abs(direct - L) < 1e-3 * Math.max(1, Math.abs(direct))) {
     steps.push({ title: "Passo 2 — Continuidade", lines: [`f é contínua em x = ${fmt(c)}, logo lim f(x) = f(${fmt(c)}) = ${fmt(direct, 6)}`] });
     return steps;
@@ -103,6 +111,11 @@ export function limitSteps(expression: string, c: number, L: number, L1: number,
       if (expression.includes("sqrt")) steps.push({ title: "Passo 3 — Racionalização", lines: ["Multiplique numerador e denominador pelo conjugado do termo com raiz: (√a − b)(√a + b) = a − b²", "Isso elimina a raiz que gera o 0/0; equivalentemente podemos aplicar L'Hôpital:"] });
       for (let i = 0; i < 3; i++) {
         const du = d(u), dv = d(v), a = evalAt(du, c), b = evalAt(dv, c);
+        const quotient = evaluateLimit(`(${du.toString()})/(${dv.toString()})`, c);
+        if (expression.includes("abs") || (!small(a) || !small(b)) && (!Number.isFinite(a) || !Number.isFinite(b) || small(b) || !Number.isFinite(quotient.L) || Math.abs(quotient.L - a / b) > 1e-3)) {
+          steps.push({ title: "Análise lateral (sem aplicar L'Hôpital)", lines: ["Não foram estabelecidas as condições da regra nem um limite comum para u′/v′. Analisamos cada lado separadamente.", `À esquerda: ${fmt(L1, 5)}. À direita: ${fmt(L2, 5)}.`] });
+          return conclude(steps, L, L1, L2, c);
+        }
         steps.push({ title: `Passo ${steps.length + 1} — Regra de L'Hôpital${i ? ` (${i + 1}ª aplicação)` : ""}`, lines: [`lim u/v = lim u′/v′`, `u′ = ${str(du)} → ${fmt(a, 5)}`, `v′ = ${str(dv)} → ${fmt(b, 5)}`, small(a) && small(b) ? "Ainda 0/0 — aplicar novamente" : `lim = ${fmt(a, 5)} / ${fmt(b, 5)} = ${small(b) ? "±∞" : fmt(a / b, 6)}`] });
         if (!(small(a) && small(b))) break;
         u = du; v = dv;
@@ -110,7 +123,8 @@ export function limitSteps(expression: string, c: number, L: number, L1: number,
       return conclude(steps, L, L1, L2, c);
     }
   }
-  steps.push({ title: `Passo ${steps.length + 1} — Análise dos limites laterais`, lines: [`lim x→${fmt(c)}⁻ f(x) ≈ ${fmt(L1, 5)}`, `lim x→${fmt(c)}⁺ f(x) ≈ ${fmt(L2, 5)}`] });
+  const sideText = (v: number) => Number.isNaN(v) ? "não foi observada convergência (estimativa inconclusiva)" : `${Number.isFinite(v) ? "≈ " : ""}${fmt(v, 5)}`;
+  steps.push({ title: `Passo ${steps.length + 1} — Análise dos limites laterais`, lines: [`lim x→${fmt(c)}⁻ f(x): ${sideText(L1)}`, `lim x→${fmt(c)}⁺ f(x): ${sideText(L2)}`] });
   return conclude(steps, L, L1, L2, c);
 }
 function conclude(steps: UvStep[], L: number, L1: number, L2: number, c: number) {
@@ -159,8 +173,19 @@ function anti(n0: MathNode): Anti | null {
 }
 
 export function integralSteps(expression: string, a: number, b: number): UvStep[] | null {
-  const { fn } = parseFn(expression); if (!fn) return null;
+  return definiteIntegral(expression, a, b).steps;
+}
+
+export function definiteIntegral(expression: string, a: number, b: number): { value: number; method: "primitiva" | "Simpson" | null; error: string | null; steps: UvStep[] | null } {
+  const invalid = (error: string) => ({ value: NaN, method: null, error, steps: null });
+  const { fn } = parseFn(expression); if (!fn || !Number.isFinite(a) || !Number.isFinite(b)) return invalid("Informe uma função e limites válidos.");
+  if (a === b) return { value: 0, method: "Simpson", error: null, steps: [{ title: "Intervalo nulo", lines: ["Os limites coincidem; a integral no intervalo nulo é 0."] }] };
+  const domain = realDomain(expression, a, b);
+  if (domain.poles.length) return invalid(`Integral imprópria não avaliada: ${expression} não está definida em x = ${domain.poles.map((x) => fmt(x, 6)).join(", ")}, dentro do intervalo. Não aplicamos Simpson nem F(b) − F(a) através de singularidades; o valor principal de Cauchy não é a integral comum.${/^(?:1\s*\/\s*x|1\s*\/\s*\(x\))$/.test(expression.trim()) ? " Para 1/x, a integral imprópria é divergente neste intervalo." : " A convergência deve ser analisada por limites laterais."}`);
+  if (domain.invalidInterior) return invalid(`A função não é real em todo o intervalo. Domínio: ${domain.text}.`);
+  if (domain.unresolved) return invalid(`Existem restrições de domínio cuja regularidade no intervalo não foi estabelecida: ${domain.text}. A integral não foi calculada.`);
   const numeric = integrate(fn, a, b);
+  if (!Number.isFinite(numeric)) return invalid("Não foi possível calcular uma integral finita; verifique o domínio e a convergência nos extremos.");
   let A: Anti | null = null;
   try { A = anti(parse(normalize(expression))); } catch { A = null; }
   const steps: UvStep[] = [];
@@ -168,12 +193,12 @@ export function integralSteps(expression: string, a: number, b: number): UvStep[
     const F = simplify(A.F), Fb = evalAt(F, b), Fa = evalAt(F, a);
     if (Number.isFinite(Fb - Fa) && Math.abs(Fb - Fa - numeric) < 1e-4 * Math.max(1, Math.abs(numeric))) {
       steps.push({ title: `Passo 1 — Método: ${A.method}`, lines: A.lines });
-      steps.push({ title: "Passo 2 — Antiderivada", lines: [`F(x) = ${str(F)} + C`, `Verificação: F′(x) = ${str(d(F))}`] });
+      steps.push({ title: "Passo 2 — Antiderivada", lines: [], formulas: [`F(x) = ${expressionLatex(F.toString())} + C`, `F'(x) = ${expressionLatex(d(F).toString())}`] });
       steps.push({ title: "Passo 3 — Teorema Fundamental do Cálculo", lines: [`∫ de ${fmt(a)} a ${fmt(b)} f(x) dx = F(${fmt(b)}) − F(${fmt(a)})`, `= ${fmt(Fb, 6)} − (${fmt(Fa, 6)})`, `= ${fmt(Fb - Fa, 6)}`] });
-      return steps;
+      return { value: Fb - Fa, method: "primitiva", error: null, steps };
     }
   }
   steps.push({ title: "Passo 1 — Antiderivada", lines: ["Não foi encontrada uma antiderivada elementar pelos métodos de substituição simples ou por partes."] });
   steps.push({ title: "Passo 2 — Aproximação numérica (Simpson)", lines: [`∫ de ${fmt(a)} a ${fmt(b)} f(x) dx ≈ ${fmt(numeric, 6)}`] });
-  return steps;
+  return { value: numeric, method: "Simpson", error: null, steps };
 }
