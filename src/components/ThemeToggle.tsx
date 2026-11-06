@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Presentation, Flashlight, Sun, Moon } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ export function ThemeToggle() {
   const [theme, setTheme] = useState<LabTheme>("standard");
   const [uv, setUv] = useState(false);
   const [uvHint, setUvHint] = useState(false);
+  const touchHint = useRef(false);
   const descriptionId = useId();
   useEffect(() => {
     if (!uvHint) return;
@@ -63,7 +64,7 @@ export function ThemeToggle() {
     </DropdownMenu>
     {theme === "chalkboard" && <div className="grid min-w-0 justify-items-end gap-1 py-2">
     <Tooltip open={uvHint} onOpenChange={setUvHint}><TooltipTrigger asChild>
-      <Button type="button" variant="outline" size="sm" aria-label="Luz Negra" aria-describedby={descriptionId} aria-pressed={uv} onPointerUp={(event) => { if (event.pointerType === "touch") setUvHint(true); }} onClick={toggleUv} className="uv-toggle h-11 shrink-0 gap-2 rounded-lg px-3 font-semibold">
+      <Button type="button" variant="outline" size="sm" aria-label="Luz Negra" aria-describedby={descriptionId} aria-pressed={uv} onPointerDown={(event) => { touchHint.current = event.pointerType === "touch"; }} onClick={() => { toggleUv(); if (touchHint.current) setUvHint(true); }} className="uv-toggle h-11 shrink-0 gap-2 rounded-lg px-3 font-semibold">
         <Flashlight className="h-5 w-5" /><span>Luz Negra</span><span className="font-mono text-xs">{uv ? "ON" : "UV"}</span>
       </Button>
     </TooltipTrigger><TooltipContent className="max-w-64 text-sm leading-relaxed" side="bottom">
