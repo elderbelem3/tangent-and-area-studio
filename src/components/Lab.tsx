@@ -98,7 +98,7 @@ export function MathToolbar({ inputRef, value, onChange, onInsert, onClear }: { 
       <div className="mb-2 flex items-center gap-1" role="tablist">
         <div className="grid flex-1 grid-cols-4 gap-1 rounded-lg bg-background/70 p-0.5">
           {MATH_GROUPS.map((g) => (
-            <button key={g.id} type="button" role="tab" aria-selected={g.id === tab} onClick={() => setTab(g.id)}
+            <button key={g.id} type="button" role="tab" aria-selected={g.id === tab} onMouseDown={(e) => e.preventDefault()} onClick={() => setTab(g.id)}
               className={`truncate rounded-md px-1 py-1.5 text-[11px] font-semibold transition ${g.id === tab ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
               {g.label}
             </button>
