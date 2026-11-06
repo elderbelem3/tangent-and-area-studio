@@ -142,6 +142,8 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
         // Configure once connected: the default log shortcut adds a subscript
         // box, which would nest a second subscript when the user types _.
         el.inlineShortcuts = { ...el.inlineShortcuts, log: "\\operatorname{log}" };
+        // MathLive ignores the space bar in math mode by default; accept it as a visual space.
+        (el as unknown as { mathModeSpace: string }).mathModeSpace = "\\:";
         try { el.menuItems = []; } catch { /* older versions */ }
         mf.current = el;
         setReady(true);
