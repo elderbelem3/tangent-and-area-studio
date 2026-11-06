@@ -1,4 +1,5 @@
 # Refinamento visual
+- [ ] Adicionar zoom/pan compartilhado aos gráficos 2D, ticks adaptativos e cursor preciso; verificar mouse e touch.
 - [x] Ampliar tour com atalhos, teclado científico, Aprenda e orientação da IA em manutenção; validar sintaxe e navegação.
 - [x] Suspender temporariamente tutor, ENADE e copiloto e verificar avisos de manutenção.
 - [x] Refinar identidade, navegação e controles compartilhados.
