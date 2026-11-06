@@ -73,8 +73,12 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
           lastEmitted.current = out;
           onChangeRef.current(out);
           const end = el.position;
-          const prefix = asciiToMathjs(el.getValue(0, end, "ascii-math"));
+          const prefix = asciiToMathjs(el.getValue(0, end, "ascii-math")).replace(/x\^\(\(\)\)$/, "x^");
           const context = mathSuggestions(prefix);
+          if (prefix.endsWith("x^") && context && /x\^\{\\placeholder\{\}\}$/.test(el.value)) {
+            suggestionRef.current = { items: context.suggestions, start: Math.max(0, end - 2), end: end + 1, active: 0 };
+            setSuggestions(context.suggestions); setActive(0); return;
+          }
           if (!context) { dismiss(); return; }
           let start = end;
           for (let offset = end - 1; offset >= 0; offset--) {
