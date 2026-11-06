@@ -1,4 +1,6 @@
-import { forwardRef, useState, type ReactNode, type RefObject } from "react";
+import { forwardRef, useState, useRef, useId, useImperativeHandle, type ReactNode, type RefObject } from "react";
+import { mathSuggestions, type SuggestionContext, type MathSuggestion } from "@/lib/math-suggestions";
+import { MathSuggestions } from "@/components/MathSuggestions";
 import { AlertTriangle, ChartSpline, Table2, BookOpen, SlidersHorizontal, ArrowUpRight, Eraser } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -27,16 +29,49 @@ export function Panel({ title, children, className = "" }: { title?: string; chi
 
 export const Field = forwardRef<HTMLInputElement, { label: string; value: string; onChange: (v: string) => void; mono?: boolean; placeholder?: string }>(
   function Field({ label, value, onChange, mono = true, placeholder }, ref) {
+    const input = useRef<HTMLInputElement>(null);
+    useImperativeHandle(ref, () => input.current as HTMLInputElement);
+    const id = useId();
+    const [context, setContext] = useState<SuggestionContext | null>(null);
+    const [active, setActive] = useState(0);
+    const suggest = (el: HTMLInputElement) => {
+      setContext(label === "f(x) =" ? mathSuggestions(el.value.slice(0, el.selectionStart ?? el.value.length)) : null);
+      setActive(0);
+    };
+    const accept = (item: MathSuggestion) => {
+      const el = input.current; if (!el || !context) return;
+      const end = el.selectionStart ?? value.length;
+      onChange(value.slice(0, context.start) + item.expression + value.slice(end));
+      setContext(null);
+      requestAnimationFrame(() => {
+        el.focus();
+        const pos = context.start + (item.argument ? item.expression.indexOf("(") + 1 : item.expression.length);
+        el.setSelectionRange(pos, pos + (item.argument ? 1 : 0));
+      });
+    };
     return (
       <label className="block">
         <span className="mb-1 block text-sm font-medium text-muted-foreground">{label}</span>
+        <div className="relative">
         <input
-          ref={ref}
+          ref={input}
           value={value}
           placeholder={placeholder}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => { onChange(e.target.value); suggest(e.target); }}
+          onClick={(e) => suggest(e.currentTarget)}
+          onBlur={() => setContext(null)}
+          aria-autocomplete={label === "f(x) =" ? "list" : undefined}
+          aria-controls={context ? id : undefined}
+          onKeyDown={(event) => {
+            if (!context || event.nativeEvent.isComposing) return;
+            if (event.key === "Escape") { event.preventDefault(); setContext(null); }
+            else if (event.key === "ArrowDown" || event.key === "ArrowUp") { event.preventDefault(); setActive((v) => (v + (event.key === "ArrowDown" ? 1 : -1) + context.suggestions.length) % context.suggestions.length); }
+            else if (event.key === "Tab" || event.key === "Enter") { const item = context.suggestions[active]; if (item) { event.preventDefault(); accept(item); } }
+          }}
           className={`h-11 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 ${mono ? "font-mono" : ""}`}
         />
+        {context && <MathSuggestions id={id} items={context.suggestions} active={active} onSelect={accept} />}
+        </div>
       </label>
     );
   }

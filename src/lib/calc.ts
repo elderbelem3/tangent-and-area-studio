@@ -4,7 +4,8 @@ export type Fn = (x: number) => number;
 
 /** Normalize base-10 subscripts without splitting digits that belong to function names. */
 export function normalizeLogarithms(expr: string): string {
-  return expr.replace(/\blog\s*_\s*(?:\{\s*10\s*\}|\(\s*10\s*\)|10)\s*(?=\()/g, "log10")
+  return expr.replace(/\blog\s*_\s*(?:\{\s*2\s*\}|\(\s*2\s*\)|2)\s*(?=\()/g, "log2")
+    .replace(/\blog\s*_\s*(?:\{\s*10\s*\}|\(\s*10\s*\)|10)\s*(?=\()/g, "log10")
     .replace(/\bln\s*(?=\()/g, "log");
 }
 
