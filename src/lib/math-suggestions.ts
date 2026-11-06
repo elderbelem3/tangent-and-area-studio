@@ -6,6 +6,7 @@ const functions: MathSuggestion[] = ["sin", "cos", "tan", "sqrt", "exp", "abs", 
 const baseTwo: MathSuggestion = { label: "log_2(x)", expression: "log(x, 2)", latex: "\\operatorname{log}_{2}\\left(x\\right)", argument: true };
 
 export function mathSuggestions(prefix: string): SuggestionContext | null {
+  prefix = prefix.replace(/\b(?:l\s+o\s+g|s\s+i\s+n|c\s+o\s+s|t\s+a\s+n|s\s+q\s+r\s+t|e\s+x\s+p|a\s+b\s+s)\s*$/g, (word) => word.replace(/\s+/g, ""));
   const power = prefix.match(/x\s*\^\s*(?:\(\s*\))?$/);
   if (power && power.index !== undefined) return { start: power.index, token: power[0], suggestions: [2, 3].map((n) => ({ label: `x^${n}`, expression: `x^${n}`, latex: `x^{${n}}`, argument: false })) };
   const match = prefix.match(/([a-zA-Z][a-zA-Z0-9]*)$/);
