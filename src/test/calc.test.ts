@@ -19,5 +19,6 @@ describe("Special functions and logarithm bases", () => {
   });
   it("evaluates subscripted editor output through the real parser", () => {
     expect(parseFn(asciiToMathjs("log_(10)(x)")).fn?.(100)).toBeCloseTo(2, 12);
+    expect(parseFn(asciiToMathjs("l o g _(10)(x)")).fn?.(100)).toBeCloseTo(2, 12);
   });
 });

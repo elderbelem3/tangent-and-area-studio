@@ -26,7 +26,7 @@ export const Route = createFileRoute("/aprenda")({
 
 function TestButton({ test }: { test: GraphTest }) {
   const navigate = useNavigate();
-  return <Button type="button" size="sm" className="mt-4 gap-2" onClick={() => void navigate({ to: applyGraphTest(test) })}>
+  return <Button data-tour="learn-graph" type="button" size="sm" className="mt-4 gap-2" onClick={() => void navigate({ to: applyGraphTest(test) })}>
     <Play className="h-4 w-4" />Testar no Gráfico<span className="font-mono text-xs opacity-80">{test.expression} · {test.module}</span>
   </Button>;
 }
