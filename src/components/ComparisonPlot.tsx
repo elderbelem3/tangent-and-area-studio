@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { CartesianGrid, Line, LineChart, ReferenceLine, ReferenceDot, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
 import { derivative, fmt, parseFn } from "@/lib/calc";
@@ -12,6 +12,7 @@ import { PlotControls, PlotCrosshair } from "@/components/PlotNavigation";
 import { ChalkAxis } from "@/components/ChalkAxis";
 import { useModuleState } from "@/lib/module-state";
 import { plotSamples, sampleCurve } from "@/lib/plot-sampling";
+import { useSettledPlotDomain } from "@/lib/use-settled-plot-domain";
 
 export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax, tangentAt, analysis = true }: {
   functions: ComparisonFunction[]; xMin: number; xMax: number; tangentAt?: number; analysis?: boolean;
@@ -38,9 +39,10 @@ export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax
   const navigation = usePlotViewport({ xMin: initialXMin, xMax: initialXMax, yMin: low, yMax: high }, functions.map((f) => `${f.slot}:${f.expression}`).join("|") + hidden.join(","));
   const { xMin, xMax, yMin: viewLow, yMax: viewHigh } = navigation.domain;
   low = viewLow; high = viewHigh;
-  const samples = useMemo(() => plotSamples(xMin, xMax, initialXMax - initialXMin), [xMin, xMax, initialXMin, initialXMax]);
-  const annotations = useMemo(() => curves.flatMap((item) => item.fn ? findPlotAnnotations(item.fn, xMin, xMax).map((point) => ({ ...point, slot: item.slot })) : []), [curves, xMin, xMax]);
-  const yIntercepts = xMin <= 0 && xMax >= 0 ? curves.map((item) => ({ slot: item.slot, y: item.fn?.(0) ?? NaN })).filter((p) => Number.isFinite(p.y)) : [];
+  const settled = useSettledPlotDomain(xMin, xMax);
+  const samples = useMemo(() => plotSamples(xMin, xMax, initialXMax - initialXMin, visible.length), [xMin, xMax, initialXMin, initialXMax, visible.length]);
+  const annotations = useMemo(() => curves.flatMap((item) => item.fn ? findPlotAnnotations(item.fn, settled.xMin, settled.xMax).map((point) => ({ ...point, slot: item.slot })) : []), [curves, settled]);
+  const yIntercepts = useMemo(() => xMin <= 0 && xMax >= 0 ? curves.map((item) => ({ slot: item.slot, y: item.fn?.(0) ?? NaN })).filter((p) => Number.isFinite(p.y)) : [], [curves, xMin, xMax]);
 
   const tangents = useMemo(() => visible.map((item) => {
     const y = tangentAt !== undefined ? item.fn?.(tangentAt) ?? NaN : NaN;
@@ -60,15 +62,8 @@ export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax
     });
   }, [samples, tangents, low, high, tangentAt]);
   const analysisFunctions = useMemo(() => functions.filter((f) => !hidden.includes(f.slot)), [functions, hidden]);
-  return <div className="min-w-0">
-    <div className="mb-5 flex flex-wrap gap-2" role="group" aria-label="Legenda interativa das funções">
-      {curves.map((item) => <Button key={item.slot} variant="outline" size="sm" aria-pressed={!hidden.includes(item.slot)} title={`${hidden.includes(item.slot) ? "Mostrar" : "Ocultar"} ${FUNCTION_SLOTS[item.slot]}(x)`} onClick={() => setHidden((previous) => previous.includes(item.slot) ? previous.filter((slot) => slot !== item.slot) : [...previous, item.slot])} className={`h-auto min-h-9 min-w-0 max-w-full py-2 ${hidden.includes(item.slot) ? "opacity-50" : ""}`}>
-        <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${FUNCTION_BG_COLORS[item.slot]}`} />
-        <span className="break-all whitespace-normal text-left font-mono text-xs">{FUNCTION_SLOTS[item.slot]}(x) = {item.expression || "—"}</span>
-      </Button>)}
-    </div>
-    <PlotControls navigation={navigation} />
-    <div ref={navigation.ref} className="relative touch-none cursor-crosshair h-[360px] w-full min-w-0 sm:h-[420px]" role="img" aria-label={tangentAt === undefined ? "Gráfico comparativo das funções" : "Gráfico comparativo das funções e retas tangentes"}>
+  const analysisPanel = useMemo(() => analysis ? <AnalysisPanels functions={analysisFunctions} xMin={settled.xMin} xMax={settled.xMax} /> : null, [analysis, analysisFunctions, settled]);
+  const chart = useMemo(() => (
       <ResponsiveContainer width="100%" height="100%" minWidth={0}>
         <LineChart data={data} margin={{ top: 12, right: 16, bottom: 12, left: 0 }}>
           <CartesianGrid stroke="var(--grid)" />
@@ -97,9 +92,20 @@ export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax
           {yIntercepts.filter((p) => !hidden.includes(p.slot) && p.y >= low && p.y <= high).map((p) => <ReferenceDot key={`uvi-${p.slot}`} x={0} y={p.y} ifOverflow="hidden" shape={(props: { cx?: number; cy?: number }) => props.cx === undefined || props.cy === undefined ? <g /> : <g className="uv-layer"><rect x={props.cx - 4} y={props.cy - 4} width={8} height={8} fill="var(--uv)" transform={`rotate(45 ${props.cx} ${props.cy})`} /><text x={props.cx + 8} y={props.cy - 8} className="uv-label">{`y₀ = ${fmt(p.y, 3)}`}</text></g>} />)}
         </LineChart>
       </ResponsiveContainer>
+  ), [data, xMin, xMax, low, high, tangents, tangentAt, annotations, hidden, yIntercepts]);
+  return <div className="min-w-0">
+    <div className="mb-5 flex flex-wrap gap-2" role="group" aria-label="Legenda interativa das funções">
+      {curves.map((item) => <Button key={item.slot} variant="outline" size="sm" aria-pressed={!hidden.includes(item.slot)} title={`${hidden.includes(item.slot) ? "Mostrar" : "Ocultar"} ${FUNCTION_SLOTS[item.slot]}(x)`} onClick={() => setHidden((previous) => previous.includes(item.slot) ? previous.filter((slot) => slot !== item.slot) : [...previous, item.slot])} className={`h-auto min-h-9 min-w-0 max-w-full py-2 ${hidden.includes(item.slot) ? "opacity-50" : ""}`}>
+        <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${FUNCTION_BG_COLORS[item.slot]}`} />
+        <span className="break-all whitespace-normal text-left font-mono text-xs">{FUNCTION_SLOTS[item.slot]}(x) = {item.expression || "—"}</span>
+      </Button>)}
+    </div>
+    <PlotControls navigation={navigation} />
+    <div ref={navigation.ref} className="relative touch-none cursor-crosshair h-[360px] w-full min-w-0 sm:h-[420px]" role="img" aria-label={tangentAt === undefined ? "Gráfico comparativo das funções" : "Gráfico comparativo das funções e retas tangentes"}>
+      {chart}
       <PlotCrosshair navigation={navigation} values={tangents.map((item) => ({ name: `${FUNCTION_SLOTS[item.slot]}(x)`, value: item.fn?.(navigation.cursor?.x ?? 0) ?? NaN }))} />
     </div>
-    {analysis && <AnalysisPanels functions={analysisFunctions} xMin={xMin} xMax={xMax} />}
+    {analysisPanel}
     {visible.length === 0 && <p className="mt-3 text-sm text-muted-foreground">Nenhuma função válida visível.</p>}
     {tangentAt !== undefined && <p className="mt-4 border-t border-border pt-4 text-center text-xs text-muted-foreground">Curvas: linhas contínuas · Retas tangentes: linhas tracejadas</p>}
   </div>;
