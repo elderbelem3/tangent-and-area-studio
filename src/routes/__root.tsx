@@ -119,8 +119,8 @@ function RootComponent() {
             </div>
             <span className="hidden items-center gap-2 text-xs font-medium text-muted-foreground sm:flex"><GraduationCap className="h-4 w-4" />Cálculo Diferencial e Integral</span>
           </div>
-          <div className="mx-auto flex max-w-7xl items-center px-4 sm:px-7">
-          <nav className="flex min-w-0 flex-1 gap-1 overflow-x-auto" aria-label="Módulos">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center px-4 sm:px-7">
+          <nav className="flex min-w-0 flex-1 basis-full gap-1 overflow-x-auto sm:basis-0" aria-label="Módulos">
             {nav.map((n) => (
               <Button key={n.to} asChild variant="ghost" className="h-12 shrink-0 rounded-none border-b-2 border-transparent px-4 text-muted-foreground hover:bg-muted/60 hover:text-foreground">
                 <Link to={n.to} onClick={(event) => { if (n.to === "/ia" && AI_MAINTENANCE) { event.preventDefault(); setMaintenance(true); } }} activeOptions={{ exact: true }} activeProps={{ className: "border-primary bg-primary/5 !text-primary" }}><n.icon className="h-4 w-4" />{n.label}</Link>

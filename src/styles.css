@@ -283,7 +283,18 @@
 .uv-panel > div { overflow: hidden; }
 .uv-panel :is(h3, p, li, span) { color: var(--uv); text-shadow: 0 0 4px var(--uv-strong), 0 0 12px var(--uv-strong); }
 .uv-panel .uv-box { border: 2px dashed color-mix(in oklch, var(--uv) 60%, transparent); border-radius: 7px; padding: 1rem; background: oklch(0.15 0.03 300 / 35%); }
-.chalkboard.blacklight .uv-toggle { color: var(--uv); background: oklch(0.72 0.18 305 / 18%); box-shadow: 0 0 12px var(--uv-strong); }
+.chalkboard .uv-toggle {
+  --uv-control-bg: color-mix(in oklch, var(--uv-strong) 18%, var(--background));
+  --uv-control-active-bg: color-mix(in oklch, var(--uv-strong) 32%, var(--background));
+  --uv-control-shadow: 0 0 12px color-mix(in oklch, var(--uv-strong) 45%, transparent);
+  color: var(--uv);
+  background: var(--uv-control-bg);
+  border: 2px solid var(--uv-strong);
+  font-family: var(--font-math);
+}
+.chalkboard .uv-toggle:hover { background: var(--uv-control-active-bg); border-color: var(--uv); }
+.chalkboard .uv-toggle:focus-visible { outline: 3px solid var(--uv); outline-offset: 3px; }
+.chalkboard.blacklight .uv-toggle { background: var(--uv-control-active-bg); box-shadow: var(--uv-control-shadow); }
 /* Quadro limpo sem Luz Negra; anotações de giz só com UV */
 .chalkboard .chalk-annotation, .chalkboard .chalk-guide { display: inline; opacity: 0; transition: opacity 450ms ease; }
 .chalkboard.blacklight .chalk-annotation, .chalkboard.blacklight .chalk-guide { opacity: 1; }
