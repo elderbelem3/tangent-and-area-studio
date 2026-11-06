@@ -1,5 +1,5 @@
 import { derivative as symD, parse, rationalize, simplify, type MathNode } from "mathjs";
-import { fmt, integrate, normalize, parseFn } from "@/lib/calc";
+import { constantValue, fmt, integrate, normalize, parseFn } from "@/lib/calc";
 
 export type UvStep = { title: string; lines: string[] };
 
@@ -49,6 +49,12 @@ function ruleOf(n0: MathNode): { rule: string; lines: string[] } {
 
 export function derivativeSteps(expression: string): UvStep[] | null {
   try {
+    const value = constantValue(expression);
+    if (value !== null) return [
+      { title: "Passo 1 — Função constante", lines: [`f(x) = ${show(expression)} = ${fmt(value)}. O valor não depende de x.`] },
+      { title: "Passo 2 — Derivada da constante", lines: ["f′(x) = 0 e f″(x) = 0 em todo o domínio ℝ."] },
+      { title: "Conclusão", lines: ["A função é constante: não há pontos críticos isolados nem pontos de inflexão.", value === 0 ? "A função nula tem todos os números reais como raízes; não há uma raiz isolada a determinar." : "A função constante não nula não possui raízes reais: nenhum x faz f(x) = 0."] },
+    ];
     const node = parse(normalize(expression)), top = ruleOf(node);
     const steps: UvStep[] = [{ title: "Passo 1 — Identificar a estrutura", lines: [`f(x) = ${str(node)}`, `Regra principal: ${top.rule}`] }];
     steps.push({ title: `Passo 2 — Aplicar: ${top.rule}`, lines: top.lines });

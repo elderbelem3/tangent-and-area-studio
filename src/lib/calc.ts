@@ -1,6 +1,16 @@
-import { compile } from "mathjs";
+import { compile, parse } from "mathjs";
 
 export type Fn = (x: number) => number;
+
+/** Detect real constants structurally, never by a few coincidentally equal samples. */
+export function constantValue(expression: string): number | null {
+  try {
+    const node = parse(normalize(expression));
+    if (node.filter((n) => n.type === "SymbolNode" && n.toString() === "x").length) return null;
+    const value = parseFn(expression).fn?.(0);
+    return value !== undefined && Number.isFinite(value) ? value : null;
+  } catch { return null; }
+}
 
 /** Normalize base-10 subscripts without splitting digits that belong to function names. */
 export function normalizeLogarithms(expr: string): string {

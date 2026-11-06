@@ -4,6 +4,11 @@ import { derivativeSteps, integralSteps, limitSteps } from "@/lib/uv-steps";
 const text = (s: { lines: string[]; title: string }[] | null) => (s ?? []).map((x) => x.title + " " + x.lines.join(" ")).join("\n");
 
 describe("uv steps", () => {
+  it.each(["5", "sqrt(9)", "2", "0"])("returns bounded zero-derivative steps for %s", (expression) => {
+    const steps = derivativeSteps(expression);
+    expect(steps).toHaveLength(3);
+    expect(steps?.[1]?.lines[0]).toBe("f′(x) = 0 e f″(x) = 0 em todo o domínio ℝ.");
+  });
   it("factors (x^2-1)/(x-1) at 1 to limit 2", () => {
     const t = text(limitSteps("(x^2-1)/(x-1)", 1, 2, 2, 2));
     expect(t).toContain("Fatoração");

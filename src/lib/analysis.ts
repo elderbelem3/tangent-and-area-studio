@@ -1,5 +1,5 @@
 import { derivative as symDerivative, parse, simplify } from "mathjs";
-import { fmt, normalize, parseFn, type Fn } from "@/lib/calc";
+import { constantValue, fmt, normalize, parseFn, type Fn } from "@/lib/calc";
 import { findPlotAnnotations } from "@/lib/plot-annotations";
 
 export type SignInterval = { from: number; to: number; sign: "+" | "−" };
@@ -8,6 +8,7 @@ export type FunctionAnalysis = {
   roots: number[]; critical: { x: number; y: number; kind: string }[];
   signs: SignInterval[]; inflections: { x: number; y: number }[];
   domain: string; limitPos: string; limitNeg: string;
+  constantValue: number | null;
 };
 
 function symbolic(expr: string): string | null {
@@ -45,6 +46,12 @@ function domainText(fn: Fn, xMin: number, xMax: number): string {
 
 export function analyzeFunction(expression: string, xMin: number, xMax: number): FunctionAnalysis | null {
   const { fn } = parseFn(expression); if (!fn) return null;
+  const value = constantValue(expression);
+  if (value !== null) return {
+    expression, constantValue: value, d1: "0", d2: "0",
+    roots: [], critical: [], signs: [], inflections: [],
+    domain: "ℝ", limitPos: fmt(value, 4), limitNeg: fmt(value, 4),
+  };
   const norm = normalize(expression);
   const d1 = symbolic(norm), d2 = d1 ? symbolic(d1) : null;
   const f1 = (d1 && parseFn(d1).fn) || ((x: number) => (fn(x + 1e-5) - fn(x - 1e-5)) / 2e-5);
@@ -53,7 +60,7 @@ export function analyzeFunction(expression: string, xMin: number, xMax: number):
   const crit = zeros(f1, xMin, xMax).sort((a, b) => a - b);
   const bounds = [xMin, ...crit, xMax];
   const signs: SignInterval[] = [];
-  for (let i = 0; i < bounds.length - 1; i++) { const a = bounds[i]!, b = bounds[i + 1]!; const v = f1((a + b) / 2); if (Number.isFinite(v)) signs.push({ from: a, to: b, sign: v >= 0 ? "+" : "−" }); }
+  for (let i = 0; i < bounds.length - 1; i++) { const a = bounds[i], b = bounds[i + 1]; if (a === undefined || b === undefined) continue; const v = f1((a + b) / 2); if (Number.isFinite(v)) signs.push({ from: a, to: b, sign: v >= 0 ? "+" : "−" }); }
   const critical = crit.map((x) => {
     const before = f1(x - 1e-3), after = f1(x + 1e-3);
     const kind = before > 0 && after < 0 ? "Máximo local" : before < 0 && after > 0 ? "Mínimo local" : "Ponto crítico (sem troca de sinal)";
@@ -61,7 +68,7 @@ export function analyzeFunction(expression: string, xMin: number, xMax: number):
   });
   const inflections = zeros(f2, xMin, xMax).filter((x) => Math.sign(f2(x - 1e-3)) !== Math.sign(f2(x + 1e-3))).map((x) => ({ x, y: fn(x) }));
   return {
-    expression, d1, d2,
+    expression, constantValue: null, d1, d2,
     roots: ann.filter((a) => a.kind === "Raiz").map((a) => a.x).sort((a, b) => a - b),
     critical, signs, inflections,
     domain: domainText(fn, xMin, xMax), limitPos: limitText(fn, 1), limitNeg: limitText(fn, -1),
