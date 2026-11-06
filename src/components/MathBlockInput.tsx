@@ -143,7 +143,7 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
         // box, which would nest a second subscript when the user types _.
         el.inlineShortcuts = { ...el.inlineShortcuts, log: "\\operatorname{log}" };
         // MathLive ignores the space bar in math mode by default; accept it as a visual space.
-        // MATHSPACE
+        (el as unknown as { mathModeSpace: string }).mathModeSpace = "\\:";
         try { el.menuItems = []; } catch { /* older versions */ }
         mf.current = el;
         setReady(true);
@@ -175,7 +175,7 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
     return <div className="block min-w-0">
       <span className="mb-1 block text-sm font-medium text-muted-foreground">{label}</span>
       <div className="relative">
-      <div ref={host} onPointerUp={(event) => { if (event.pointerType !== "mouse") focusField(mf.current); }} onClick={(event) => { if (event.target === event.currentTarget) focusField(mf.current); }} className="math-block-host min-h-11 w-full min-w-0 rounded-lg border border-input bg-background px-2 py-1 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
+      <div ref={host} onPointerUp={() => focusField(mf.current)} onClick={(event) => { if (event.target === event.currentTarget) focusField(mf.current); }} className="math-block-host min-h-11 w-full min-w-0 rounded-lg border border-input bg-background px-2 py-1 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
         {!ready && <span className="block py-2 font-mono text-sm text-muted-foreground">{value || "carregando editor…"}</span>}
       </div>
       {suggestions.length > 0 && <MathSuggestions id={id} items={suggestions} active={active} onSelect={(item) => acceptRef.current(item)} />}
