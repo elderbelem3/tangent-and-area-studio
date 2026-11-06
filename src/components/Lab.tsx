@@ -138,7 +138,7 @@ export function MathToolbar({ inputRef, value, onChange, onInsert, onClear }: { 
   return (
     <div className="rounded-xl border border-border bg-muted/50 p-2" aria-label="Teclado de símbolos matemáticos">
       <div className="mb-2 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2" role="tablist">
-        <div className="grid min-w-0 grid-cols-2 gap-1 rounded-lg bg-background/70 p-0.5 sm:grid-cols-4">
+        <div className="grid min-w-0 grid-cols-2 gap-1 rounded-lg bg-background/70 p-0.5">
           {MATH_GROUPS.map((g) => (
             <Button variant="ghost" key={g.id} type="button" role="tab" aria-selected={g.id === tab} onMouseDown={(e) => e.preventDefault()} onClick={() => setTab(g.id)}
               className={`h-11 min-w-0 rounded-md px-1 text-[11px] font-semibold transition sm:h-8 ${g.id === tab ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>

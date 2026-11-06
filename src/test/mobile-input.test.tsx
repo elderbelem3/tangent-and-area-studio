@@ -10,7 +10,7 @@ describe("Native mobile input interaction", () => {
     const input = createRef<HTMLInputElement>();
     const update = vi.fn();
     render(<><Field ref={input} label="f(x) =" value="x" onChange={update} /><MathToolbar inputRef={input} value="x" onChange={update} /></>);
-    const key = screen.getByRole("button", { name: "+", exact: true });
+    const key = screen.getByRole("button", { name: "+" });
     key.focus();
     fireEvent.click(key);
     expect(document.activeElement).toBe(input.current);
