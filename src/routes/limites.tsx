@@ -7,6 +7,7 @@ import { Plot } from "@/components/Plot";
 import { LimitUvOverlay } from "@/components/UvOverlays";
 import { UvStepsPanel } from "@/components/UvStepsPanel";
 import { limitSteps } from "@/lib/uv-steps";
+import { evaluateLimit } from "@/lib/limits";
 import { limitExamples } from "@/lib/study-examples";
 import { PageHeader, Panel, Field, ErrorBox, Chip, MathToolbar, Stat, num } from "@/components/Lab";
 
@@ -25,14 +26,6 @@ export const Route = createFileRoute("/limites")({
 });
 
 type Dir = "esq" | "dir" | "ambos";
-const hs = [0.1, 0.01, 0.001, 0.0001, 0.00001];
-
-function estimate(vals: number[]): number {
-  const last = vals[vals.length - 1] ?? NaN, prev = vals[vals.length - 2] ?? NaN;
-  if (!Number.isFinite(last)) return NaN;
-  if (Math.abs(last) > 1e6 && Math.abs(last) > Math.abs(prev) * 5) return last > 0 ? Infinity : -Infinity;
-  return Math.abs(last - prev) < 1e-3 * Math.max(1, Math.abs(last)) ? last : NaN;
-}
 
 function Limites() {
   const [expr, setExpr] = useModuleState("limites.expr", "sin(x)/x");
@@ -44,18 +37,17 @@ function Limites() {
 
   const data = useMemo(() => {
     if (!fn || c === null) return null;
-    const left = hs.map((h) => ({ x: c - h, y: fn(c - h) }));
-    const right = hs.map((h) => ({ x: c + h, y: fn(c + h) }));
-    const L1 = estimate(left.map((p) => p.y)), L2 = estimate(right.map((p) => p.y));
+    const { left, right, L1, L2, oscillation } = evaluateLimit(expr, c);
     let L = NaN, note = "";
     if (dir === "esq") L = L1;
     else if (dir === "dir") L = L2;
     else if (Number.isFinite(L1) && Number.isFinite(L2) && Math.abs(L1 - L2) < 1e-3 * Math.max(1, Math.abs(L1))) L = (L1 + L2) / 2;
     else if (L1 === L2 && !Number.isFinite(L1) && !Number.isNaN(L1)) L = L1;
     else note = "Os limites laterais são diferentes ou não convergem: o limite bilateral não existe.";
-    if (Number.isNaN(L) && !note) note = "Os valores não parecem convergir — o limite pode não existir.";
+    if (oscillation) note = oscillation;
+    if (Number.isNaN(L) && !note) note = "Os valores não parecem convergir — a estimativa numérica é inconclusiva.";
     return { left, right, L1, L2, L, note };
-  }, [fn, c, dir]);
+  }, [fn, expr, c, dir]);
 
   const steps = useMemo(() => (data && c !== null ? limitSteps(expr, c, data.L, data.L1, data.L2) : null), [data, c, expr]);
   const dirLabel = dir === "esq" ? "⁻" : dir === "dir" ? "⁺" : "";
