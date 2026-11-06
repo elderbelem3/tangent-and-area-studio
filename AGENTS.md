@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## UI architecture
+- Share mathematical completion candidates between plain and MathLive fields; replace only the cursor-adjacent token and keep inserted expressions parser-compatible.
 - Share bounded zoom-dependent sampling and discontinuity checks across both 2D renderers; break pole crossings without mistaking ordinary roots for asymptotes.
 - Optimize tab navigation with TanStack route preloading and bounded pure-render caches rather than frozen router contexts; keep inactive charts unmounted to preserve routing, sizing and graph-transfer behavior.
 - Keep official study presets in a shared typed module consumed by all four calculus routes; colocate each preset's necessary study parameters so selecting it produces a meaningful calculation.

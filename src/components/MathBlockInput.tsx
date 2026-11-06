@@ -1,9 +1,14 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState, useId } from "react";
 import { asciiToMathjs, exprToLatex, templateToLatex } from "@/lib/math-blocks";
+import { mathSuggestions, type MathSuggestion } from "@/lib/math-suggestions";
+import { MathSuggestions } from "@/components/MathSuggestions";
 
 type MathfieldLike = HTMLElement & {
   value: string;
-  getValue: (format: string) => string;
+  getValue: { (format: string): string; (start: number, end: number, format: string): string };
+  position: number;
+  lastOffset: number;
+  selection: { ranges: [number, number][] };
   setValue: (v: string, opts?: Record<string, unknown>) => void;
   insert: (latex: string, opts?: Record<string, unknown>) => boolean;
   executeCommand: (cmd: unknown) => boolean;
@@ -31,6 +36,27 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
     const lastEmitted = useRef<string | null>(null);
     const onChangeRef = useRef(onChange); onChangeRef.current = onChange;
     const [ready, setReady] = useState(false);
+    const id = useId();
+    const [suggestions, setSuggestions] = useState<MathSuggestion[]>([]);
+    const [active, setActive] = useState(0);
+    const suggestionRef = useRef<{ items: MathSuggestion[]; start: number; end: number; active: number } | null>(null);
+    const dismiss = () => { suggestionRef.current = null; setSuggestions([]); };
+    const acceptRef = useRef<(item: MathSuggestion) => void>(() => {});
+    acceptRef.current = (item) => {
+      const el = mf.current, context = suggestionRef.current;
+      if (!el || !context) return;
+      focusField(el);
+      el.selection = { ranges: [[context.start, context.end]] };
+      el.insert(item.latex, { selectionMode: "after", format: "latex" });
+      if (item.argument) {
+        el.executeCommand("moveToPreviousChar");
+        const end = el.position;
+        el.selection = { ranges: [[end - 1, end]] };
+      }
+      dismiss();
+      const out = asciiToMathjs(el.getValue("ascii-math"));
+      lastEmitted.current = out; onChangeRef.current(out);
+    };
 
     useEffect(() => {
       let cancelled = false;
@@ -47,7 +73,56 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
           const out = asciiToMathjs(el.getValue("ascii-math"));
           lastEmitted.current = out;
           onChangeRef.current(out);
+          const end = el.position;
+          const prefix = asciiToMathjs(el.getValue(0, end, "ascii-math")).replace(/x\^\(\(\)\)$/, "x^");
+          const context = mathSuggestions(prefix);
+          if (/x\^\{\\placeholder\{\}\}$/.test(el.value)) {
+            const powerContext = mathSuggestions("x^");
+            if (powerContext) {
+              suggestionRef.current = { items: powerContext.suggestions, start: Math.max(0, el.lastOffset - 4), end: el.lastOffset, active: 0 };
+              setSuggestions(powerContext.suggestions); setActive(0); return;
+            }
+          }
+          if (!context) { dismiss(); return; }
+          let start = end;
+          for (let offset = end - 1; offset >= 0; offset--) {
+            const text = asciiToMathjs(el.getValue(offset, end, "ascii-math")).replace(/\s+/g, "");
+            if (text === context.token.replace(/\s+/g, "")) { start = offset; break; }
+          }
+          if (start === end) { dismiss(); return; }
+          suggestionRef.current = { items: context.suggestions, start, end, active: 0 };
+          setSuggestions(context.suggestions); setActive(0);
         });
+        el.addEventListener("keydown", (event) => {
+          if (event.key === "^" && !event.isComposing) {
+            const end = el.position;
+            const text = el.getValue(0, end, "ascii-math").replace(/\s+/g, "");
+            if (text.endsWith("x")) {
+              event.preventDefault(); event.stopImmediatePropagation();
+              const context = mathSuggestions("x^");
+              if (context) {
+                suggestionRef.current = { items: context.suggestions, start: end - 1, end, active: 0 };
+                setSuggestions(context.suggestions); setActive(0);
+                el.insert("^{#0}", { selectionMode: "placeholder", format: "latex" });
+                // Include the whole power atom when accepting a suggestion.
+                const start = end - 1;
+                suggestionRef.current = { items: context.suggestions, start, end: end + 2, active: 0 };
+              }
+              return;
+            }
+          }
+          const context = suggestionRef.current;
+          if (!context || event.isComposing) return;
+          if (event.key === "Escape") { event.preventDefault(); event.stopImmediatePropagation(); dismiss(); }
+          else if (["ArrowDown", "ArrowUp", "Tab", "Enter"].includes(event.key)) {
+            event.preventDefault(); event.stopImmediatePropagation();
+            if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+              context.active = (context.active + (event.key === "ArrowDown" ? 1 : -1) + context.items.length) % context.items.length;
+              setActive(context.active);
+            } else { const item = context.items[context.active]; if (item) acceptRef.current(item); }
+          }
+        }, { capture: true });
+        el.addEventListener("blur", dismiss);
         host.current.appendChild(el);
         // Configure once connected: the default log shortcut adds a subscript
         // box, which would nest a second subscript when the user types _.
@@ -81,8 +156,11 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
 
     return <div className="block">
       <span className="mb-1 block text-sm font-medium text-muted-foreground">{label}</span>
+      <div className="relative">
       <div ref={host} onClick={() => focusField(mf.current)} className="math-block-host min-h-11 w-full min-w-0 rounded-lg border border-input bg-background px-2 py-1 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
         {!ready && <span className="block py-2 font-mono text-sm text-muted-foreground">{value || "carregando editor…"}</span>}
+      </div>
+      {suggestions.length > 0 && <MathSuggestions id={id} items={suggestions} active={active} onSelect={(item) => acceptRef.current(item)} />}
       </div>
       <p className="mt-1 text-[11px] text-muted-foreground">Use → ou Tab para ir ao próximo bloco; digite ^ ou / para criar potência e fração.</p>
     </div>;
