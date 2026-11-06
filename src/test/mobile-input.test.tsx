@@ -23,3 +23,13 @@ describe("Native mobile input interaction", () => {
     expect(event.defaultPrevented).toBe(false);
   });
 });
+describe("Touch delete key", () => {
+  it("removes the character before the cursor in a plain field", () => {
+    const input = createRef<HTMLInputElement>();
+    const update = vi.fn();
+    render(<><Field ref={input} label="f(x) =" value="x+1" onChange={update} /><MathToolbar inputRef={input} value="x+1" onChange={update} /></>);
+    input.current!.setSelectionRange(2, 2);
+    fireEvent.click(screen.getByRole("button", { name: "Apagar caractere" }));
+    expect(update).toHaveBeenCalledWith("x1");
+  });
+});

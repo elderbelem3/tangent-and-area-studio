@@ -1,7 +1,7 @@
 import { forwardRef, useState, useRef, useId, useImperativeHandle, type ReactNode, type RefObject } from "react";
 import { mathSuggestions, type SuggestionContext, type MathSuggestion } from "@/lib/math-suggestions";
 import { MathSuggestions } from "@/components/MathSuggestions";
-import { AlertTriangle, ChartSpline, Table2, BookOpen, SlidersHorizontal, ArrowUpRight, Eraser } from "lucide-react";
+import { AlertTriangle, ChartSpline, Table2, BookOpen, SlidersHorizontal, ArrowUpRight, Eraser, Delete } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function PageHeader({ tag, title, desc }: { tag: string; title: string; desc: string }) {
