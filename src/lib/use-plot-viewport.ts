@@ -10,6 +10,21 @@ export function usePlotViewport(base: PlotDomain, resetKey: string) {
   const [view, setView] = useState<PlotDomain | null>(null);
   const viewRef = useRef<PlotDomain | null>(null);
   const [cursor, setCursor] = useState<{ px: number; py: number; x: number; y: number; rect: PlotRect } | null>(null);
+  const frame = useRef<number | null>(null);
+  const pendingView = useRef<PlotDomain | null>(null);
+  const pendingCursor = useRef<typeof cursor>(null);
+  const flush = useRef(() => {});
+  flush.current = () => {
+    frame.current = null;
+    if (pendingView.current) {
+      setView(pendingView.current);
+      pendingView.current = null;
+    }
+    setCursor(pendingCursor.current);
+  };
+  function schedule() {
+    if (frame.current === null) frame.current = requestAnimationFrame(() => flush.current());
+  }
   function rect(): PlotRect | null {
     const el = ref.current;
     const area = el?.querySelector("[data-plot-area], .recharts-cartesian-grid");
@@ -36,26 +51,27 @@ export function usePlotViewport(base: PlotDomain, resetKey: string) {
         const bounds = rect();
         if (!bounds) return;
         const next = transformedDomain(baseRef.current, bounds, event.transform);
-        viewRef.current = next; setView(next); setCursor(null);
+        viewRef.current = next; pendingView.current = next; pendingCursor.current = null; schedule();
       });
     behavior.current = controller;
     selection.call(controller).on("dblclick.zoom", null);
     const move = (event: PointerEvent) => {
-      if (event.buttons || event.pointerType === "touch") { setCursor(null); return; }
+      if (event.buttons || event.pointerType === "touch") { pendingCursor.current = null; schedule(); return; }
       const bounds = rect();
       if (!bounds) return;
       const outer = el.getBoundingClientRect(), px = event.clientX - outer.left, py = event.clientY - outer.top;
-      if (px < bounds.left || px > bounds.left + bounds.width || py < bounds.top || py > bounds.top + bounds.height) { setCursor(null); return; }
-      setCursor({ px, py, ...plotCoordinate(viewRef.current ?? baseRef.current, bounds, px, py), rect: bounds });
+      if (px < bounds.left || px > bounds.left + bounds.width || py < bounds.top || py > bounds.top + bounds.height) { pendingCursor.current = null; schedule(); return; }
+      pendingCursor.current = { px, py, ...plotCoordinate(viewRef.current ?? baseRef.current, bounds, px, py), rect: bounds }; schedule();
     };
-    const leave = () => setCursor(null);
+    const leave = () => { pendingCursor.current = null; schedule(); };
     el.addEventListener("pointermove", move); el.addEventListener("pointerleave", leave);
     const observer = new ResizeObserver(() => { selection.call(controller.transform, zoomIdentity); });
     observer.observe(el);
-    return () => { observer.disconnect(); selection.on(".zoom", null); el.removeEventListener("pointermove", move); el.removeEventListener("pointerleave", leave); behavior.current = null; };
+    return () => { if (frame.current !== null) cancelAnimationFrame(frame.current); frame.current = null; observer.disconnect(); selection.on(".zoom", null); el.removeEventListener("pointermove", move); el.removeEventListener("pointerleave", leave); behavior.current = null; };
   }, []);
   useEffect(() => {
     if (ref.current && behavior.current) select<HTMLDivElement, unknown>(ref.current).call(behavior.current.transform, zoomIdentity);
+    pendingView.current = null; pendingCursor.current = null;
     setView(null); viewRef.current = null; setCursor(null);
   }, [resetKey, base.xMin, base.xMax, base.yMin, base.yMax]);
   function changeScale(factor: number) {

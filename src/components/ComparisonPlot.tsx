@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { CartesianGrid, Line, LineChart, ReferenceLine, ReferenceDot, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
 import { derivative, fmt, parseFn } from "@/lib/calc";
@@ -12,6 +12,7 @@ import { PlotControls, PlotCrosshair } from "@/components/PlotNavigation";
 import { ChalkAxis } from "@/components/ChalkAxis";
 import { useModuleState } from "@/lib/module-state";
 import { plotSamples, sampleCurve } from "@/lib/plot-sampling";
+import { useSettledPlotDomain } from "@/lib/use-settled-plot-domain";
 
 export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax, tangentAt, analysis = true }: {
   functions: ComparisonFunction[]; xMin: number; xMax: number; tangentAt?: number; analysis?: boolean;
@@ -38,9 +39,10 @@ export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax
   const navigation = usePlotViewport({ xMin: initialXMin, xMax: initialXMax, yMin: low, yMax: high }, functions.map((f) => `${f.slot}:${f.expression}`).join("|") + hidden.join(","));
   const { xMin, xMax, yMin: viewLow, yMax: viewHigh } = navigation.domain;
   low = viewLow; high = viewHigh;
-  const samples = useMemo(() => plotSamples(xMin, xMax, initialXMax - initialXMin), [xMin, xMax, initialXMin, initialXMax]);
-  const annotations = useMemo(() => curves.flatMap((item) => item.fn ? findPlotAnnotations(item.fn, xMin, xMax).map((point) => ({ ...point, slot: item.slot })) : []), [curves, xMin, xMax]);
-  const yIntercepts = xMin <= 0 && xMax >= 0 ? curves.map((item) => ({ slot: item.slot, y: item.fn?.(0) ?? NaN })).filter((p) => Number.isFinite(p.y)) : [];
+  const settled = useSettledPlotDomain(xMin, xMax);
+  const samples = useMemo(() => plotSamples(xMin, xMax, initialXMax - initialXMin, visible.length), [xMin, xMax, initialXMin, initialXMax, visible.length]);
+  const annotations = useMemo(() => curves.flatMap((item) => item.fn ? findPlotAnnotations(item.fn, settled.xMin, settled.xMax).map((point) => ({ ...point, slot: item.slot })) : []), [curves, settled]);
+  const yIntercepts = useMemo(() => xMin <= 0 && xMax >= 0 ? curves.map((item) => ({ slot: item.slot, y: item.fn?.(0) ?? NaN })).filter((p) => Number.isFinite(p.y)) : [], [curves, xMin, xMax]);
 
   const tangents = useMemo(() => visible.map((item) => {
     const y = tangentAt !== undefined ? item.fn?.(tangentAt) ?? NaN : NaN;
@@ -60,6 +62,10 @@ export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax
     });
   }, [samples, tangents, low, high, tangentAt]);
   const analysisFunctions = useMemo(() => functions.filter((f) => !hidden.includes(f.slot)), [functions, hidden]);
+  const analysisPanel = useMemo(() => analysis ? <AnalysisPanels functions={analysisFunctions} xMin={settled.xMin} xMax={settled.xMax} /> : null, [analysis, analysisFunctions, settled]);
+  const chart = useMemo(() => (
+      <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+        <LineChart data={data} margin={{ top: 12, right: 16, bottom: 12, left: 0 }}>
   return <div className="min-w-0">
     <div className="mb-5 flex flex-wrap gap-2" role="group" aria-label="Legenda interativa das funções">
       {curves.map((item) => <Button key={item.slot} variant="outline" size="sm" aria-pressed={!hidden.includes(item.slot)} title={`${hidden.includes(item.slot) ? "Mostrar" : "Ocultar"} ${FUNCTION_SLOTS[item.slot]}(x)`} onClick={() => setHidden((previous) => previous.includes(item.slot) ? previous.filter((slot) => slot !== item.slot) : [...previous, item.slot])} className={`h-auto min-h-9 min-w-0 max-w-full py-2 ${hidden.includes(item.slot) ? "opacity-50" : ""}`}>
