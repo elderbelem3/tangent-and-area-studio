@@ -175,7 +175,7 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
     return <div className="block min-w-0">
       <span className="mb-1 block text-sm font-medium text-muted-foreground">{label}</span>
       <div className="relative">
-      <div ref={host} onPointerUp={(event) => { if (event.pointerType !== "mouse") focusField(mf.current); }} onClick={(event) => { if (event.target === event.currentTarget) focusField(mf.current); }} className="math-block-host min-h-11 w-full min-w-0 rounded-lg border border-input bg-background px-2 py-1 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
+      <div ref={host} onPointerUp={() => focusField(mf.current)} onClick={(event) => { if (event.target === event.currentTarget) focusField(mf.current); }} className="math-block-host min-h-11 w-full min-w-0 rounded-lg border border-input bg-background px-2 py-1 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
         {!ready && <span className="block py-2 font-mono text-sm text-muted-foreground">{value || "carregando editor…"}</span>}
       </div>
       {suggestions.length > 0 && <MathSuggestions id={id} items={suggestions} active={active} onSelect={(item) => acceptRef.current(item)} />}
