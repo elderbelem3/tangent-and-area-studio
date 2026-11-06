@@ -18,7 +18,7 @@ export function ThemeToggle() {
   const descriptionId = useId();
   useEffect(() => {
     if (!uvHint) return;
-    const timer = setTimeout(() => setUvHint(false), 5000);
+    const timer = setTimeout(() => setUvHint(false), 15000);
     return () => clearTimeout(timer);
   }, [uvHint]);
   useEffect(() => {
