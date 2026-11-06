@@ -1,4 +1,5 @@
 # Refinamento visual
+- [x] Ajustar foco nativo, alvos de toque e layout móvel; verificar digitação, teclado científico e gestos 2D (teclado do sistema em aparelhos físicos ainda não verificado).
 - [x] Separar explicitamente trechos descontínuos nos dois gráficos 2D e verificar cortes por altura visível e polos racionais.
 - [x] Reduzir trabalho do zoom/pan 2D com orçamento de amostras e atualizações por quadro; verificar descontinuidades e desempenho.
 - [x] Adicionar autocompletar nos campos das quatro abas; verificar clique, Tab/Enter, Esc e cursor.

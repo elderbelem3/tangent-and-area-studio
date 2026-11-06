@@ -47,8 +47,8 @@ export function HelpButton() {
   return <>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button type="button" size="sm" className="help-pulse h-9 gap-1.5 rounded-full px-3.5" aria-label="Como usar o CalculusLab">
-          <CircleHelp className="h-4 w-4" /><span>Como Usar</span><ChevronDown className="h-3.5 w-3.5 opacity-80" />
+        <Button type="button" size="sm" className="help-pulse h-11 shrink-0 gap-1.5 rounded-full px-3.5 sm:h-9" aria-label="Como usar o CalculusLab">
+          <CircleHelp className="h-4 w-4" /><span className="max-[360px]:hidden">Como Usar</span><ChevronDown className="h-3.5 w-3.5 opacity-80" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-72 p-1.5">

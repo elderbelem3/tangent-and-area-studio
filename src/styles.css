@@ -432,3 +432,10 @@
 /* Structured block equation editor */
 .math-block-field { display: block; width: 100%; min-height: 2.5rem; font-size: 1.15rem; background: transparent; color: var(--foreground); border: 0; outline: none; --caret-color: var(--primary); --selection-background-color: color-mix(in oklab, var(--primary) 25%, transparent); --placeholder-color: var(--muted-foreground); --contains-highlight-background-color: color-mix(in oklab, var(--primary) 10%, transparent); }
 .math-block-field::part(virtual-keyboard-toggle), .math-block-field::part(menu-toggle) { display: none; }
+.math-block-field::part(content) { max-width: 100%; overflow-x: auto; }
+@media (pointer: coarse) {
+  input, textarea { font-size: 1rem; }
+  button, a, [role="tab"] { touch-action: manipulation; }
+  .math-block-host { touch-action: pan-y; }
+  .lab-panel { padding: 1rem; }
+}

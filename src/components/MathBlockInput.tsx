@@ -23,7 +23,11 @@ type MathfieldLike = HTMLElement & {
 function focusField(el: MathfieldLike | null) {
   if (!el) return;
   el.focus();
-  (el.shadowRoot?.querySelector("[part=keyboard-sink]") as HTMLElement | null)?.focus();
+  const sink = el.shadowRoot?.querySelector<HTMLElement>("[part=keyboard-sink]");
+  // MathLive defaults to inputmode=none, even with its keyboard set to manual.
+  // Enable the phone keyboard, keeping the app's scientific keyboard independent.
+  sink?.setAttribute("inputmode", "text");
+  if (sink && el.shadowRoot?.activeElement !== sink) sink.focus({ preventScroll: true });
 }
 
 export type MathBlockHandle = { insertTemplate: (insert: string) => void; clear: () => void; focus: () => void };
@@ -124,6 +128,7 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
         }, { capture: true });
         el.addEventListener("blur", dismiss);
         host.current.appendChild(el);
+        el.shadowRoot?.querySelector("[part=keyboard-sink]")?.setAttribute("inputmode", "text");
         // Configure once connected: the default log shortcut adds a subscript
         // box, which would nest a second subscript when the user types _.
         el.inlineShortcuts = { ...el.inlineShortcuts, log: "\\operatorname{log}" };
@@ -154,10 +159,10 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
       focus: () => focusField(mf.current),
     }), []);
 
-    return <div className="block">
+    return <div className="block min-w-0">
       <span className="mb-1 block text-sm font-medium text-muted-foreground">{label}</span>
       <div className="relative">
-      <div ref={host} onClick={() => focusField(mf.current)} className="math-block-host min-h-11 w-full min-w-0 rounded-lg border border-input bg-background px-2 py-1 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
+      <div ref={host} onPointerUp={(event) => { if (event.pointerType !== "mouse") focusField(mf.current); }} onClick={(event) => { if (event.target === event.currentTarget) focusField(mf.current); }} className="math-block-host min-h-11 w-full min-w-0 rounded-lg border border-input bg-background px-2 py-1 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
         {!ready && <span className="block py-2 font-mono text-sm text-muted-foreground">{value || "carregando editor…"}</span>}
       </div>
       {suggestions.length > 0 && <MathSuggestions id={id} items={suggestions} active={active} onSelect={(item) => acceptRef.current(item)} />}

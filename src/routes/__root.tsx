@@ -123,17 +123,17 @@ function RootComponent() {
       <div className="app-shell min-h-screen bg-background">
         <img className="chalk-surface" src={chalkDust.url} alt="" aria-hidden="true" />
         <header className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur">
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
-            <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-3 font-display text-2xl font-bold">
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary font-mono text-2xl text-primary-foreground">∫</span>
-              <span>Calculus<span className="text-primary">Lab</span></span>
+          <div className="mx-auto max-w-7xl min-w-0 items-center justify-between gap-4 px-4 py-5 sm:flex sm:px-8">
+            <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:flex sm:gap-3">
+            <Link to="/" className="flex min-w-0 items-center gap-2 font-display text-xl font-bold sm:gap-3 sm:text-2xl">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary font-mono text-2xl text-primary-foreground">∫</span>
+              <span className="min-w-0 truncate">Calculus<span className="text-primary">Lab</span></span>
             </Link>
             <HelpButton />
             </div>
             <span className="hidden items-center gap-2 text-xs font-medium text-muted-foreground sm:flex"><GraduationCap className="h-4 w-4" />Cálculo Diferencial e Integral</span>
           </div>
-          <div className="mx-auto flex max-w-7xl flex-wrap items-center px-4 sm:px-7">
+          <div className="mx-auto grid min-w-0 max-w-7xl grid-cols-[minmax(0,1fr)] items-center px-4 sm:flex sm:px-7">
           <nav className="flex min-w-0 flex-1 basis-full gap-1 overflow-x-auto sm:basis-0" aria-label="Módulos">
             {nav.map((n) => (
               <Button key={n.to} asChild variant="ghost" className="h-12 shrink-0 rounded-none border-b-2 border-transparent px-4 text-muted-foreground hover:bg-muted/60 hover:text-foreground">
