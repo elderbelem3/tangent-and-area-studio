@@ -1,5 +1,5 @@
 # Refinamento visual
-- [ ] Reduzir trabalho do zoom/pan 2D com orçamento de amostras e atualizações por quadro; verificar descontinuidades e desempenho.
+- [x] Reduzir trabalho do zoom/pan 2D com orçamento de amostras e atualizações por quadro; verificar descontinuidades e desempenho.
 - [x] Adicionar autocompletar nos campos das quatro abas; verificar clique, Tab/Enter, Esc e cursor.
 - [x] Corrigir descontinuidades e amostragem dinâmica no zoom out dos dois gráficos 2D; verificar funções racionais e raízes contínuas.
 - [x] Otimizar carregamento e troca de abas com pré-carregamento, renderização eficiente e preservação de estado; verificar navegação e recursos.
