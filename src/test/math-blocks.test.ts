@@ -1,0 +1,10 @@
+import { describe, expect, it } from "vitest";
+import { asciiToMathjs, templateToLatex } from "@/lib/math-blocks";
+describe("math blocks translation", () => {
+  it("power block becomes a placeholder exponent", () => expect(templateToLatex("^()")).toBe("^{#0}"));
+  it("fraction block has two boxes", () => expect(templateToLatex("()/()")).toBe("\\frac{#0}{#?}"));
+  it("translates editor output to parser syntax", () => {
+    expect(asciiToMathjs("log_(10)(x)+|x|")).toBe("log10(x)+abs(x)");
+    expect(asciiToMathjs("ln(x)+oo")).toBe("log(x)+Infinity");
+  });
+});
