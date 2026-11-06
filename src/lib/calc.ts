@@ -2,11 +2,19 @@ import { compile } from "mathjs";
 
 export type Fn = (x: number) => number;
 
-/** Normalize student syntax: "3x" -> "3*x", "ln" -> "log". */
+/** Normalize base-10 subscripts without splitting digits that belong to function names. */
+export function normalizeLogarithms(expr: string): string {
+  return expr.replace(/\blog\s*_\s*(?:\{\s*10\s*\}|\(\s*10\s*\)|10)\s*(?=\()/g, "log10")
+    .replace(/\bln\s*(?=\()/g, "log");
+}
+
+/** Normalize student syntax: "3x" -> "3*x", preserving names such as log10. */
 export function normalize(expr: string): string {
-  return expr
-    .replace(/\bln\(/g, "log(")
-    .replace(/(\d)\s*([a-zA-Z(])/g, "$1*$2")
+  return normalizeLogarithms(expr)
+    .replace(/(\d)\s*([a-zA-Z(])/g, (match: string, digit: string, next: string, offset: number, source: string) => {
+      // An identifier such as log10 is not an implicit multiplication coefficient.
+      return /[a-zA-Z_][a-zA-Z_0-9]*$/.test(source.slice(0, offset + 1)) ? match : `${digit}*${next}`;
+    })
     .replace(/\)\s*([a-zA-Z0-9(])/g, ")*$1");
 }
 
