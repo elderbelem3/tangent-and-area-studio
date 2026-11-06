@@ -33,6 +33,46 @@ function crossesPole(fn: Fn, left: number, right: number, a: number, b: number):
 }
 
 export type CurveSample = { x: number; y: number | null; breakBefore: boolean };
+export type CurvePoint = { x: number; y: number };
+
+/** Independent subpaths: a rejected edge never survives into rendering. */
+export function curveSegments(points: CurveSample[]): CurvePoint[][] {
+  const segments: CurvePoint[][] = [];
+  let current: CurvePoint[] = [];
+  for (const point of points) {
+    if (point.y === null || point.breakBefore) {
+      if (current.length) segments.push(current);
+      current = [];
+    }
+    if (point.y !== null) current.push({ x: point.x, y: point.y });
+  }
+  if (current.length) segments.push(current);
+  return segments;
+}
+
+/** Null separator rows create distinct Recharts subpaths without losing restart points.
+ * Only the broken curve is interrupted; other curves and tangents stay continuous.
+ */
+export function curveChartRows(xs: number[], curves: { key: string; points: CurveSample[] }[]): Record<string, number | null>[] {
+  const rows: Record<string, number | null>[] = [];
+  xs.forEach((x, index) => {
+    const row: Record<string, number | null> = { x };
+    let hasBreak = false;
+    for (const curve of curves) {
+      row[curve.key] = curve.points[index]?.y ?? null;
+      hasBreak ||= curve.points[index]?.breakBefore ?? false;
+    }
+    if (hasBreak) {
+      const separator = { ...row };
+      for (const curve of curves) {
+        if (curve.points[index]?.breakBefore) separator[curve.key] = null;
+      }
+      rows.push(separator);
+    }
+    rows.push(row);
+  });
+  return rows;
+}
 
 /** Shared discontinuity handling for both 2D renderers; never alters fn itself. */
 export function sampleCurve(fn: Fn, xs: number[], yMin: number, yMax: number): CurveSample[] {
@@ -44,7 +84,7 @@ export function sampleCurve(fn: Fn, xs: number[], yMin: number, yMax: number): C
     let breakBefore = index > 0 && (!finite || !Number.isFinite(previousY));
     if (index > 0 && finite && Number.isFinite(previousY)) {
       // Reject unsafe jumps before spending work probing the interval.
-      breakBefore = Math.abs(value - previousY) > span * 2;
+      breakBefore = Math.abs(value - previousY) > span * 3;
       if (!breakBefore) {
         const mid = fn(previousX + (x - previousX) / 2);
         breakBefore = !Number.isFinite(mid)

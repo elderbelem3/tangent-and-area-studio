@@ -5,7 +5,7 @@ import { PlotControls, PlotCrosshair } from "@/components/PlotNavigation";
 import type { Fn } from "@/lib/calc";
 import { findPlotAnnotations } from "@/lib/plot-annotations";
 import { ChalkAnnotation } from "@/components/ChalkAnnotation";
-import { plotSamples, sampleCurve } from "@/lib/plot-sampling";
+import { curveSegments, plotSamples, sampleCurve } from "@/lib/plot-sampling";
 import { useSettledPlotDomain } from "@/lib/use-settled-plot-domain";
 
 type Props = {
@@ -56,14 +56,9 @@ export function Plot({ fn, xMin: initialXMin, xMax: initialXMax, points = EMPTY_
   const sy = (y: number) => H - P - ((y - yMin) / (yMax - yMin)) * (H - 2 * P);
 
   const path = (f: Fn) => {
-    let d = "", pen = false;
-    for (const { x, y, breakBefore } of sampleCurve(f, xs, yMin, yMax)) {
-      if (y === null) { pen = false; continue; }
-      if (breakBefore) pen = false;
-      d += `${pen ? "L" : "M"}${sx(x).toFixed(1)},${sy(y).toFixed(1)}`;
-      pen = true;
-    }
-    return d;
+    return curveSegments(sampleCurve(f, xs, yMin, yMax)).map((segment) =>
+      segment.map(({ x, y }, index) => `${index === 0 ? "M" : "L"}${sx(x).toFixed(1)},${sy(y).toFixed(1)}`).join("")
+    );
   };
 
   const curvePath = useMemo(() => path(fn), [fn, xs, xMin, xMax, yMin, yMax]);
@@ -110,10 +105,10 @@ export function Plot({ fn, xMin: initialXMin, xMax: initialXMax, points = EMPTY_
       {xMin <= 0 && xMax >= 0 && <line x1={sx(0)} x2={sx(0)} y1={P} y2={H - P} className="stroke-axis" strokeWidth={1.5} />}
       <g clipPath={`url(#${clipId})`}>
         {shade && <path d={shadePath} className="fill-primary/25 stroke-primary/40" />}
-        <path d={curvePath} fill="none" className="stroke-primary" strokeWidth={2.5} strokeLinejoin="round" />
-        {linePaths.map((d, i) => (
-          <path key={i} d={d} fill="none" className="stroke-accent-strong" strokeWidth={2} strokeDasharray="6 4" />
-        ))}
+        {curvePath.map((d, i) => <path key={i} d={d} fill="none" className="stroke-primary" strokeWidth={2.5} strokeLinejoin="round" />)}
+        {linePaths.flatMap((segments, i) => segments.map((d, j) => (
+          <path key={`${i}-${j}`} d={d} fill="none" className="stroke-accent-strong" strokeWidth={2} strokeDasharray="6 4" />
+        )))}
         {points.filter((p) => Number.isFinite(p.y)).map((p, i) => (
           <g key={i}>
             <circle cx={sx(p.x)} cy={sy(p.y)} r={6} className={p.hollow ? "fill-card stroke-accent-strong" : "fill-accent-strong stroke-card"} strokeWidth={2.5} />

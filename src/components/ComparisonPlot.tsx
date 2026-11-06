@@ -11,7 +11,7 @@ import { axisTicks, axisLabel } from "@/lib/plot-viewport";
 import { PlotControls, PlotCrosshair } from "@/components/PlotNavigation";
 import { ChalkAxis } from "@/components/ChalkAxis";
 import { useModuleState } from "@/lib/module-state";
-import { plotSamples, sampleCurve } from "@/lib/plot-sampling";
+import { curveChartRows, plotSamples, sampleCurve } from "@/lib/plot-sampling";
 import { useSettledPlotDomain } from "@/lib/use-settled-plot-domain";
 
 export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax, tangentAt, analysis = true }: {
@@ -50,12 +50,10 @@ export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax
     return { ...item, y, slope };
   }), [visible, tangentAt]);
   const data = useMemo(() => {
-    const sampled = tangents.map((item) => ({ item, points: item.fn ? sampleCurve(item.fn, samples, low, high) : [] }));
-    return samples.map((x, index) => {
-    const row: Record<string, number | null> = { x };
-    for (const { item, points } of sampled) {
-      const point = points[index];
-      row[`curve${item.slot}`] = point && !point.breakBefore ? point.y : null;
+    const sampled = tangents.map((item) => ({ key: `curve${item.slot}`, points: item.fn ? sampleCurve(item.fn, samples, low, high) : [] }));
+    return curveChartRows(samples, sampled).map((row) => {
+    const x = row.x ?? 0;
+    for (const item of tangents) {
       row[`tangent${item.slot}`] = tangentAt !== undefined && Number.isFinite(item.y) && Number.isFinite(item.slope) ? item.y + item.slope * (x - tangentAt) : null;
     }
     return row;
@@ -71,7 +69,7 @@ export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax
           <YAxis type="number" domain={[low, high]} allowDataOverflow ticks={axisTicks(low, high)} tickFormatter={(value: number) => axisLabel(value, high - low)} width={56} stroke="var(--axis)" tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
           {low <= 0 && high >= 0 && <ReferenceLine y={0} stroke="var(--axis)" shape={(props: { x1?: number; y1?: number; x2?: number; y2?: number }) => <ChalkAxis {...props} />} />}
           {xMin <= 0 && xMax >= 0 && <ReferenceLine x={0} stroke="var(--axis)" shape={(props: { x1?: number; y1?: number; x2?: number; y2?: number }) => <ChalkAxis {...props} />} />}
-          {tangents.map((item) => <Line key={`curve${item.slot}`} dataKey={`curve${item.slot}`} name={`${FUNCTION_SLOTS[item.slot]}(x)`} stroke={`var(--chart-${item.slot + 1})`} strokeWidth={2.5} dot={false} connectNulls={false} isAnimationActive={false} />)}
+          {tangents.map((item) => <Line key={`curve${item.slot}`} type="linear" dataKey={`curve${item.slot}`} name={`${FUNCTION_SLOTS[item.slot]}(x)`} stroke={`var(--chart-${item.slot + 1})`} strokeWidth={2.5} dot={false} connectNulls={false} isAnimationActive={false} />)}
           {tangentAt !== undefined && tangents.filter((item) => Number.isFinite(item.y) && Number.isFinite(item.slope)).map((item) => <Line key={`tangent${item.slot}`} dataKey={`tangent${item.slot}`} name={`Tangente ${FUNCTION_SLOTS[item.slot]}`} stroke={`var(--chart-${item.slot + 1})`} strokeWidth={1.5} strokeDasharray="6 4" dot={false} isAnimationActive={false} />)}
           {tangentAt !== undefined && tangents.filter((item) => Number.isFinite(item.y)).map((item) => <ReferenceDot key={item.slot} x={tangentAt} y={item.y} r={4} fill={`var(--chart-${item.slot + 1})`} stroke="var(--card)" />)}
           {annotations.filter((point) => !hidden.includes(point.slot) && point.y >= low && point.y <= high).map((point, index) => <ReferenceDot key={`annotation-${point.slot}-${index}`} x={point.x} y={point.y} ifOverflow="hidden" shape={(props: { cx?: number; cy?: number }) => <ChalkAnnotation {...props} point={point} color={`var(--chart-${point.slot + 1})`} />} />)}
