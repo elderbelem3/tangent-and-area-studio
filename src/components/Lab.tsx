@@ -117,7 +117,7 @@ export function templateCursor(insert: string): number {
 }
 
 /** Scientific-calculator keyboard: inserts full templates and places the cursor inside them. */
-export function MathToolbar({ inputRef, value, onChange, onInsert, onClear }: { inputRef?: RefObject<HTMLInputElement | null>; value: string; onChange: (v: string) => void; onInsert?: (template: string) => void; onClear?: () => void }) {
+export function MathToolbar({ inputRef, value, onChange, onInsert, onClear, onDelete }: { onDelete?: () => void; inputRef?: RefObject<HTMLInputElement | null>; value: string; onChange: (v: string) => void; onInsert?: (template: string) => void; onClear?: () => void }) {
   const [tab, setTab] = useState("basic");
   const group = MATH_GROUPS.find((g) => g.id === tab) ?? MATH_GROUPS[0];
   if (!group) return null;
@@ -135,6 +135,16 @@ export function MathToolbar({ inputRef, value, onChange, onInsert, onClear }: { 
     onChange(value.slice(0, start) + piece + value.slice(end));
     requestAnimationFrame(() => { el?.focus(); el?.setSelectionRange(pos, pos); });
   };
+  const deleteBackward = () => {
+    if (onDelete) { onDelete(); return; }
+    const el = inputRef?.current;
+    if (!el) { onChange(value.slice(0, -1)); return; }
+    el.focus();
+    const start = el.selectionStart ?? value.length, end = el.selectionEnd ?? value.length;
+    const from = start === end ? Math.max(0, start - 1) : start;
+    onChange(value.slice(0, from) + value.slice(end));
+    requestAnimationFrame(() => { el.focus(); el.setSelectionRange(from, from); });
+  };
   return (
     <div className="rounded-xl border border-border bg-muted/50 p-2" aria-label="Teclado de símbolos matemáticos">
       <div className="mb-2 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2" role="tablist">
@@ -146,7 +156,10 @@ export function MathToolbar({ inputRef, value, onChange, onInsert, onClear }: { 
             </Button>
           ))}
         </div>
+        <div className="flex shrink-0 gap-1">
+        <Button variant="ghost" size="icon" type="button" title="Apagar caractere" aria-label="Apagar caractere" disabled={!value} onMouseDown={(e) => e.preventDefault()} onPointerDown={(e) => { if (e.pointerType !== "mouse") e.preventDefault(); }} onClick={deleteBackward} className="h-11 w-11 shrink-0 text-muted-foreground hover:text-foreground sm:h-8 sm:w-8"><Delete /></Button>
         <Button variant="ghost" size="icon" type="button" title="Limpar função" aria-label="Limpar função" disabled={!value} onClick={() => { if (onClear) { onClear(); return; } onChange(""); inputRef?.current?.focus(); }} className="h-11 w-11 shrink-0 text-muted-foreground hover:text-destructive sm:h-8 sm:w-8"><Eraser /></Button>
+        </div>
       </div>
       <div className="grid grid-cols-4 gap-2 sm:gap-1.5" role="toolbar" aria-label={group.label}>
         {group.keys.map((k) => (

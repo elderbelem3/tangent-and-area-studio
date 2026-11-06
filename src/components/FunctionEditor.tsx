@@ -53,7 +53,7 @@ function FunctionBlock({ item, onChange, onRemove, children }: {
       <span className={`min-w-0 font-mono text-sm font-semibold ${FUNCTION_TEXT_COLORS[item.slot]}`}>{name}</span>
       {item.slot !== 0 && <Button type="button" variant="ghost" size="icon" title={`Excluir ${name}`} aria-label={`Excluir ${name}`} onClick={onRemove} className="h-11 w-11 shrink-0 text-muted-foreground hover:text-destructive sm:h-8 sm:w-8"><Trash2 className="h-4 w-4" /></Button>}
     </div>
-    <MathToolbar value={item.expression} onChange={onChange} onInsert={(t) => ref.current?.insertTemplate(t)} onClear={() => ref.current?.clear()} />
+    <MathToolbar value={item.expression} onChange={onChange} onInsert={(t) => ref.current?.insertTemplate(t)} onClear={() => ref.current?.clear()} onDelete={() => ref.current?.deleteBackward()} />
     <MathBlockInput ref={ref} label={`${name} =`} value={item.expression} onChange={onChange} />
     {error && <ErrorBox msg={error} />}
     {children}
