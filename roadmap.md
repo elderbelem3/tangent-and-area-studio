@@ -1,4 +1,5 @@
 # Refinamento visual
+- [x] Separar explicitamente trechos descontínuos nos dois gráficos 2D e verificar cortes por altura visível e polos racionais.
 - [x] Reduzir trabalho do zoom/pan 2D com orçamento de amostras e atualizações por quadro; verificar descontinuidades e desempenho.
 - [x] Adicionar autocompletar nos campos das quatro abas; verificar clique, Tab/Enter, Esc e cursor.
 - [x] Corrigir descontinuidades e amostragem dinâmica no zoom out dos dois gráficos 2D; verificar funções racionais e raízes contínuas.
