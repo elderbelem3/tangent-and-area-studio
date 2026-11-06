@@ -86,6 +86,23 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
           setSuggestions(context.suggestions); setActive(0);
         });
         el.addEventListener("keydown", (event) => {
+          if (event.key === "^" && !event.isComposing) {
+            const end = el.position;
+            const text = el.getValue(0, end, "ascii-math").replace(/\s+/g, "");
+            if (text.endsWith("x")) {
+              event.preventDefault(); event.stopImmediatePropagation();
+              const context = mathSuggestions("x^");
+              if (context) {
+                suggestionRef.current = { items: context.suggestions, start: end - 1, end, active: 0 };
+                setSuggestions(context.suggestions); setActive(0);
+                el.insert("^{#0}", { selectionMode: "placeholder", format: "latex" });
+                // Include the whole power atom when accepting a suggestion.
+                const start = end - 1;
+                suggestionRef.current = { items: context.suggestions, start, end: end + 2, active: 0 };
+              }
+              return;
+            }
+          }
           const context = suggestionRef.current;
           if (!context || event.isComposing) return;
           if (event.key === "Escape") { event.preventDefault(); event.stopImmediatePropagation(); dismiss(); }
