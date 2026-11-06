@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Presentation, Flashlight, Sun, Moon } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,14 @@ const THEMES = [
 export function ThemeToggle() {
   const [theme, setTheme] = useState<LabTheme>("standard");
   const [uv, setUv] = useState(false);
+  const [uvHint, setUvHint] = useState(false);
+  const touchHint = useRef(false);
+  const descriptionId = useId();
+  useEffect(() => {
+    if (!uvHint) return;
+    const timer = setTimeout(() => { touchHint.current = false; setUvHint(false); }, 15000);
+    return () => clearTimeout(timer);
+  }, [uvHint]);
   useEffect(() => {
     try { setTheme(readTheme(window.localStorage)); setUv(readBlacklight(window.localStorage)); } catch { /* Storage may be blocked. */ }
   }, []);
@@ -54,10 +62,16 @@ export function ThemeToggle() {
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
-    {theme === "chalkboard" && <Tooltip><TooltipTrigger asChild>
-      <Button type="button" variant="outline" size="sm" aria-label="Luz Negra" aria-pressed={uv} onClick={toggleUv} className="uv-toggle h-11 shrink-0 gap-2 rounded-lg px-3 font-semibold">
+    {theme === "chalkboard" && <div className="grid min-w-0 justify-items-end gap-1 py-2">
+    <Tooltip open={uvHint} onOpenChange={(open) => { if (open || !touchHint.current) setUvHint(open); }}><TooltipTrigger asChild>
+      <Button type="button" variant="outline" size="sm" aria-label="Luz Negra" aria-describedby={descriptionId} aria-pressed={uv} onPointerDown={(event) => { touchHint.current = event.pointerType === "touch"; }} onClick={() => { toggleUv(); if (touchHint.current) setUvHint(true); }} className="uv-toggle h-11 shrink-0 gap-2 rounded-lg px-3 font-semibold">
         <Flashlight className="h-5 w-5" /><span>Luz Negra</span><span className="font-mono text-xs">{uv ? "ON" : "UV"}</span>
       </Button>
-    </TooltipTrigger><TooltipContent>{uv ? "Desativar Luz Negra" : "Ativar Luz Negra / Revelar Segredos"}</TooltipContent></Tooltip>}
+    </TooltipTrigger><TooltipContent className="max-w-64 border border-border bg-popover text-popover-foreground text-sm leading-relaxed" side="bottom" sideOffset={48}>
+      <p className="font-semibold">{uv ? "Luz Negra ativa · toque para desativar" : "Ativar Luz Negra / Revelar Segredos"}</p>
+      <p className="mt-1">A visão analítica da lousa revela notas, detalhes dos gráficos e passos ocultos, além dos colaboradores secretos na aba Créditos.</p>
+    </TooltipContent></Tooltip>
+    <p id={descriptionId} className="max-w-64 text-right text-xs leading-relaxed text-muted-foreground">Modo UV: revela análises, notas e créditos secretos.</p>
+    </div>}
   </div></TooltipProvider>;
 }
