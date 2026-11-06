@@ -105,7 +105,21 @@ function Creditos() {
           </ol>
         </div>
 
-        <p className="mt-8 text-center text-xs text-muted-foreground">
+        {/* Colaboradores especiais: só aparecem sob a Luz Negra */}
+        <div className="uv-secret" aria-label="Colaboradores especiais">
+          <span className="uv-secret-label">Colaboradores Especiais · revelado pela Luz Negra</span>
+          <span className="uv-secret-name">Ramiro Jose Peixoto Bisneto</span>
+          <span className="uv-secret-note">Agradecimento acadêmico secreto do grupo.</span>
+        </div>
+
+        <p className="mt-8 flex justify-center text-center text-xs text-muted-foreground">
+          <span className="uv-secret-hint">
+            <Sparkles className="h-3.5 w-3.5" />
+            Existem segredos acadêmicos ocultos sob a luz UV…
+          </span>
+        </p>
+
+        <p className="mt-3 text-center text-xs text-muted-foreground">
           UniCatólica do RN · CalculusLab · Cálculo 1 e 2
         </p>
       </div>
