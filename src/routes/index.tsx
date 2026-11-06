@@ -7,6 +7,7 @@ import { FunctionEditor } from "@/components/FunctionEditor";
 import { addComparisonFunction, FUNCTION_BG_COLORS, FUNCTION_SLOTS, removeComparisonFunction, type ComparisonFunction } from "@/lib/comparison";
 import { PageHeader, Panel, Field, ErrorBox, Chip, num } from "@/components/Lab";
 import { Smart3DView } from "@/components/Smart3DView";
+import { InversePanel } from "@/components/InversePanel";
 import { UvStepsPanel } from "@/components/UvStepsPanel";
 import { needs3D, surfaceAnalysis } from "@/lib/smart3d";
 import { EV_FUNCTION } from "@/lib/copilot-actions";
@@ -82,6 +83,10 @@ function Funcoes() {
               <p className="text-xs text-muted-foreground">Suporta: + − * / ^, sin, cos, tan, exp, log (ln), sqrt, abs, pi, e.</p>
             </div>
           </Panel>
+          {!is3D && xMin !== null && xMax !== null && <InversePanel expression={expr} xMin={xMin} xMax={xMax} onPlot={(inverse) => setFunctions((prev) => {
+            const main = prev.find((item) => item.slot === 0) ?? { slot: 0, expression: expr };
+            return [main, { slot: 1, expression: inverse }, { slot: 2, expression: "x" }];
+          })} />}
           <Panel title="Tabela de valores">
             <div className="max-h-80 overflow-auto">
               <table className="w-full font-mono text-sm">
