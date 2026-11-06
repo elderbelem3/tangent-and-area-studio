@@ -5,6 +5,7 @@ import { parseFn, derivative, fmt } from "@/lib/calc";
 import { ComparisonPlot } from "@/components/ComparisonPlot";
 import { UvStepsPanel } from "@/components/UvStepsPanel";
 import { derivativeSteps } from "@/lib/uv-steps";
+import { derivativeExamples } from "@/lib/study-examples";
 import { FunctionEditor } from "@/components/FunctionEditor";
 import { addComparisonFunction, removeComparisonFunction, FUNCTION_SLOTS, FUNCTION_TEXT_COLORS, type ComparisonFunction } from "@/lib/comparison";
 import { PageHeader, Panel, Field, ErrorBox, Chip, Stat, num } from "@/components/Lab";
@@ -44,7 +45,7 @@ function Derivadas() {
           <Panel>
             <div className="space-y-5">
               <FunctionEditor functions={functions} onChange={changeExpression} onAdd={() => setFunctions(addComparisonFunction)} onRemove={(slot) => setFunctions((previous) => removeComparisonFunction(previous, slot))} mainExtras={<div className="flex flex-wrap gap-2">
-                {["x^2", "sin(x)", "exp(x)", "x^3 - 3x", "log(x)"].map((f) => <Chip key={f} onClick={() => setExpr(f)}>{f}</Chip>)}
+                {derivativeExamples.map((e) => <Chip key={e.label} onClick={() => setExpr(e.expression)}>{e.label}</Chip>)}
               </div>} />
               <Field label="Ponto x₀" value={x0S} onChange={setX0} />
               {x0 === null && <ErrorBox msg="Informe um número válido para x₀." />}

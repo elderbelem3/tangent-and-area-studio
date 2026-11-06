@@ -11,6 +11,7 @@ import { UvStepsPanel } from "@/components/UvStepsPanel";
 import { needs3D, surfaceAnalysis } from "@/lib/smart3d";
 import { EV_FUNCTION } from "@/lib/copilot-actions";
 import { decodeTutorPlot, tutorPlotFunctions } from "@/lib/tutor-plot";
+import { functionExamples } from "@/lib/study-examples";
 
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>): { grafico?: string } => typeof search["grafico"] === "string" ? { grafico: search["grafico"] } : {},
@@ -26,17 +27,6 @@ export const Route = createFileRoute("/")({
   }),
   component: Funcoes,
 });
-
-const examples = [
-  { label: "Quadrática", f: "x^2 - 2x - 3" },
-  { label: "Trigonométrica", f: "sin(x)" },
-  { label: "Exponencial", f: "exp(x)" },
-  { label: "Cúbica", f: "x^3 - 3x" },
-  { label: "Racional", f: "1/x" },
-  { label: "Paraboloide 3D", f: "x^2 + y^2" },
-  { label: "Sela 3D", f: "x^2 - y^2" },
-  { label: "Onda 3D", f: "sin(x)*cos(y)" },
-];
 
 function Funcoes() {
   const { grafico } = Route.useSearch();
@@ -79,7 +69,7 @@ function Funcoes() {
           <Panel>
             <div className="space-y-5">
               <FunctionEditor functions={functions} onChange={changeExpression} onAdd={() => setFunctions(addComparisonFunction)} onRemove={(slot) => setFunctions((previous) => removeComparisonFunction(previous, slot))} mainExtras={<div className="flex flex-wrap gap-2">
-                {examples.map((e) => <Chip key={e.label} onClick={() => setExpr(e.f)}>{e.label}</Chip>)}
+                {functionExamples.map((e) => <Chip key={e.label} onClick={() => setExpr(e.expression)}>{e.label}</Chip>)}
               </div>} />
               <div className="grid grid-cols-3 gap-2">
                 <Field label="x mín" value={a} onChange={setA} />

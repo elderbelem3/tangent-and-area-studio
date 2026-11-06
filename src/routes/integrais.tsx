@@ -8,6 +8,7 @@ import { UvStepsPanel } from "@/components/UvStepsPanel";
 import { integralSteps } from "@/lib/uv-steps";
 import { Smart3DView } from "@/components/Smart3DView";
 import { solidSteps } from "@/lib/smart3d";
+import { integralExamples } from "@/lib/study-examples";
 import { Button } from "@/components/ui/button";
 import { PageHeader, Panel, Field, ErrorBox, Chip, MathToolbar, Stat, num } from "@/components/Lab";
 
@@ -50,7 +51,7 @@ function Integrais() {
               <MathToolbar inputRef={inputRef} value={expr} onChange={setExpr} />
               <Field ref={inputRef} label="f(x) =" value={expr} onChange={setExpr} />
               <div className="flex flex-wrap gap-2">
-                {["x^2", "sin(x)", "exp(x)", "x^3 - 3x", "1/x"].map((f) => <Chip key={f} onClick={() => setExpr(f)}>{f}</Chip>)}
+                {integralExamples.map((e) => <Chip key={e.label} onClick={() => { setExpr(e.expression); setA(e.a); setB(e.b); }}>{e.label}</Chip>)}
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <Field label="Limite inferior a" value={aS} onChange={setA} />

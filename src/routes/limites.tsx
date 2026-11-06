@@ -7,6 +7,7 @@ import { Plot } from "@/components/Plot";
 import { LimitUvOverlay } from "@/components/UvOverlays";
 import { UvStepsPanel } from "@/components/UvStepsPanel";
 import { limitSteps } from "@/lib/uv-steps";
+import { limitExamples } from "@/lib/study-examples";
 import { PageHeader, Panel, Field, ErrorBox, Chip, MathToolbar, Stat, num } from "@/components/Lab";
 
 export const Route = createFileRoute("/limites")({
@@ -69,10 +70,7 @@ function Limites() {
             <MathToolbar inputRef={inputRef} value={expr} onChange={setExpr} />
             <Field ref={inputRef} label="f(x) =" value={expr} onChange={setExpr} />
             <div className="flex flex-wrap gap-2">
-              <Chip onClick={() => { setExpr("sin(x)/x"); setC("0"); }}>sin(x)/x</Chip>
-              <Chip onClick={() => { setExpr("(x^2-1)/(x-1)"); setC("1"); }}>(x²−1)/(x−1)</Chip>
-              <Chip onClick={() => { setExpr("abs(x)/x"); setC("0"); }}>|x|/x</Chip>
-              <Chip onClick={() => { setExpr("1/x^2"); setC("0"); }}>1/x²</Chip>
+              {limitExamples.map((e) => <Chip key={e.label} onClick={() => { setExpr(e.expression); setC(e.point); setDir("ambos"); }}>{e.label}</Chip>)}
             </div>
             <Field label="Ponto c" value={cS} onChange={setC} />
             <div>

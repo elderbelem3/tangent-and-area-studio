@@ -1,4 +1,5 @@
 # Refinamento visual
+- [x] Atualizar os exemplos oficiais das quatro abas, manter um único exemplo 3D e verificar seleção e cálculos.
 - [x] Adicionar zoom/pan compartilhado aos gráficos 2D, ticks adaptativos e cursor preciso; verificar mouse e touch.
 - [x] Ampliar tour com atalhos, teclado científico, Aprenda e orientação da IA em manutenção; validar sintaxe e navegação.
 - [x] Suspender temporariamente tutor, ENADE e copiloto e verificar avisos de manutenção.
