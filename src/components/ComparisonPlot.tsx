@@ -10,39 +10,43 @@ import { usePlotViewport } from "@/lib/use-plot-viewport";
 import { axisTicks, axisLabel } from "@/lib/plot-viewport";
 import { PlotControls, PlotCrosshair } from "@/components/PlotNavigation";
 import { ChalkAxis } from "@/components/ChalkAxis";
+import { useModuleState } from "@/lib/module-state";
 
 export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax, tangentAt, analysis = true }: {
   functions: ComparisonFunction[]; xMin: number; xMax: number; tangentAt?: number; analysis?: boolean;
 }) {
-  const [hidden, setHidden] = useState<number[]>([]);
+  const [hidden, setHidden] = useModuleState<number[]>(tangentAt === undefined ? "funcoes.hiddenCurves" : "derivadas.hiddenCurves", []);
   useEffect(() => {
     setHidden((previous) => previous.filter((slot) => functions.some((item) => item.slot === slot)));
   }, [functions]);
   const curves = useMemo(() => functions.map((item) => ({ ...item, ...parseFn(item.expression) })), [functions]);
-  const visible = curves.filter((item) => item.fn && !hidden.includes(item.slot));
-  const initialSamples = Array.from({ length: 601 }, (_, i) => initialXMin + (initialXMax - initialXMin) * i / 600);
-  const values = visible.flatMap((item) => initialSamples.map((x) => item.fn?.(x) ?? NaN)).filter(Number.isFinite).sort((a, b) => a - b);
-  let low = Math.min(0, values[Math.floor(values.length * 0.03)] ?? -1);
-  let high = Math.max(0, values[Math.floor(values.length * 0.97)] ?? 1);
-  for (const item of visible) {
-    const y = tangentAt !== undefined ? item.fn?.(tangentAt) : NaN;
-    if (y !== undefined && Number.isFinite(y)) { low = Math.min(low, y); high = Math.max(high, y); }
-  }
-  const pad = Math.max(high - low, 1) * 0.12;
-  low -= pad; high += pad;
+  const visible = useMemo(() => curves.filter((item) => item.fn && !hidden.includes(item.slot)), [curves, hidden]);
+  const initialRange = useMemo(() => {
+    const initialSamples = Array.from({ length: 601 }, (_, i) => initialXMin + (initialXMax - initialXMin) * i / 600);
+    const values = visible.flatMap((item) => initialSamples.map((x) => item.fn?.(x) ?? NaN)).filter(Number.isFinite).sort((a, b) => a - b);
+    let low = Math.min(0, values[Math.floor(values.length * 0.03)] ?? -1);
+    let high = Math.max(0, values[Math.floor(values.length * 0.97)] ?? 1);
+    for (const item of visible) {
+      const y = tangentAt !== undefined ? item.fn?.(tangentAt) : NaN;
+      if (y !== undefined && Number.isFinite(y)) { low = Math.min(low, y); high = Math.max(high, y); }
+    }
+    const pad = Math.max(high - low, 1) * 0.12;
+    return { low: low - pad, high: high + pad };
+  }, [visible, initialXMin, initialXMax, tangentAt]);
+  let { low, high } = initialRange;
   const navigation = usePlotViewport({ xMin: initialXMin, xMax: initialXMax, yMin: low, yMax: high }, functions.map((f) => `${f.slot}:${f.expression}`).join("|") + hidden.join(","));
   const { xMin, xMax, yMin: viewLow, yMax: viewHigh } = navigation.domain;
   low = viewLow; high = viewHigh;
-  const samples = Array.from({ length: 601 }, (_, i) => xMin + (xMax - xMin) * i / 600);
+  const samples = useMemo(() => Array.from({ length: 601 }, (_, i) => xMin + (xMax - xMin) * i / 600), [xMin, xMax]);
   const annotations = useMemo(() => curves.flatMap((item) => item.fn ? findPlotAnnotations(item.fn, xMin, xMax).map((point) => ({ ...point, slot: item.slot })) : []), [curves, xMin, xMax]);
   const yIntercepts = xMin <= 0 && xMax >= 0 ? curves.map((item) => ({ slot: item.slot, y: item.fn?.(0) ?? NaN })).filter((p) => Number.isFinite(p.y)) : [];
 
-  const tangents = visible.map((item) => {
+  const tangents = useMemo(() => visible.map((item) => {
     const y = tangentAt !== undefined ? item.fn?.(tangentAt) ?? NaN : NaN;
     const slope = tangentAt !== undefined && item.fn ? derivative(item.fn, tangentAt) : NaN;
     return { ...item, y, slope };
-  });
-  const data = samples.map((x, index) => {
+  }), [visible, tangentAt]);
+  const data = useMemo(() => samples.map((x, index) => {
     const row: Record<string, number | null> = { x };
     for (const item of tangents) {
       const y = item.fn?.(x) ?? NaN;
@@ -51,7 +55,8 @@ export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax
       row[`tangent${item.slot}`] = tangentAt !== undefined && Number.isFinite(item.y) && Number.isFinite(item.slope) ? item.y + item.slope * (x - tangentAt) : null;
     }
     return row;
-  });
+  }), [samples, tangents, low, high, tangentAt]);
+  const analysisFunctions = useMemo(() => functions.filter((f) => !hidden.includes(f.slot)), [functions, hidden]);
   return <div className="min-w-0">
     <div className="mb-5 flex flex-wrap gap-2" role="group" aria-label="Legenda interativa das funções">
       {curves.map((item) => <Button key={item.slot} variant="outline" size="sm" aria-pressed={!hidden.includes(item.slot)} title={`${hidden.includes(item.slot) ? "Mostrar" : "Ocultar"} ${FUNCTION_SLOTS[item.slot]}(x)`} onClick={() => setHidden((previous) => previous.includes(item.slot) ? previous.filter((slot) => slot !== item.slot) : [...previous, item.slot])} className={`h-auto min-h-9 min-w-0 max-w-full py-2 ${hidden.includes(item.slot) ? "opacity-50" : ""}`}>
@@ -91,7 +96,7 @@ export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax
       </ResponsiveContainer>
       <PlotCrosshair navigation={navigation} values={tangents.map((item) => ({ name: `${FUNCTION_SLOTS[item.slot]}(x)`, value: item.fn?.(navigation.cursor?.x ?? 0) ?? NaN }))} />
     </div>
-    {analysis && <AnalysisPanels functions={functions.filter((f) => !hidden.includes(f.slot))} xMin={xMin} xMax={xMax} />}
+    {analysis && <AnalysisPanels functions={analysisFunctions} xMin={xMin} xMax={xMax} />}
     {visible.length === 0 && <p className="mt-3 text-sm text-muted-foreground">Nenhuma função válida visível.</p>}
     {tangentAt !== undefined && <p className="mt-4 border-t border-border pt-4 text-center text-xs text-muted-foreground">Curvas: linhas contínuas · Retas tangentes: linhas tracejadas</p>}
   </div>;
