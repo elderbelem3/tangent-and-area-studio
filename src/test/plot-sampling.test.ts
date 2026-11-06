@@ -5,8 +5,18 @@ describe("Discontinuity-safe zoom sampling", () => {
   it("increases resolution proportionally on zoom out within a safe budget", () => {
     expect(plotSampleCount(6, 6)).toBe(600);
     expect(plotSampleCount(24, 6)).toBe(2400);
-    expect(plotSampleCount(6000, 6)).toBe(12000);
+    expect(plotSampleCount(6000, 6)).toBe(2400);
     expect(plotSamples(-12, 12, 6)).toHaveLength(2401);
+  });
+  it("bounds the total sampling budget for five simultaneous curves", () => {
+    expect(plotSampleCount(6000, 6, 5)).toBe(480);
+    expect(plotSampleCount(6, 6, 5) * 5).toBeLessThanOrEqual(2400);
+  });
+  it("rejects unsafe jumps immediately without midpoint evaluation", () => {
+    let evaluations = 0;
+    const points = sampleCurve((x) => { evaluations++; return 1 / x; }, [-0.001, 0.001], -10, 10);
+    expect(points[1]?.breakBefore).toBe(true);
+    expect(evaluations).toBe(2);
   });
   it("breaks an off-grid pole even when zoomed-out y range masks the jump", () => {
     const points = sampleCurve((x) => 1 / (x - 0.137), [0.1, 0.2], -10000, 10000);

@@ -1,16 +1,17 @@
 import type { Fn } from "./calc";
 
 const BASE_SEGMENTS = 600;
-const MAX_SEGMENTS = 12_000;
+const MAX_SEGMENTS = 2_400;
 
 /** Maintain the initial x resolution on zoom out, with a bounded work budget. */
-export function plotSampleCount(span: number, initialSpan: number): number {
-  if (!Number.isFinite(span) || span <= 0 || !Number.isFinite(initialSpan) || initialSpan <= 0) return BASE_SEGMENTS;
-  return Math.min(MAX_SEGMENTS, Math.ceil(BASE_SEGMENTS * Math.max(1, span / initialSpan)));
+export function plotSampleCount(span: number, initialSpan: number, curveCount = 1): number {
+  const budget = Math.max(300, Math.floor(MAX_SEGMENTS / Math.max(1, curveCount)));
+  if (!Number.isFinite(span) || span <= 0 || !Number.isFinite(initialSpan) || initialSpan <= 0) return Math.min(budget, BASE_SEGMENTS);
+  return Math.min(budget, Math.ceil(BASE_SEGMENTS * Math.max(1, span / initialSpan)));
 }
 
-export function plotSamples(xMin: number, xMax: number, initialSpan: number): number[] {
-  const count = plotSampleCount(xMax - xMin, initialSpan);
+export function plotSamples(xMin: number, xMax: number, initialSpan: number, curveCount = 1): number[] {
+  const count = plotSampleCount(xMax - xMin, initialSpan, curveCount);
   return Array.from({ length: count + 1 }, (_, i) => xMin + (xMax - xMin) * i / count);
 }
 
@@ -42,11 +43,14 @@ export function sampleCurve(fn: Fn, xs: number[], yMin: number, yMax: number): C
     const finite = Number.isFinite(value);
     let breakBefore = index > 0 && (!finite || !Number.isFinite(previousY));
     if (index > 0 && finite && Number.isFinite(previousY)) {
-      const mid = fn(previousX + (x - previousX) / 2);
-      breakBefore = Math.abs(value - previousY) > span * 2
-        || !Number.isFinite(mid)
-        || Math.abs(mid - (value + previousY) / 2) > span * 2
-        || crossesPole(fn, previousX, x, previousY, value);
+      // Reject unsafe jumps before spending work probing the interval.
+      breakBefore = Math.abs(value - previousY) > span * 2;
+      if (!breakBefore) {
+        const mid = fn(previousX + (x - previousX) / 2);
+        breakBefore = !Number.isFinite(mid)
+          || Math.abs(mid - (value + previousY) / 2) > span * 2
+          || crossesPole(fn, previousX, x, previousY, value);
+      }
     }
     previousX = x; previousY = value;
     return { x, y: finite && value >= yMin - span * 3 && value <= yMax + span * 3 ? value : null, breakBefore };
