@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BookOpen, GraduationCap, Users, Sigma } from "lucide-react";
+import { BookOpen, GraduationCap, Users, Sigma, Sparkles } from "lucide-react";
 import logoAsset from "@/assets/unicatolica-logo.png.asset.json";
 
 export const Route = createFileRoute("/creditos")({
