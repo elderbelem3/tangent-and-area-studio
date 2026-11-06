@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## UI architecture
+- Keep official study presets in a shared typed module consumed by all four calculus routes; colocate each preset's necessary study parameters so selecting it produces a meaningful calculation.
 - Share domain-space navigation through usePlotViewport and d3-zoom across both 2D renderers; resample curves and transform overlays in data coordinates so gestures, ticks and crosshairs remain synchronized.
 - Keep temporary AI availability in one shared switch and enforce it in every AI server handler as well as entry-point notices, so suspended features cannot trigger provider requests.
 - Keep CalculusLab visual tokens in src/styles.css and reuse Lab primitives and the shared Button across modules, so all six pages stay consistent without changing calculation logic.
