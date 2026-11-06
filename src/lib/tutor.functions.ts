@@ -1,10 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
+import { AI_MAINTENANCE, AI_MAINTENANCE_MESSAGE } from "@/lib/ai-maintenance";
 import { generateResponse, GatewayError } from "@lovable.dev/ai-gateway";
 import { tutorRequestSchema, tutorSolutionSchema, TUTOR_OUTPUT_SCHEMA, type TutorSolution } from "@/lib/tutor";
 
 export const askTutor = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => tutorRequestSchema.parse(input))
   .handler(async ({ data }): Promise<{ solution: TutorSolution | null; error: string | null }> => {
+    if (AI_MAINTENANCE) return { solution: null, error: AI_MAINTENANCE_MESSAGE };
     try {
       const response = await generateResponse({
         model: "openai/gpt-6-astra",

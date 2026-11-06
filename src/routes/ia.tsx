@@ -14,6 +14,7 @@ import { validateTutorPlot } from "@/lib/tutor-plot";
 import { EnadePanel } from "@/components/EnadePanel";
 import { isEnadeRequest } from "@/lib/enade";
 import { GraduationCap } from "lucide-react";
+import { AI_MAINTENANCE, AI_MAINTENANCE_MESSAGE } from "@/lib/ai-maintenance";
 
 export const Route = createFileRoute("/ia")({
   head: () => ({ meta: [
@@ -22,8 +23,16 @@ export const Route = createFileRoute("/ia")({
     { property: "og:title", content: "IA · Tutor de Cálculo · CalculusLab" },
     { property: "og:description", content: "Resoluções didáticas com fórmulas e perguntas contextualizadas por etapa." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
-  ] }), component: TutorPage,
+  ] }), component: AiPage,
 });
+
+function AiPage() {
+  if (AI_MAINTENANCE) return <>
+    <PageHeader tag="Tutor de Cálculo 1 e 2" title="IA" desc="IA em manutenção" />
+    <p role="alert" className="border-y border-border py-6 text-muted-foreground">{AI_MAINTENANCE_MESSAGE}</p>
+  </>;
+  return <TutorPage />;
+}
 
 const sessionSchema = z.array(z.object({ id: z.string(), problem: z.string(), solution: tutorSolutionSchema, questions: z.record(z.string(), z.array(z.object({ question: z.string(), answer: tutorSolutionSchema }))) }));
 const SESSION_KEY = "calculuslab-tutor-session";

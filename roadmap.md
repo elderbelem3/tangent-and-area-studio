@@ -1,4 +1,5 @@
 # Refinamento visual
+- [x] Suspender temporariamente tutor, ENADE e copiloto e verificar avisos de manutenção.
 - [x] Refinar identidade, navegação e controles compartilhados.
 - [x] Harmonizar as seis abas e gráficos sem mudar os cálculos.
 - [x] Verificar navegação, teclado matemático, telas estreitas e testes existentes.
