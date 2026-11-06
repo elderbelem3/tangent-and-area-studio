@@ -20,8 +20,10 @@ type Props = {
 export type PlotHelpers = { sx: (x: number) => number; sy: (y: number) => number; xMin: number; xMax: number; yMin: number; yMax: number; fn: Fn };
 
 const W = 640, H = 400, P = 36;
+const EMPTY_POINTS: NonNullable<Props["points"]> = [];
+const EMPTY_LINES: Fn[] = [];
 
-export function Plot({ fn, xMin: initialXMin, xMax: initialXMax, points = [], lines = [], shade, overlay }: Props) {
+export function Plot({ fn, xMin: initialXMin, xMax: initialXMax, points = EMPTY_POINTS, lines = EMPTY_LINES, shade, overlay }: Props) {
   const clipId = useId();
   const pointRangeKey = JSON.stringify(points.map((p) => p.y));
   const initialRange = useMemo(() => {
