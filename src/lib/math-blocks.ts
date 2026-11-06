@@ -22,7 +22,7 @@ export function templateToLatex(insert: string): string {
 /** MathLive ascii-math output → mathjs syntax understood by the parser/plotter. */
 export function asciiToMathjs(ascii: string): string {
   // MathLive serializes typed operator names as space-separated letters.
-  let s = ascii.replace(/\b(?:l\s+o\s+g10|s\s+q\s+r\s+t|c\s+b\s+r\s+t|e\s+x\s+p|a\s+b\s+s)(?=\s*\()/g, (name) => name.replace(/\s+/g, ""))
+  let s = ascii.replace(/\b(?:l\s+o\s+g10|l\s+o\s+g|s\s+q\s+r\s+t|c\s+b\s+r\s+t|e\s+x\s+p|a\s+b\s+s)(?=\s*[_\(])/g, (name) => name.replace(/\s+/g, ""))
     .replace(/⋅|·|\bxx\b/g, "*")
     .replace(/\boo\b|∞/g, "Infinity")
     .replace(/π/g, "pi")
