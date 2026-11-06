@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { AI_MAINTENANCE, AI_MAINTENANCE_MESSAGE } from "@/lib/ai-maintenance";
 import { generateResponse, GatewayError } from "@lovable.dev/ai-gateway";
 import { z } from "zod";
 import { enadeQuestionSchema, enadeFeedbackSchema, ENADE_QUESTION_SCHEMA, ENADE_FEEDBACK_SCHEMA, type EnadeQuestion, type EnadeFeedback } from "@/lib/enade";
@@ -18,6 +19,7 @@ function outputText(r: Awaited<ReturnType<typeof generateResponse>>) {
 export const generateEnade = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ tema: z.string().max(200).optional() }).parse(input))
   .handler(async ({ data }): Promise<{ question: EnadeQuestion | null; error: string | null }> => {
+    if (AI_MAINTENANCE) return { question: null, error: AI_MAINTENANCE_MESSAGE };
     try {
       const r = await generateResponse({
         model: "openai/gpt-6-astra",
@@ -33,6 +35,7 @@ export const generateEnade = createServerFn({ method: "POST" })
 export const evaluateEnade = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ question: enadeQuestionSchema, answer: z.string().trim().min(1).max(4000) }).parse(input))
   .handler(async ({ data }): Promise<{ result: EnadeFeedback | null; error: string | null }> => {
+    if (AI_MAINTENANCE) return { result: null, error: AI_MAINTENANCE_MESSAGE };
     try {
       const r = await generateResponse({
         model: "openai/gpt-6-astra",

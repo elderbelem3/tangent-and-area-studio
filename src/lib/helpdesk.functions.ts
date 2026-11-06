@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { AI_MAINTENANCE, AI_MAINTENANCE_MESSAGE } from "@/lib/ai-maintenance";
 import { generateResponse, GatewayError } from "@lovable.dev/ai-gateway";
 import { z } from "zod";
 import { COPILOT_ACTIONS, type CopilotAction } from "@/lib/copilot-actions";
@@ -40,6 +41,7 @@ export const askHelpdesk = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => inputSchema.parse(input))
   .handler(async ({ data }): Promise<{ reply: string | null; redirect: boolean; actions: CopilotAction[]; error: string | null }> => {
     const fail = (error: string) => ({ reply: null, redirect: false, actions: [], error });
+    if (AI_MAINTENANCE) return fail(AI_MAINTENANCE_MESSAGE);
     try {
       const response = await generateResponse({
         model: "openai/gpt-6-astra",

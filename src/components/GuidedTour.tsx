@@ -5,6 +5,8 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { CircleHelp, ChevronDown, ChevronLeft, ChevronRight, Sparkles, Route as RouteIcon, X } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { HelpChat } from "@/components/HelpChat";
+import { AiMaintenanceDialog } from "@/components/AiMaintenance";
+import { AI_MAINTENANCE } from "@/lib/ai-maintenance";
 import { Button } from "@/components/ui/button";
 
 type Step = { selector: string; title: string; text: string; route?: "/" | "/limites" | "/derivadas" | "/integrais" | "/ia"; before?: () => void };
@@ -32,6 +34,8 @@ const PAD = 8;
 export function HelpButton() {
   const [open, setOpen] = useState(false);
   const [chat, setChat] = useState(false);
+  const [maintenance, setMaintenance] = useState(false);
+  const openAi = () => AI_MAINTENANCE ? setMaintenance(true) : setChat(true);
   return <>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -43,13 +47,14 @@ export function HelpButton() {
         <DropdownMenuItem onSelect={() => { setChat(false); setOpen(true); }} className="items-start gap-3 p-2.5">
           <RouteIcon className="mt-0.5 h-4 w-4 text-primary" /><span><span className="block font-semibold">Tour Guiado</span><span className="block text-xs text-muted-foreground">Passo a passo iluminando cada ferramenta</span></span>
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setChat(true)} className="items-start gap-3 p-2.5">
+        <DropdownMenuItem onSelect={openAi} className="items-start gap-3 p-2.5">
           <Sparkles className="mt-0.5 h-4 w-4 text-primary" /><span><span className="block font-semibold">Ajuda com IA</span><span className="block text-xs text-muted-foreground">Copiloto que explica e demonstra ao vivo</span></span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-    {open && <GuidedTour onClose={() => setOpen(false)} onAskAi={() => { setOpen(false); setChat(true); }} />}
+    {open && <GuidedTour onClose={() => setOpen(false)} onAskAi={() => { setOpen(false); openAi(); }} />}
     {chat && <HelpChat onClose={() => setChat(false)} />}
+    <AiMaintenanceDialog open={maintenance} onOpenChange={setMaintenance} />
   </>;
 }
 
