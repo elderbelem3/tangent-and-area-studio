@@ -9,6 +9,7 @@ describe("math blocks translation", () => {
     expect(latex).not.toMatch(/#|\^|_/);
   });
   it("translates editor output to parser syntax", () => {
+    expect(asciiToMathjs("s q r t (2)+l o g10 (100)+sin (x)")).toBe("sqrt(2)+log10(100)+sin(x)");
     expect(asciiToMathjs("log_(10)(x)+|x|")).toBe("log10(x)+abs(x)");
     expect(asciiToMathjs("ln(x)+oo")).toBe("log(x)+Infinity");
   });

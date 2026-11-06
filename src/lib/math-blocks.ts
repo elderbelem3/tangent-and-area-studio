@@ -21,7 +21,8 @@ export function templateToLatex(insert: string): string {
 
 /** MathLive ascii-math output → mathjs syntax understood by the parser/plotter. */
 export function asciiToMathjs(ascii: string): string {
-  let s = ascii
+  // MathLive serializes typed operator names as space-separated letters.
+  let s = ascii.replace(/\b(?:l\s+o\s+g10|s\s+q\s+r\s+t|c\s+b\s+r\s+t|e\s+x\s+p|a\s+b\s+s)(?=\s*\()/g, (name) => name.replace(/\s+/g, ""))
     .replace(/⋅|·|\bxx\b/g, "*")
     .replace(/\boo\b|∞/g, "Infinity")
     .replace(/π/g, "pi")
@@ -32,7 +33,7 @@ export function asciiToMathjs(ascii: string): string {
     .replace(/root\(3\)\(/g, "cbrt(");
   // |a| → abs(a) for simple, non-nested pairs
   for (let i = 0; i < 5 && /\|[^|]+\|/.test(s); i++) s = s.replace(/\|([^|]+)\|/, "abs($1)");
-  return s.replace(/\s+/g, " ").trim();
+  return s.replace(/\b(log10|log|sin|cos|tan|sec|csc|asin|acos|atan|sqrt|cbrt|exp|abs)\s+\(/g, "$1(").replace(/\s+/g, " ").trim();
 }
 
 /** Plain expression → LaTeX for loading external values (examples, copilot, tutor) into the block editor. */
