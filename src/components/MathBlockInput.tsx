@@ -13,6 +13,13 @@ type MathfieldLike = HTMLElement & {
   menuItems?: unknown[];
 };
 
+/** Focus MathLive's internal keyboard sink (host.focus() alone doesn't always reach it). */
+function focusField(el: MathfieldLike | null) {
+  if (!el) return;
+  el.focus();
+  (el.shadowRoot?.querySelector("[part=keyboard-sink]") as HTMLElement | null)?.focus();
+}
+
 export type MathBlockHandle = { insertTemplate: (insert: string) => void; clear: () => void; focus: () => void };
 
 /** Structured equation editor (MathLive): visual blocks with placeholder boxes, translated to mathjs syntax. */
@@ -58,17 +65,17 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
     useImperativeHandle(ref, () => ({
       insertTemplate: (insert) => {
         const el = mf.current; if (!el) return;
-        el.focus();
+        focusField(el);
         el.insert(templateToLatex(insert), { selectionMode: "placeholder", format: "latex" });
         el.dispatchEvent(new Event("input"));
       },
-      clear: () => { const el = mf.current; if (!el) return; el.setValue(""); lastEmitted.current = ""; onChangeRef.current(""); el.focus(); },
-      focus: () => mf.current?.focus(),
+      clear: () => { const el = mf.current; if (!el) return; el.setValue(""); lastEmitted.current = ""; onChangeRef.current(""); focusField(el); },
+      focus: () => focusField(mf.current),
     }), []);
 
     return <div className="block">
       <span className="mb-1 block text-sm font-medium text-muted-foreground">{label}</span>
-      <div ref={host} className="math-block-host min-h-11 w-full min-w-0 rounded-lg border border-input bg-background px-2 py-1 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
+      <div ref={host} onClick={() => focusField(mf.current)} className="math-block-host min-h-11 w-full min-w-0 rounded-lg border border-input bg-background px-2 py-1 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
         {!ready && <span className="block py-2 font-mono text-sm text-muted-foreground">{value || "carregando editor…"}</span>}
       </div>
       <p className="mt-1 text-[11px] text-muted-foreground">Use → ou Tab para ir ao próximo bloco; digite ^ ou / para criar potência e fração.</p>
