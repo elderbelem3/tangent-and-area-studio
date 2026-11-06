@@ -11,6 +11,7 @@ type MathfieldLike = HTMLElement & {
   smartFence?: boolean;
   mathVirtualKeyboardPolicy?: string;
   menuItems?: unknown[];
+  inlineShortcuts?: Record<string, string>;
 };
 
 /** Focus MathLive's internal keyboard sink (host.focus() alone doesn't always reach it). */
@@ -38,6 +39,9 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
         MathfieldElement.fontsDirectory = "https://cdn.jsdelivr.net/npm/mathlive@0.111.4/fonts/";
         MathfieldElement.soundsDirectory = null;
         const el = new MathfieldElement() as unknown as MathfieldLike;
+        // MathLive's default "log" shortcut already adds a subscript box;
+        // a subsequent typed underscore would nest a second subscript.
+        el.inlineShortcuts = { ...el.inlineShortcuts, log: "\\operatorname{log}" };
         el.setAttribute("math-virtual-keyboard-policy", "manual");
         el.setAttribute("smart-superscript", "true");
         el.setAttribute("aria-label", label);
