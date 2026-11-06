@@ -31,9 +31,8 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
         MathfieldElement.fontsDirectory = "https://cdn.jsdelivr.net/npm/mathlive@0.111.4/fonts/";
         MathfieldElement.soundsDirectory = null;
         const el = new MathfieldElement() as unknown as MathfieldLike;
-        el.mathVirtualKeyboardPolicy = "manual";
-        el.smartSuperscript = true;
-        el.menuItems = [];
+        el.setAttribute("math-virtual-keyboard-policy", "manual");
+        el.setAttribute("smart-superscript", "true");
         el.setAttribute("aria-label", label);
         el.className = "math-block-field";
         el.addEventListener("input", () => {
@@ -42,6 +41,7 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
           onChangeRef.current(out);
         });
         host.current.appendChild(el);
+        try { el.menuItems = []; } catch { /* older versions */ }
         mf.current = el;
         setReady(true);
       });
