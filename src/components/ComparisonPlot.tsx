@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
-import { CartesianGrid, Line, LineChart, ReferenceLine, ReferenceDot, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, ReferenceLine, ReferenceDot, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
 import { derivative, fmt, parseFn } from "@/lib/calc";
 import { FUNCTION_BG_COLORS, FUNCTION_SLOTS, type ComparisonFunction } from "@/lib/comparison";
 import { findPlotAnnotations } from "@/lib/plot-annotations";
 import { ChalkAnnotation } from "@/components/ChalkAnnotation";
 import { AnalysisPanels } from "@/components/AnalysisPanels";
+import { usePlotViewport } from "@/lib/use-plot-viewport";
+import { axisTicks, axisLabel } from "@/lib/plot-viewport";
+import { PlotControls, PlotCrosshair } from "@/components/PlotNavigation";
 import { ChalkAxis } from "@/components/ChalkAxis";
 
-export function ComparisonPlot({ functions, xMin, xMax, tangentAt, analysis = true }: {
+export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax, tangentAt, analysis = true }: {
   functions: ComparisonFunction[]; xMin: number; xMax: number; tangentAt?: number; analysis?: boolean;
 }) {
   const [hidden, setHidden] = useState<number[]>([]);
@@ -16,11 +19,9 @@ export function ComparisonPlot({ functions, xMin, xMax, tangentAt, analysis = tr
     setHidden((previous) => previous.filter((slot) => functions.some((item) => item.slot === slot)));
   }, [functions]);
   const curves = useMemo(() => functions.map((item) => ({ ...item, ...parseFn(item.expression) })), [functions]);
-  const annotations = useMemo(() => curves.flatMap((item) => item.fn ? findPlotAnnotations(item.fn, xMin, xMax).map((point) => ({ ...point, slot: item.slot })) : []), [curves, xMin, xMax]);
-  const yIntercepts = xMin <= 0 && xMax >= 0 ? curves.map((item) => ({ slot: item.slot, y: item.fn?.(0) ?? NaN })).filter((p) => Number.isFinite(p.y)) : [];
   const visible = curves.filter((item) => item.fn && !hidden.includes(item.slot));
-  const samples = Array.from({ length: 601 }, (_, i) => xMin + (xMax - xMin) * i / 600);
-  const values = visible.flatMap((item) => samples.map((x) => item.fn?.(x) ?? NaN)).filter(Number.isFinite).sort((a, b) => a - b);
+  const initialSamples = Array.from({ length: 601 }, (_, i) => initialXMin + (initialXMax - initialXMin) * i / 600);
+  const values = visible.flatMap((item) => initialSamples.map((x) => item.fn?.(x) ?? NaN)).filter(Number.isFinite).sort((a, b) => a - b);
   let low = Math.min(0, values[Math.floor(values.length * 0.03)] ?? -1);
   let high = Math.max(0, values[Math.floor(values.length * 0.97)] ?? 1);
   for (const item of visible) {
@@ -29,6 +30,13 @@ export function ComparisonPlot({ functions, xMin, xMax, tangentAt, analysis = tr
   }
   const pad = Math.max(high - low, 1) * 0.12;
   low -= pad; high += pad;
+  const navigation = usePlotViewport({ xMin: initialXMin, xMax: initialXMax, yMin: low, yMax: high }, functions.map((f) => `${f.slot}:${f.expression}`).join("|") + hidden.join(","));
+  const { xMin, xMax, yMin: viewLow, yMax: viewHigh } = navigation.domain;
+  low = viewLow; high = viewHigh;
+  const samples = Array.from({ length: 601 }, (_, i) => xMin + (xMax - xMin) * i / 600);
+  const annotations = useMemo(() => curves.flatMap((item) => item.fn ? findPlotAnnotations(item.fn, xMin, xMax).map((point) => ({ ...point, slot: item.slot })) : []), [curves, xMin, xMax]);
+  const yIntercepts = xMin <= 0 && xMax >= 0 ? curves.map((item) => ({ slot: item.slot, y: item.fn?.(0) ?? NaN })).filter((p) => Number.isFinite(p.y)) : [];
+
   const tangents = visible.map((item) => {
     const y = tangentAt !== undefined ? item.fn?.(tangentAt) ?? NaN : NaN;
     const slope = tangentAt !== undefined && item.fn ? derivative(item.fn, tangentAt) : NaN;
@@ -51,15 +59,15 @@ export function ComparisonPlot({ functions, xMin, xMax, tangentAt, analysis = tr
         <span className="break-all whitespace-normal text-left font-mono text-xs">{FUNCTION_SLOTS[item.slot]}(x) = {item.expression || "—"}</span>
       </Button>)}
     </div>
-    <div className="h-[360px] w-full min-w-0 sm:h-[420px]" role="img" aria-label={tangentAt === undefined ? "Gráfico comparativo das funções" : "Gráfico comparativo das funções e retas tangentes"}>
+    <PlotControls navigation={navigation} />
+    <div ref={navigation.ref} className="relative touch-none cursor-crosshair h-[360px] w-full min-w-0 sm:h-[420px]" role="img" aria-label={tangentAt === undefined ? "Gráfico comparativo das funções" : "Gráfico comparativo das funções e retas tangentes"}>
       <ResponsiveContainer width="100%" height="100%" minWidth={0}>
         <LineChart data={data} margin={{ top: 12, right: 16, bottom: 12, left: 0 }}>
           <CartesianGrid stroke="var(--grid)" />
-          <XAxis type="number" dataKey="x" domain={[xMin, xMax]} tickFormatter={(value: number) => fmt(value, 2)} stroke="var(--axis)" tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
-          <YAxis type="number" domain={[low, high]} allowDataOverflow tickFormatter={(value: number) => fmt(value, 2)} width={56} stroke="var(--axis)" tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
-          <ReferenceLine y={0} stroke="var(--axis)" shape={(props: { x1?: number; y1?: number; x2?: number; y2?: number }) => <ChalkAxis {...props} />} />
+          <XAxis type="number" dataKey="x" domain={[xMin, xMax]} allowDataOverflow ticks={axisTicks(xMin, xMax, 5)} tickFormatter={(value: number) => axisLabel(value, xMax - xMin)} stroke="var(--axis)" tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
+          <YAxis type="number" domain={[low, high]} allowDataOverflow ticks={axisTicks(low, high)} tickFormatter={(value: number) => axisLabel(value, high - low)} width={56} stroke="var(--axis)" tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
+          {low <= 0 && high >= 0 && <ReferenceLine y={0} stroke="var(--axis)" shape={(props: { x1?: number; y1?: number; x2?: number; y2?: number }) => <ChalkAxis {...props} />} />}
           {xMin <= 0 && xMax >= 0 && <ReferenceLine x={0} stroke="var(--axis)" shape={(props: { x1?: number; y1?: number; x2?: number; y2?: number }) => <ChalkAxis {...props} />} />}
-          <Tooltip content={({ active, payload, label }) => active && payload?.length ? <div className="max-w-64 rounded-lg border border-border bg-card p-3 text-xs shadow-soft"><p className="mb-2 font-mono">x = {fmt(Number(label), 4)}</p>{payload.map((entry) => <p key={String(entry.dataKey)} className="font-mono">{entry.name}: {fmt(Number(entry.value), 5)}</p>)}</div> : null} />
           {tangents.map((item) => <Line key={`curve${item.slot}`} dataKey={`curve${item.slot}`} name={`${FUNCTION_SLOTS[item.slot]}(x)`} stroke={`var(--chart-${item.slot + 1})`} strokeWidth={2.5} dot={false} connectNulls={false} isAnimationActive={false} />)}
           {tangentAt !== undefined && tangents.filter((item) => Number.isFinite(item.y) && Number.isFinite(item.slope)).map((item) => <Line key={`tangent${item.slot}`} dataKey={`tangent${item.slot}`} name={`Tangente ${FUNCTION_SLOTS[item.slot]}`} stroke={`var(--chart-${item.slot + 1})`} strokeWidth={1.5} strokeDasharray="6 4" dot={false} isAnimationActive={false} />)}
           {tangentAt !== undefined && tangents.filter((item) => Number.isFinite(item.y)).map((item) => <ReferenceDot key={item.slot} x={tangentAt} y={item.y} r={4} fill={`var(--chart-${item.slot + 1})`} stroke="var(--card)" />)}
@@ -81,6 +89,7 @@ export function ComparisonPlot({ functions, xMin, xMax, tangentAt, analysis = tr
           {yIntercepts.filter((p) => !hidden.includes(p.slot) && p.y >= low && p.y <= high).map((p) => <ReferenceDot key={`uvi-${p.slot}`} x={0} y={p.y} ifOverflow="hidden" shape={(props: { cx?: number; cy?: number }) => props.cx === undefined || props.cy === undefined ? <g /> : <g className="uv-layer"><rect x={props.cx - 4} y={props.cy - 4} width={8} height={8} fill="var(--uv)" transform={`rotate(45 ${props.cx} ${props.cy})`} /><text x={props.cx + 8} y={props.cy - 8} className="uv-label">{`y₀ = ${fmt(p.y, 3)}`}</text></g>} />)}
         </LineChart>
       </ResponsiveContainer>
+      <PlotCrosshair navigation={navigation} values={tangents.map((item) => ({ name: `${FUNCTION_SLOTS[item.slot]}(x)`, value: item.fn?.(navigation.cursor?.x ?? 0) ?? NaN }))} />
     </div>
     {analysis && <AnalysisPanels functions={functions.filter((f) => !hidden.includes(f.slot))} xMin={xMin} xMax={xMax} />}
     {visible.length === 0 && <p className="mt-3 text-sm text-muted-foreground">Nenhuma função válida visível.</p>}

@@ -1,4 +1,7 @@
 import { useId, useMemo, type ReactNode } from "react";
+import { usePlotViewport } from "@/lib/use-plot-viewport";
+import { axisTicks, axisLabel } from "@/lib/plot-viewport";
+import { PlotControls, PlotCrosshair } from "@/components/PlotNavigation";
 import type { Fn } from "@/lib/calc";
 import { findPlotAnnotations } from "@/lib/plot-annotations";
 import { ChalkAnnotation } from "@/components/ChalkAnnotation";
@@ -16,12 +19,11 @@ export type PlotHelpers = { sx: (x: number) => number; sy: (y: number) => number
 
 const W = 640, H = 400, P = 36;
 
-export function Plot({ fn, xMin, xMax, points = [], lines = [], shade, overlay }: Props) {
+export function Plot({ fn, xMin: initialXMin, xMax: initialXMax, points = [], lines = [], shade, overlay }: Props) {
   const clipId = useId();
-  const annotations = useMemo(() => findPlotAnnotations(fn, xMin, xMax), [fn, xMin, xMax]);
   const N = 600;
-  const xs = Array.from({ length: N + 1 }, (_, i) => xMin + ((xMax - xMin) * i) / N);
-  const ys = xs.map(fn).filter((y) => Number.isFinite(y));
+  const initialXs = Array.from({ length: N + 1 }, (_, i) => initialXMin + ((initialXMax - initialXMin) * i) / N);
+  const ys = initialXs.map(fn).filter((y) => Number.isFinite(y));
   let yMin = ys.length ? Math.min(...ys) : -1;
   let yMax = ys.length ? Math.max(...ys) : 1;
   // robust clipping for asymptotes
@@ -35,6 +37,11 @@ export function Plot({ fn, xMin, xMax, points = [], lines = [], shade, overlay }
   if (yMax - yMin < 1e-9) { yMax += 1; yMin -= 1; }
   const pad = (yMax - yMin) * 0.12; yMin -= pad; yMax += pad;
 
+  const navigation = usePlotViewport({ xMin: initialXMin, xMax: initialXMax, yMin, yMax }, String(fn));
+  const { xMin, xMax } = navigation.domain;
+  yMin = navigation.domain.yMin; yMax = navigation.domain.yMax;
+  const xs = Array.from({ length: N + 1 }, (_, i) => xMin + ((xMax - xMin) * i) / N);
+  const annotations = useMemo(() => findPlotAnnotations(fn, xMin, xMax), [fn, xMin, xMax]);
   const sx = (x: number) => P + ((x - xMin) / (xMax - xMin)) * (W - 2 * P);
   const sy = (y: number) => H - P - ((y - yMin) / (yMax - yMin)) * (H - 2 * P);
 
@@ -48,14 +55,6 @@ export function Plot({ fn, xMin, xMax, points = [], lines = [], shade, overlay }
       pen = true; prev = y;
     }
     return d;
-  };
-
-  const ticks = (a: number, b: number) => {
-    const step = Math.pow(10, Math.floor(Math.log10((b - a) / 5)));
-    const s = [1, 2, 5, 10].map((m) => m * step).find((v) => (b - a) / v <= 8) ?? step * 10;
-    const out: number[] = [];
-    for (let v = Math.ceil(a / s) * s; v <= b; v += s) out.push(Number(v.toFixed(10)));
-    return out;
   };
 
   let shadePath = "";
@@ -73,23 +72,26 @@ export function Plot({ fn, xMin, xMax, points = [], lines = [], shade, overlay }
 
   return (
     <div>
+    <PlotControls navigation={navigation} />
+    <div ref={navigation.ref} className="relative touch-none cursor-crosshair">
     <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full rounded-lg bg-card font-mono" role="img" aria-label="Gráfico da função">
       <defs>
         <clipPath id={clipId}><rect x={P} y={P} width={W - 2 * P} height={H - 2 * P} /></clipPath>
       </defs>
-      {ticks(xMin, xMax).map((t) => (
+      <rect data-plot-area x={P} y={P} width={W - 2 * P} height={H - 2 * P} fill="none" />
+      {axisTicks(xMin, xMax, 5).map((t) => (
         <g key={`x${t}`}>
           <line x1={sx(t)} x2={sx(t)} y1={P} y2={H - P} className="stroke-grid" />
-          <text x={sx(t)} y={H - P + 16} textAnchor="middle" className="fill-muted-foreground text-[12px]">{t}</text>
+          <text x={sx(t)} y={H - P + 16} textAnchor="middle" className="fill-muted-foreground text-[12px]">{axisLabel(t, xMax - xMin)}</text>
         </g>
       ))}
-      {ticks(yMin, yMax).map((t) => (
+      {axisTicks(yMin, yMax).map((t) => (
         <g key={`y${t}`}>
           <line x1={P} x2={W - P} y1={sy(t)} y2={sy(t)} className="stroke-grid" />
-          <text x={P - 6} y={sy(t) + 4} textAnchor="end" className="fill-muted-foreground text-[12px]">{t}</text>
+          <text x={P - 6} y={sy(t) + 4} textAnchor="end" className="fill-muted-foreground text-[12px]">{axisLabel(t, yMax - yMin)}</text>
         </g>
       ))}
-      <line x1={P} x2={W - P} y1={sy(0)} y2={sy(0)} className="stroke-axis" strokeWidth={1.5} />
+      {yMin <= 0 && yMax >= 0 && <line x1={P} x2={W - P} y1={sy(0)} y2={sy(0)} className="stroke-axis" strokeWidth={1.5} />}
       {xMin <= 0 && xMax >= 0 && <line x1={sx(0)} x2={sx(0)} y1={P} y2={H - P} className="stroke-axis" strokeWidth={1.5} />}
       <g clipPath={`url(#${clipId})`}>
         {shade && <path d={shadePath} className="fill-primary/25 stroke-primary/40" />}
@@ -107,6 +109,8 @@ export function Plot({ fn, xMin, xMax, points = [], lines = [], shade, overlay }
         {annotations.filter((point) => point.y >= yMin && point.y <= yMax).map((point, i) => <ChalkAnnotation key={`annotation-${i}`} cx={sx(point.x)} cy={sy(point.y)} point={point} />)}
       </g>
     </svg>
+    <PlotCrosshair navigation={navigation} values={[{ name: "f(x)", value: fn(navigation.cursor?.x ?? 0) }, ...lines.map((line, i) => ({ name: `Reta ${i + 1}`, value: line(navigation.cursor?.x ?? 0) }))]} />
+    </div>
     <div className="mt-4 flex flex-wrap items-center justify-center gap-5 border-t border-border pt-4 text-xs text-muted-foreground"><span className="inline-flex items-center gap-2"><span className="h-0.5 w-5 bg-primary" />f(x)</span>{lines.length > 0 && <span className="inline-flex items-center gap-2"><span className="h-0.5 w-5 bg-accent-strong" />Reta tangente</span>}{shade && <span className="inline-flex items-center gap-2"><span className="h-3 w-3 rounded-sm bg-primary/25" />Área integrada</span>}</div>
     </div>
   );
