@@ -1,4 +1,5 @@
 # Refinamento visual
+- [x] Corrigir descontinuidades e amostragem dinâmica no zoom out dos dois gráficos 2D; verificar funções racionais e raízes contínuas.
 - [x] Otimizar carregamento e troca de abas com pré-carregamento, renderização eficiente e preservação de estado; verificar navegação e recursos.
 - [x] Atualizar os exemplos oficiais das quatro abas, manter um único exemplo 3D e verificar seleção e cálculos.
 - [x] Adicionar zoom/pan compartilhado aos gráficos 2D, ticks adaptativos e cursor preciso; verificar mouse e touch.

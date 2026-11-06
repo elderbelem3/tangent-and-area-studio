@@ -5,6 +5,7 @@ import { PlotControls, PlotCrosshair } from "@/components/PlotNavigation";
 import type { Fn } from "@/lib/calc";
 import { findPlotAnnotations } from "@/lib/plot-annotations";
 import { ChalkAnnotation } from "@/components/ChalkAnnotation";
+import { plotSamples, sampleCurve } from "@/lib/plot-sampling";
 
 type Props = {
   fn: Fn;
@@ -40,19 +41,18 @@ export function Plot({ fn, xMin: initialXMin, xMax: initialXMax, points = [], li
   const navigation = usePlotViewport({ xMin: initialXMin, xMax: initialXMax, yMin, yMax }, String(fn));
   const { xMin, xMax } = navigation.domain;
   yMin = navigation.domain.yMin; yMax = navigation.domain.yMax;
-  const xs = Array.from({ length: N + 1 }, (_, i) => xMin + ((xMax - xMin) * i) / N);
+  const xs = useMemo(() => plotSamples(xMin, xMax, initialXMax - initialXMin), [xMin, xMax, initialXMin, initialXMax]);
   const annotations = useMemo(() => findPlotAnnotations(fn, xMin, xMax), [fn, xMin, xMax]);
   const sx = (x: number) => P + ((x - xMin) / (xMax - xMin)) * (W - 2 * P);
   const sy = (y: number) => H - P - ((y - yMin) / (yMax - yMin)) * (H - 2 * P);
 
   const path = (f: Fn) => {
-    let d = "", pen = false, prev = NaN;
-    for (const x of xs) {
-      const y = f(x);
-      const jump = Number.isFinite(prev) && Math.abs(y - prev) > (yMax - yMin) * 2;
-      if (!Number.isFinite(y) || y < yMin - (yMax - yMin) * 3 || y > yMax + (yMax - yMin) * 3 || jump) { pen = false; prev = y; continue; }
+    let d = "", pen = false;
+    for (const { x, y, breakBefore } of sampleCurve(f, xs, yMin, yMax)) {
+      if (y === null) { pen = false; continue; }
+      if (breakBefore) pen = false;
       d += `${pen ? "L" : "M"}${sx(x).toFixed(1)},${sy(y).toFixed(1)}`;
-      pen = true; prev = y;
+      pen = true;
     }
     return d;
   };
