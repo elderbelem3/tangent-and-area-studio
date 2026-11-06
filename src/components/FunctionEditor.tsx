@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useRef, type ReactNode } from "react";
+import { useMemo, useRef, type ReactNode } from "react";
 import katex from "katex";
 import { parse } from "mathjs";
 import { normalize } from "@/lib/calc";
 import { Plus, Trash2 } from "lucide-react";
-import { Field, MathToolbar, ErrorBox } from "@/components/Lab";
+import { MathBlockInput, type MathBlockHandle } from "@/components/MathBlockInput";
+import { MathToolbar, ErrorBox } from "@/components/Lab";
 import { Button } from "@/components/ui/button";
 import { FUNCTION_SLOTS, FUNCTION_TEXT_COLORS, MAX_FUNCTIONS, type ComparisonFunction } from "@/lib/comparison";
 import { parseFn } from "@/lib/calc";
@@ -43,22 +44,8 @@ function ExpressionPreview({ name, expression }: { name: string; expression: str
 function FunctionBlock({ item, onChange, onRemove, children }: {
   item: ComparisonFunction; onChange: (value: string) => void; onRemove: () => void; children?: ReactNode;
 }) {
-  const ref = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    const el = ref.current; if (!el) return;
-    // Tab / Enter / → at the end of an exponent block jumps back to the baseline after ")".
-    const onKey = (e: KeyboardEvent) => {
-      if (!["Tab", "Enter", "ArrowRight"].includes(e.key) || e.shiftKey) return;
-      const pos = el.selectionStart ?? 0;
-      const exit = exponentExit(el.value, pos);
-      if (exit === null || (e.key === "ArrowRight" && el.value[pos] !== ")")) return;
-      e.preventDefault();
-      el.setSelectionRange(exit, exit);
-    };
-    el.addEventListener("keydown", onKey);
-    return () => el.removeEventListener("keydown", onKey);
-  }, []);
-  const is3D = item.slot === 0 && needs3D(item.expression);
+  const ref = useRef<MathBlockHandle>(null);
+  const is3D = needs3D(item.expression);
   const error = item.expression.trim() ? (is3D ? parseFn2(item.expression).error : parseFn(item.expression).error) : null;
   const name = `${FUNCTION_SLOTS[item.slot]}(${is3D ? "x, y" : "x"})`;
   return <div className="space-y-3">
@@ -66,9 +53,9 @@ function FunctionBlock({ item, onChange, onRemove, children }: {
       <span className={`font-mono text-sm font-semibold ${FUNCTION_TEXT_COLORS[item.slot]}`}>{name}</span>
       {item.slot !== 0 && <Button type="button" variant="ghost" size="icon" title={`Excluir ${name}`} aria-label={`Excluir ${name}`} onClick={onRemove} className="h-8 w-8 text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>}
     </div>
-    <MathToolbar inputRef={ref} value={item.expression} onChange={onChange} />
-    <Field ref={ref} label={`${name} =`} value={item.expression} onChange={onChange} placeholder="ex: x^2, sin(x), exp(x)" />
-    {error ? <ErrorBox msg={error} /> : <ExpressionPreview name={name} expression={item.expression} />}
+    <MathToolbar value={item.expression} onChange={onChange} onInsert={(t) => ref.current?.insertTemplate(t)} onClear={() => ref.current?.clear()} />
+    <MathBlockInput ref={ref} label={`${name} =`} value={item.expression} onChange={onChange} />
+    {error && <ErrorBox msg={error} />}
     {children}
   </div>;
 }
