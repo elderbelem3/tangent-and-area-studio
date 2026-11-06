@@ -4,9 +4,22 @@ import { analyzeFunction } from "@/lib/analysis";
 import { FUNCTION_SLOTS, type ComparisonFunction } from "@/lib/comparison";
 
 const list = (xs: number[]) => xs.length ? xs.map((x) => fmt(x, 4)).join(", ") : "nenhuma no intervalo";
+// Analysis is pure: returning to an unchanged graph reuses the exact result.
+const analysisCache = new Map<string, ReturnType<typeof analyzeFunction>>();
+function cachedAnalysis(expression: string, xMin: number, xMax: number) {
+  const key = JSON.stringify([expression, xMin, xMax]);
+  if (analysisCache.has(key)) return analysisCache.get(key) ?? null;
+  const result = analyzeFunction(expression, xMin, xMax);
+  if (analysisCache.size >= 50) {
+    const oldest = analysisCache.keys().next().value;
+    if (oldest !== undefined) analysisCache.delete(oldest);
+  }
+  analysisCache.set(key, result);
+  return result;
+}
 
 export function AnalysisPanels({ functions, xMin, xMax }: { functions: ComparisonFunction[]; xMin: number; xMax: number }) {
-  const items = useMemo(() => functions.map((f) => ({ slot: f.slot, a: analyzeFunction(f.expression, xMin, xMax) })).filter((i) => i.a), [functions, xMin, xMax]);
+  const items = useMemo(() => functions.map((f) => ({ slot: f.slot, a: cachedAnalysis(f.expression, xMin, xMax) })).filter((i) => i.a), [functions, xMin, xMax]);
   if (!items.length) return null;
   return <>
     <section className="chalk-summary" aria-label="Resumo Matemático"><div><div className="chalk-summary-box">
