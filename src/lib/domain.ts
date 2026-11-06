@@ -54,6 +54,7 @@ export function realDomain(expression: string, min: number, max: number) {
         const name = o.fn.name;
         if (["log", "log2", "log10"].includes(name)) { add(u, ">"); if (name === "log" && v) { add(v, ">"); add(parse(`(${v.toString()})-1`), "≠"); } }
         if (name === "sqrt") add(u, "≥");
+        if (["asin", "acos"].includes(name)) { add(parse(`1-(${u.toString()})`), "≥"); add(parse(`1+(${u.toString()})`), "≥"); }
         if (["tan", "sec"].includes(name)) add(parse(`cos(${u.toString()})`), "≠", true);
         if (["csc", "cot"].includes(name)) add(parse(`sin(${u.toString()})`), "≠", true);
       }
@@ -91,8 +92,9 @@ export function realDomain(expression: string, min: number, max: number) {
   }
   const unique = (xs: number[]) => xs.sort((a, b) => a - b).filter((x, i, all) => i === 0 || Math.abs(x - (all[i - 1] ?? 0)) > 1e-8);
   const excluded = unique(exclusions), cuts = unique(boundaries);
-  const satisfies = (x: number) => restrictions.every((r) => {
-    const value = parseFn(r.expression).fn?.(x) ?? NaN;
+  const evaluatedRestrictions = restrictions.map((r) => ({ ...r, fn: parseFn(r.expression).fn }));
+  const satisfies = (x: number) => evaluatedRestrictions.every((r) => {
+    const value = r.fn?.(x) ?? NaN;
     return Number.isFinite(value) && (r.relation === "≠" ? Math.abs(value) > 1e-12 : r.relation === ">" ? value > 0 : value >= 0);
   });
   const intervals = [lo, ...cuts.filter((x) => x > lo && x < hi), hi];
