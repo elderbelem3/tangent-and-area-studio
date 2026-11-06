@@ -9,6 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { PageHeader } from "@/components/Lab";
 import { MathFormula } from "@/components/MathFormula";
 import { LEARN } from "@/lib/learn-content";
+import { useModuleState } from "@/lib/module-state";
 
 export const Route = createFileRoute("/aprenda")({
   head: () => ({
@@ -32,8 +33,8 @@ function TestButton({ test }: { test: GraphTest }) {
 }
 
 function Aprenda() {
-  const [active, setActive] = useState(LEARN[0]?.id ?? "");
-  const [opened, setOpened] = useState<string[]>(LEARN[0]?.topics[0] ? [LEARN[0].topics[0].id] : []);
+  const [active, setActive] = useModuleState("aprenda.active", LEARN[0]?.id ?? "");
+  const [opened, setOpened] = useModuleState<string[]>("aprenda.opened", LEARN[0]?.topics[0] ? [LEARN[0].topics[0].id] : []);
   const mod = LEARN.find((m) => m.id === active) ?? LEARN[0];
   if (!mod) return null;
 

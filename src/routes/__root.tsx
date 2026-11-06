@@ -103,7 +103,21 @@ const nav = [
 function RootComponent() {
   const [maintenance, setMaintenance] = useState(false);
   const { queryClient } = Route.useRouteContext();
-  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const router = useRouter();
+  useEffect(() => {
+    let cancelled = false;
+    // Load route chunks after the first page is usable, without mounting hidden
+    // charts or executing tutor actions. Sequential work avoids a download burst.
+    const timer = window.setTimeout(() => {
+      void (async () => {
+        for (const item of nav) {
+          if (cancelled) return;
+          try { await router.preloadRoute({ to: item.to }); } catch { /* Navigation retains its normal error handling. */ }
+        }
+      })();
+    }, 800);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [router]);
   return (
     <QueryClientProvider client={queryClient}>
       <div className="app-shell min-h-screen bg-background">
@@ -132,7 +146,7 @@ function RootComponent() {
         </header>
         <AiMaintenanceDialog open={maintenance} onOpenChange={setMaintenance} />
         <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 md:py-10">
-          <div key={pathname} className="module-enter"><Outlet /></div>
+          <div className="module-enter"><Outlet /></div>
         </main>
         <footer className="mx-auto mt-8 flex max-w-7xl flex-wrap items-center justify-between gap-3 border-t border-border px-5 py-6 text-xs text-muted-foreground sm:px-8">
           <span className="font-display font-medium">CalculusLab <span className="mx-2 text-border">/</span> Cálculo 1 e 2</span>
