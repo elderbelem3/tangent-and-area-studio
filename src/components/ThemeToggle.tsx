@@ -68,10 +68,10 @@ export function ThemeToggle() {
         <Flashlight className="h-5 w-5" /><span>Luz Negra</span><span className="font-mono text-xs">{uv ? "ON" : "UV"}</span>
       </Button>
     </TooltipTrigger><TooltipContent className="max-w-64 border border-border bg-popover text-popover-foreground text-sm leading-relaxed" side="bottom" sideOffset={48}>
-      <p className="font-semibold">{uv ? "Luz Negra ativa · toque para desativar" : "Ativar Luz Negra / Revelar Segredos"}</p>
-      <p className="mt-1">A visão analítica da lousa revela notas, detalhes dos gráficos e passos ocultos, além dos colaboradores secretos na aba Créditos.</p>
+      <p className="font-semibold">{uv ? "Visão Analítica UV ativa · toque para desativar" : "Ativar Visão Analítica UV"}</p>
+      <p className="mt-1">Modo de inspeção avançada para o estudo de cálculo: realça informações dos gráficos, dados matemáticos e etapas de resolução com contraste analítico na lousa.</p>
     </TooltipContent></Tooltip>
-    <p id={descriptionId} className="max-w-64 text-right text-xs leading-relaxed text-muted-foreground">Modo UV: revela análises, notas e créditos secretos.</p>
+    <p id={descriptionId} className="max-w-64 text-right text-xs leading-relaxed text-muted-foreground">Visão Analítica UV: inspeção de gráficos e dados na lousa.</p>
     </div>}
   </div></TooltipProvider>;
 }
