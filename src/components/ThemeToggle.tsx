@@ -18,7 +18,7 @@ export function ThemeToggle() {
   const descriptionId = useId();
   useEffect(() => {
     if (!uvHint) return;
-    const timer = setTimeout(() => setUvHint(false), 15000);
+    const timer = setTimeout(() => { touchHint.current = false; setUvHint(false); }, 15000);
     return () => clearTimeout(timer);
   }, [uvHint]);
   useEffect(() => {
@@ -63,7 +63,7 @@ export function ThemeToggle() {
       </DropdownMenuContent>
     </DropdownMenu>
     {theme === "chalkboard" && <div className="grid min-w-0 justify-items-end gap-1 py-2">
-    <Tooltip open={uvHint} onOpenChange={setUvHint}><TooltipTrigger asChild>
+    <Tooltip open={uvHint} onOpenChange={(open) => { if (open || !touchHint.current) setUvHint(open); }}><TooltipTrigger asChild>
       <Button type="button" variant="outline" size="sm" aria-label="Luz Negra" aria-describedby={descriptionId} aria-pressed={uv} onPointerDown={(event) => { touchHint.current = event.pointerType === "touch"; }} onClick={() => { toggleUv(); if (touchHint.current) setUvHint(true); }} className="uv-toggle h-11 shrink-0 gap-2 rounded-lg px-3 font-semibold">
         <Flashlight className="h-5 w-5" /><span>Luz Negra</span><span className="font-mono text-xs">{uv ? "ON" : "UV"}</span>
       </Button>
