@@ -44,12 +44,17 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
     acceptRef.current = (item) => {
       const el = mf.current, context = suggestionRef.current;
       if (!el || !context) return;
+      focusField(el);
       el.selection = { ranges: [[context.start, context.end]] };
       el.insert(item.latex, { selectionMode: "after", format: "latex" });
-      if (item.argument) { el.executeCommand("moveToPreviousChar"); el.executeCommand("extendToPreviousChar"); }
+      if (item.argument) {
+        el.executeCommand("moveToPreviousChar");
+        const end = el.position;
+        el.selection = { ranges: [[end - 1, end]] };
+      }
       dismiss();
       const out = asciiToMathjs(el.getValue("ascii-math"));
-      lastEmitted.current = out; onChangeRef.current(out); focusField(el);
+      lastEmitted.current = out; onChangeRef.current(out);
     };
 
     useEffect(() => {
