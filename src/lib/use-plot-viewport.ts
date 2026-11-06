@@ -43,7 +43,14 @@ export function usePlotViewport(base: PlotDomain, resetKey: string) {
         if (event.type === "wheel") return true;
         const bounds = rect();
         if (!bounds || event.button) return false;
-        if (event.type.startsWith("touch")) return true;
+        if (event.type.startsWith("touch")) {
+          const outer = el.getBoundingClientRect();
+          const touches = Array.from(event.touches ?? []) as { clientX: number; clientY: number }[];
+          return touches.length > 0 && touches.every((touch) => {
+            const x = touch.clientX - outer.left, y = touch.clientY - outer.top;
+            return x >= bounds.left && x <= bounds.left + bounds.width && y >= bounds.top && y <= bounds.top + bounds.height;
+          });
+        }
         const outer = el.getBoundingClientRect(), x = event.clientX - outer.left, y = event.clientY - outer.top;
         return x >= bounds.left && x <= bounds.left + bounds.width && y >= bounds.top && y <= bounds.top + bounds.height;
       })

@@ -40,6 +40,7 @@ export const Field = forwardRef<HTMLInputElement, { label: string; value: string
     };
     const accept = (item: MathSuggestion) => {
       const el = input.current; if (!el || !context) return;
+      el.focus();
       const end = el.selectionStart ?? value.length;
       onChange(value.slice(0, context.start) + item.expression + value.slice(end));
       setContext(null);
