@@ -8,7 +8,7 @@ export function PageHeader({ tag, title, desc }: { tag: string; title: string; d
   return (
     <header className="mb-8 flex items-start gap-4 border-b border-border pb-7">
       <span className="mt-1 hidden h-14 w-14 shrink-0 place-items-center rounded-xl border border-primary/15 bg-primary/5 text-primary sm:grid"><ChartSpline className="h-6 w-6" /></span>
-      <div>
+      <div className="min-w-0">
       <p className="text-xs font-semibold uppercase text-primary">{tag}</p>
       <h1 className="mt-2 font-display text-3xl font-bold md:text-4xl">{title}</h1>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">{desc}</p>
@@ -58,6 +58,9 @@ export const Field = forwardRef<HTMLInputElement, { label: string; value: string
           aria-label={label}
           value={value}
           placeholder={placeholder}
+          autoCapitalize="off"
+          autoCorrect="off"
+          spellCheck={false}
           onChange={(e) => { onChange(e.target.value); suggest(e.target); }}
           onClick={(e) => suggest(e.currentTarget)}
           onBlur={() => setContext(null)}
@@ -69,7 +72,7 @@ export const Field = forwardRef<HTMLInputElement, { label: string; value: string
             else if (event.key === "ArrowDown" || event.key === "ArrowUp") { event.preventDefault(); setActive((v) => (v + (event.key === "ArrowDown" ? 1 : -1) + context.suggestions.length) % context.suggestions.length); }
             else if (event.key === "Tab" || event.key === "Enter") { const item = context.suggestions[active]; if (item) { event.preventDefault(); accept(item); } }
           }}
-          className={`h-11 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 ${mono ? "font-mono" : ""}`}
+          className={`h-11 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2.5 text-base sm:text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 ${mono ? "font-mono" : ""}`}
         />
         {context && <MathSuggestions id={id} items={context.suggestions} active={active} onSelect={accept} />}
         </div>
@@ -115,11 +118,13 @@ export function templateCursor(insert: string): number {
 /** Scientific-calculator keyboard: inserts full templates and places the cursor inside them. */
 export function MathToolbar({ inputRef, value, onChange, onInsert, onClear }: { inputRef?: RefObject<HTMLInputElement | null>; value: string; onChange: (v: string) => void; onInsert?: (template: string) => void; onClear?: () => void }) {
   const [tab, setTab] = useState("basic");
-  const group = MATH_GROUPS.find((g) => g.id === tab) ?? MATH_GROUPS[0]!;
+  const group = MATH_GROUPS.find((g) => g.id === tab) ?? MATH_GROUPS[0];
+  if (!group) return null;
   const insertAtCursor = (text: string) => {
     if (onInsert) { onInsert(text); return; }
     if (!inputRef) return;
     const el = inputRef.current;
+    el?.focus();
     const start = el?.selectionStart ?? value.length;
     const end = el?.selectionEnd ?? value.length;
     const selected = value.slice(start, end);
@@ -131,22 +136,22 @@ export function MathToolbar({ inputRef, value, onChange, onInsert, onClear }: { 
   };
   return (
     <div className="rounded-xl border border-border bg-muted/50 p-2" aria-label="Teclado de símbolos matemáticos">
-      <div className="mb-2 flex items-center gap-1" role="tablist">
-        <div className="grid flex-1 grid-cols-4 gap-1 rounded-lg bg-background/70 p-0.5">
+      <div className="mb-2 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2" role="tablist">
+        <div className="grid min-w-0 grid-cols-2 gap-1 rounded-lg bg-background/70 p-0.5 sm:grid-cols-4">
           {MATH_GROUPS.map((g) => (
-            <button key={g.id} type="button" role="tab" aria-selected={g.id === tab} onMouseDown={(e) => e.preventDefault()} onClick={() => setTab(g.id)}
-              className={`truncate rounded-md px-1 py-1.5 text-[11px] font-semibold transition ${g.id === tab ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
+            <Button variant="ghost" key={g.id} type="button" role="tab" aria-selected={g.id === tab} onMouseDown={(e) => e.preventDefault()} onClick={() => setTab(g.id)}
+              className={`h-11 min-w-0 rounded-md px-1 text-[11px] font-semibold transition sm:h-8 ${g.id === tab ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
               {g.label}
-            </button>
+            </Button>
           ))}
         </div>
-        <Button variant="ghost" size="icon" type="button" title="Limpar função" aria-label="Limpar função" disabled={!value} onClick={() => { if (onClear) { onClear(); return; } onChange(""); inputRef?.current?.focus(); }} className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"><Eraser /></Button>
+        <Button variant="ghost" size="icon" type="button" title="Limpar função" aria-label="Limpar função" disabled={!value} onClick={() => { if (onClear) { onClear(); return; } onChange(""); inputRef?.current?.focus(); }} className="h-11 w-11 shrink-0 text-muted-foreground hover:text-destructive sm:h-8 sm:w-8"><Eraser /></Button>
       </div>
-      <div className="grid grid-cols-4 gap-1.5" role="toolbar" aria-label={group.label}>
+      <div className="grid grid-cols-4 gap-2 sm:gap-1.5" role="toolbar" aria-label={group.label}>
         {group.keys.map((k) => (
           <Button variant="outline" size="sm" type="button" key={k.label} title={`${k.hint} · ${k.insert}`} aria-label={k.label}
             onMouseDown={(e) => e.preventDefault()} onClick={() => insertAtCursor(k.insert)}
-            className="h-10 min-w-0 border-border bg-card px-1 font-mono text-sm hover:border-primary/40 hover:text-primary active:scale-95">
+            className="h-12 min-w-0 border-border bg-card px-1 font-mono text-sm hover:border-primary/40 hover:text-primary active:scale-95 sm:h-10">
             {k.label}
           </Button>
         ))}
@@ -175,7 +180,7 @@ export function Stat({ label, value }: { label: string; value: string }) {
 
 export function Chip({ onClick, children }: { onClick: () => void; children: ReactNode }) {
   return (
-    <Button variant="outline" size="sm" onClick={onClick} className="h-8 rounded-md font-mono border-border bg-background px-2.5 text-xs text-muted-foreground hover:border-primary/30 hover:text-primary">
+    <Button variant="outline" size="sm" onClick={onClick} className="min-h-11 h-auto max-w-full whitespace-normal rounded-md font-mono border-border bg-background px-2.5 py-2 text-xs text-muted-foreground hover:border-primary/30 hover:text-primary sm:min-h-8">
       {children}<ArrowUpRight className="!size-3 opacity-50" />
     </Button>
   );
