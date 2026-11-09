@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState, useId } from "react";
-import { asciiToMathjs, exprToLatex, templateToLatex } from "@/lib/math-blocks";
+import { asciiToMathjs, blockTemplateLatex, exprToLatex, templateToLatex } from "@/lib/math-blocks";
 import { mathSuggestions, type MathSuggestion } from "@/lib/math-suggestions";
 import { MathSuggestions } from "@/components/MathSuggestions";
 

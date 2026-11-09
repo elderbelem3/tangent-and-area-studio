@@ -82,7 +82,7 @@ export const Field = forwardRef<HTMLInputElement, { label: string; value: string
   }
 );
 
-type MathKey = { label: string; insert: string; hint: string };
+type MathKey = { label: string; insert: string; hint: string; /** Text inserted into plain inputs (Limites/Integrais) when different from the block-editor token. */ plain?: string };
 const fnKey = (label: string, name: string, hint: string): MathKey => ({ label, insert: `${name}()`, hint });
 
 export const MATH_GROUPS: { id: string; label: string; keys: MathKey[] }[] = [
@@ -93,10 +93,11 @@ export const MATH_GROUPS: { id: string; label: string; keys: MathKey[] }[] = [
     { label: "x", insert: "x", hint: "Variável x" }, { label: "y", insert: "y", hint: "Variável y (3D)" },
   ] },
   { id: "pow", label: "Potências", keys: [
-    { label: "x²", insert: "^2", hint: "Ao quadrado" }, { label: "xʸ", insert: "^()", hint: "Potência: digite o expoente" },
-    fnKey("√x", "sqrt", "Raiz quadrada"), fnKey("∛x", "cbrt", "Raiz cúbica"),
+    { label: "x²", insert: "^2", hint: "Ao quadrado" }, { label: "xʸ", insert: "^()", hint: "Potência: base e expoente" },
+    fnKey("√x", "sqrt", "Raiz quadrada"), { label: "ⁿ√x", insert: "nthroot", hint: "Raiz de índice variável", plain: "nthRoot()" },
     fnKey("eˣ", "exp", "Exponencial"), fnKey("ln", "log", "Logaritmo natural"),
-    fnKey("log₁₀", "log10", "Logaritmo base 10"), fnKey("|x|", "abs", "Módulo"),
+    fnKey("log₁₀", "log10", "Logaritmo base 10"), { label: "logₓ", insert: "logb()", hint: "Logaritmo de base variável", plain: "log(,)" },
+    fnKey("|x|", "abs", "Módulo"),
   ] },
   { id: "trig", label: "Trigonometria", keys: [
     fnKey("sin", "sin", "Seno"), fnKey("cos", "cos", "Cosseno"), fnKey("tan", "tan", "Tangente"), fnKey("sec", "sec", "Secante"),
