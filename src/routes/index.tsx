@@ -1,7 +1,7 @@
 import { useModuleState } from "@/lib/module-state";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { parseFn, fmt } from "@/lib/calc";
+import { } from "@/lib/calc";
 import { ComparisonPlot } from "@/components/ComparisonPlot";
 import { FunctionEditor } from "@/components/FunctionEditor";
 import { addComparisonFunction, FUNCTION_BG_COLORS, FUNCTION_SLOTS, removeComparisonFunction, type ComparisonFunction } from "@/lib/comparison";
