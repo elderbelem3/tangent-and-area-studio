@@ -1,11 +1,13 @@
 import { useModuleState } from "@/lib/module-state";
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useRef, useState } from "react";
-import { parseFn, integrate, fmt } from "@/lib/calc";
+import { useMemo, useRef } from "react";
+import { parseFn, fmt } from "@/lib/calc";
+import { MathExpression } from "@/components/MathExpression";
+import { expressionLatex } from "@/lib/math-format";
 import { Plot } from "@/components/Plot";
 import { IntegralUvOverlay } from "@/components/UvOverlays";
 import { UvStepsPanel } from "@/components/UvStepsPanel";
-import { definiteIntegral } from "@/lib/uv-steps";
+import { definiteIntegral, indefiniteIntegral } from "@/lib/uv-steps";
 import { Smart3DView } from "@/components/Smart3DView";
 import { solidSteps } from "@/lib/smart3d";
 import { integralExamples } from "@/lib/study-examples";
@@ -18,9 +20,9 @@ export const Route = createFileRoute("/integrais")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { title: "Integrais · CalculusLab" },
-      { name: "description", content: "Calcule integrais definidas e visualize a área sob a curva." },
+      { name: "description", content: "Veja integrais indefinidas em notação matemática e calcule integrais definidas com área sob a curva." },
       { property: "og:title", content: "Integrais · CalculusLab" },
-      { property: "og:description", content: "Integral definida como área acumulada." },
+      { property: "og:description", content: "Primitivas com constante de integração e integrais definidas como área acumulada." },
     ],
   }),
   component: Integrais,
@@ -33,6 +35,7 @@ function Integrais() {
   const [mode, setMode] = useModuleState<"area" | "solido">("integrais.mode", "area");
   const inputRef = useRef<HTMLInputElement>(null);
   const { fn, error } = useMemo(() => parseFn(expr), [expr]);
+  const primitive = useMemo(() => indefiniteIntegral(expr), [expr]);
   const a = num(aS), b = num(bS);
   const valid = fn && a !== null && b !== null;
   const result = useMemo(() => valid ? definiteIntegral(expr, a, b) : null, [valid, expr, a, b]);
@@ -69,7 +72,14 @@ function Integrais() {
               {bad && <ErrorBox msg={result?.error ?? "Não foi possível estabelecer uma integral finita no intervalo."} />}
             </div>
           </Panel>
-          {valid && !bad && (mode === "solido" && solid ? <Stat label={`V = π ∫ de ${fmt(a)} a ${fmt(b)} f(x)² dx`} value={fmt(solid.volume, 6)} /> : <Stat label={`∫ de ${fmt(a)} a ${fmt(b)} f(x) dx`} value={fmt(value, 6)} />)}
+          {fn && <Panel title="Integral indefinida">
+            <div className="space-y-4">
+              <div><p className="text-xs font-medium text-muted-foreground">Função original</p><MathExpression expression={expr} prefix="f(x) = " /></div>
+              <div><p className="text-xs font-medium text-muted-foreground">Integral indefinida</p>{primitive !== null ? <MathExpression expression={primitive} prefix="F(x) = " suffix=" + C" /> : <p className="text-sm text-muted-foreground">Não foi possível obter uma primitiva simbólica verificada pelo método disponível. A integração definida continua disponível quando o intervalo é válido.</p>}</div>
+              {primitive !== null && <p className="text-xs text-muted-foreground">C é a constante de integração. A primitiva vale em cada intervalo do domínio da função.</p>}
+            </div>
+          </Panel>}
+          {valid && !bad && (mode === "solido" && solid ? <Stat label={`V = π ∫ de ${fmt(a)} a ${fmt(b)} f(x)² dx`} value={fmt(solid.volume, 6)} /> : <Panel title="Integral definida"><MathExpression expression={fmt(value, 6)} prefix={`\\int_{${a}}^{${b}} \\left(${expressionLatex(expr)}\\right)\\,dx ${result?.method === "Simpson" ? "\\approx" : "="} `} /></Panel>)}
         </div>
         <div className="min-w-0 space-y-6">
           <Panel title={mode === "solido" ? "Sólido de revolução (3D)" : "Área sob a curva"}>
