@@ -21,7 +21,8 @@ export function DerivativeResult({ item, point, onPointChange }: { item: Compari
         {symbolic !== null ? <MathExpression expression={symbolic} prefix={`${name}'(x) = `} /> : <p className="text-sm text-muted-foreground">Não foi possível obter a derivada simbólica desta expressão pelo método disponível.</p>}
       </div>
       <Field label={`Ponto x₀ de ${name}(x)`} value={point} onChange={onPointChange} placeholder="Opcional" />
-      {point.trim() && !values && <ErrorBox msg="Informe um número válido para x₀." />}
+      {parsed.error && <ErrorBox msg={parsed.error} />}
+      {point.trim() && !Number.isFinite(Number(point.replace(",", "."))) && <ErrorBox msg="Informe um número válido para x₀." />}
       {values && !valid && <ErrorBox msg="A função não é definida ou não é derivável neste ponto. Não existe reta tangente com inclinação finita." />}
       {valid && <>
         <div className="grid grid-cols-2 gap-3">
