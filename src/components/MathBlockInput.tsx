@@ -86,9 +86,10 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
             typedPower.current = false;
             if (/x\^\{\\placeholder\{\}\}$/.test(el.value)) {
               const powerContext = mathSuggestions("x^");
-            if (powerContext) {
-              suggestionRef.current = { items: powerContext.suggestions, start: Math.max(0, el.lastOffset - 4), end: el.lastOffset, active: 0 };
-              setSuggestions(powerContext.suggestions); setActive(0); return;
+              if (powerContext) {
+                suggestionRef.current = { items: powerContext.suggestions, start: Math.max(0, el.lastOffset - 4), end: el.lastOffset, active: 0 };
+                setSuggestions(powerContext.suggestions); setActive(0); return;
+              }
             }
           }
           if (!context) { dismiss(); return; }
