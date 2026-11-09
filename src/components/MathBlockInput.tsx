@@ -44,6 +44,8 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
     const [suggestions, setSuggestions] = useState<MathSuggestion[]>([]);
     const [active, setActive] = useState(0);
     const suggestionRef = useRef<{ items: MathSuggestion[]; start: number; end: number; active: number } | null>(null);
+    // Power suggestions only apply when the user typed ^ — not when the xʸ button inserted the block.
+    const typedPower = useRef(false);
     const dismiss = () => { suggestionRef.current = null; setSuggestions([]); };
     const acceptRef = useRef<(item: MathSuggestion) => void>(() => {});
     acceptRef.current = (item) => {
@@ -80,8 +82,10 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
           const end = el.position;
           const prefix = asciiToMathjs(el.getValue(0, end, "ascii-math")).replace(/x\^\(\(\)\)$/, "x^");
           const context = mathSuggestions(prefix);
-          if (/x\^\{\\placeholder\{\}\}$/.test(el.value)) {
-            const powerContext = mathSuggestions("x^");
+          if (typedPower.current) {
+            typedPower.current = false;
+            if (/x\^\{\\placeholder\{\}\}$/.test(el.value)) {
+              const powerContext = mathSuggestions("x^");
             if (powerContext) {
               suggestionRef.current = { items: powerContext.suggestions, start: Math.max(0, el.lastOffset - 4), end: el.lastOffset, active: 0 };
               setSuggestions(powerContext.suggestions); setActive(0); return;
