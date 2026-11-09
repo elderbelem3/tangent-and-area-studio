@@ -176,7 +176,7 @@ function SurfaceUv({ d, info }: { d: NonNullable<ReturnType<typeof surfaceData>>
 
 function Axes({ chalk, dark, L }: { chalk: boolean; dark?: boolean; L: number }) {
   // Vivid per-axis colors so users identify each axis at a glance, in every theme.
-  const xColor = chalk ? "#fde047" : dark ? "#60a5fa" : "#4f46e5";
+  const xColor = chalk ? "#fde047" : dark ? "#f472b6" : "#db2777";
   const zColor = chalk ? "#f9a8d4" : dark ? "#fb923c" : "#ea580c";
   const yColor = chalk ? "#86efac" : dark ? "#4ade80" : "#16a34a";
   return <group>
