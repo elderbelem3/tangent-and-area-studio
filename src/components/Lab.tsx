@@ -114,7 +114,9 @@ export const MATH_GROUPS: { id: string; label: string; keys: MathKey[] }[] = [
 /** Cursor position after inserting a template: inside the first empty "()". */
 export function templateCursor(insert: string): number {
   const i = insert.indexOf("()");
-  return i >= 0 ? i + 1 : insert.length;
+  if (i >= 0) return i + 1;
+  const comma = insert.indexOf("(,");
+  return comma >= 0 ? comma + 1 : insert.length;
 }
 
 /** Scientific-calculator keyboard: inserts full templates and places the cursor inside them. */
@@ -122,8 +124,9 @@ export function MathToolbar({ inputRef, value, onChange, onInsert, onClear, onDe
   const [tab, setTab] = useState("basic");
   const group = MATH_GROUPS.find((g) => g.id === tab) ?? MATH_GROUPS[0];
   if (!group) return null;
-  const insertAtCursor = (text: string) => {
-    if (onInsert) { onInsert(text); return; }
+  const insertAtCursor = (key: MathKey) => {
+    if (onInsert) { onInsert(key.insert); return; }
+    const text = key.plain ?? key.insert;
     if (!inputRef) return;
     const el = inputRef.current;
     el?.focus();
@@ -165,7 +168,7 @@ export function MathToolbar({ inputRef, value, onChange, onInsert, onClear, onDe
       <div className="grid grid-cols-4 gap-2 sm:gap-1.5" role="toolbar" aria-label={group.label}>
         {group.keys.map((k) => (
           <Button variant="outline" size="sm" type="button" key={k.label} title={`${k.hint} · ${k.insert}`} aria-label={k.label}
-            onMouseDown={(e) => e.preventDefault()} onClick={() => insertAtCursor(k.insert)}
+            onMouseDown={(e) => e.preventDefault()} onClick={() => insertAtCursor(k)}
             className="h-12 min-w-0 border-border bg-card px-1 font-mono text-sm hover:border-primary/40 hover:text-primary active:scale-95 sm:h-10">
             {k.label}
           </Button>
