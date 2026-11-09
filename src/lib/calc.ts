@@ -12,11 +12,23 @@ export function constantValue(expression: string): number | null {
   } catch { return null; }
 }
 
-/** Normalize base-10 subscripts without splitting digits that belong to function names. */
+/** Normalize base subscripts without splitting digits that belong to function names. */
 export function normalizeLogarithms(expr: string): string {
-  return expr.replace(/\blog\s*_\s*(?:\{\s*2\s*\}|\(\s*2\s*\)|2)\s*(?=\()/g, "log2")
+  let s = expr.replace(/\blog\s*_\s*(?:\{\s*2\s*\}|\(\s*2\s*\)|2)\s*(?=\()/g, "log2")
     .replace(/\blog\s*_\s*(?:\{\s*10\s*\}|\(\s*10\s*\)|10)\s*(?=\()/g, "log10")
     .replace(/\bln\s*(?=\()/g, "log");
+  // Arbitrary bases: log_3(81) → log(81, 3); log_x(25) → log(25, x).
+  const basePattern = /\blog\s*_\s*(\d+(?:\.\d+)?|[a-zA-Z]\w*)\s*\(/;
+  for (let guard = 0; guard < 10; guard++) {
+    const m = basePattern.exec(s);
+    if (!m) break;
+    const argStart = m.index + m[0].length;
+    let depth = 1, j = argStart;
+    while (j < s.length && depth > 0) { if (s[j] === "(") depth++; else if (s[j] === ")") depth--; j++; }
+    if (depth !== 0) break;
+    s = s.slice(0, m.index) + `log(${s.slice(argStart, j - 1)}, ${m[1]})` + s.slice(j);
+  }
+  return s;
 }
 
 /** Normalize student syntax: "3x" -> "3*x", preserving names such as log10. */
