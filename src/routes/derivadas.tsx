@@ -1,16 +1,16 @@
 import { useModuleState } from "@/lib/module-state";
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { parseFn, derivative, fmt } from "@/lib/calc";
 import { ComparisonPlot } from "@/components/ComparisonPlot";
 import { UvStepsPanel } from "@/components/UvStepsPanel";
 import { derivativeSteps } from "@/lib/uv-steps";
 import { tangentExpression } from "@/lib/math-format";
-import { MathExpression } from "@/components/MathExpression";
+import { DerivativeResult } from "@/components/DerivativeResult";
 import { derivativeExamples } from "@/lib/study-examples";
 import { FunctionEditor } from "@/components/FunctionEditor";
-import { addComparisonFunction, removeComparisonFunction, FUNCTION_SLOTS, FUNCTION_TEXT_COLORS, type ComparisonFunction } from "@/lib/comparison";
-import { PageHeader, Panel, Field, ErrorBox, Chip, Stat, num } from "@/components/Lab";
+import { addComparisonFunction, removeComparisonFunction, type ComparisonFunction } from "@/lib/comparison";
+import { PageHeader, Panel, Chip, num } from "@/components/Lab";
 
 export const Route = createFileRoute("/derivadas")({
   head: () => ({
@@ -18,9 +18,9 @@ export const Route = createFileRoute("/derivadas")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { title: "Derivadas · CalculusLab" },
-      { name: "description", content: "Calcule a derivada num ponto e veja a reta tangente no gráfico." },
+      { name: "description", content: "Veja derivadas simbólicas, avalie cada função no seu próprio ponto e compare retas tangentes." },
       { property: "og:title", content: "Derivadas · CalculusLab" },
-      { property: "og:description", content: "Reta tangente e taxa de variação instantânea." },
+      { property: "og:description", content: "Derivadas simbólicas e numéricas com pontos independentes por função." },
     ],
   }),
   component: Derivadas,
@@ -31,7 +31,12 @@ function Derivadas() {
   const expr = functions.find((item) => item.slot === 0)?.expression ?? "";
   const changeExpression = (slot: number, expression: string) => setFunctions((previous) => previous.map((item) => item.slot === slot ? { ...item, expression } : item));
   const setExpr = (expression: string) => changeExpression(0, expression);
-  const [x0S, setX0] = useModuleState("derivadas.x0S", "1");
+  const [points, setPoints] = useModuleState<Record<number, string>>("derivadas.points", { 0: "1" });
+  const x0S = points[0] ?? "";
+  const tangentPoints = useMemo(() => Object.fromEntries(functions.flatMap((item) => {
+    const point = num(points[item.slot] ?? "");
+    return point === null ? [] : [[item.slot, point]];
+  })), [functions, points]);
   const { fn } = useMemo(() => parseFn(expr), [expr]);
   const x0 = num(x0S);
   const y0 = fn && x0 !== null ? fn(x0) : NaN;
@@ -46,38 +51,16 @@ function Derivadas() {
         <div className="space-y-5">
           <Panel>
             <div className="space-y-5">
-              <FunctionEditor functions={functions} onChange={changeExpression} onAdd={() => setFunctions(addComparisonFunction)} onRemove={(slot) => setFunctions((previous) => removeComparisonFunction(previous, slot))} mainExtras={<div className="flex flex-wrap gap-2">
+              <FunctionEditor functions={functions} onChange={changeExpression} onAdd={() => setFunctions(addComparisonFunction)} onRemove={(slot) => { setFunctions((previous) => removeComparisonFunction(previous, slot)); setPoints((previous) => { const next = { ...previous }; delete next[slot]; return next; }); }} mainExtras={<div className="flex flex-wrap gap-2">
                 {derivativeExamples.map((e) => <Chip key={e.label} onClick={() => setExpr(e.expression)}>{e.label}</Chip>)}
               </div>} />
-              <Field label="Ponto x₀" value={x0S} onChange={setX0} />
-              {x0 === null && <ErrorBox msg="Informe um número válido para x₀." />}
-              {fn && x0 !== null && !ok && <ErrorBox msg="A função não é definida ou não é derivável neste ponto (ex.: divisão por zero)." />}
             </div>
           </Panel>
-          {ok && (
-            <div className="grid grid-cols-2 gap-3">
-              <Stat label="f'(x₀)" value={fmt(m, 5)} />
-              <Stat label="f(x₀)" value={fmt(y0, 5)} />
-              <div className="col-span-2 rounded-xl bg-secondary p-4">
-                <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">Reta tangente</p>
-                <MathExpression expression={tangentExpression(m, b)} prefix="y = " />
-                <p className="mt-1 font-mono text-sm text-muted-foreground">Inclinação: {fmt(m, 4)} ({m > 1e-6 ? "crescente" : m < -1e-6 ? "decrescente" : "ponto crítico"})</p>
-              </div>
-            </div>
-          )}
-          {functions.length > 1 && x0 !== null && <Panel title="Derivadas das funções">
-            <div className="space-y-3">{functions.filter((item) => item.slot !== 0).map((item) => {
-              const parsed = parseFn(item.expression);
-              const value = parsed.fn ? derivative(parsed.fn, x0) : NaN;
-              return <div key={item.slot} className="flex items-center justify-between gap-3 border-b border-border pb-2 font-mono text-sm"><span className={FUNCTION_TEXT_COLORS[item.slot]}>{FUNCTION_SLOTS[item.slot]}'({fmt(x0)})</span><span>{fmt(value, 5)}</span></div>;
-            })}</div>
-          </Panel>}
+          {functions.map((item) => <DerivativeResult key={item.slot} item={item} point={points[item.slot] ?? ""} onPointChange={(value) => setPoints((previous) => ({ ...previous, [item.slot]: value }))} />)}
         </div>
         <div className="min-w-0 space-y-6">
           <Panel title="Curvas e retas tangentes">
-            {x0 !== null ? (
-              <ComparisonPlot functions={functions} xMin={x0 - 4} xMax={x0 + 4} tangentAt={x0} analysis={false} />
-            ) : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
+            <ComparisonPlot functions={functions} xMin={(x0 ?? 0) - 4} xMax={(x0 ?? 0) + 4} tangentAt={x0 ?? 0} tangentPoints={tangentPoints} analysis={false} />
             {x0 !== null && fn && <UvStepsPanel title="Regras de Derivação Passo a Passo" steps={(() => { const s = derivativeSteps(expr); return s && [...s, { title: "Aplicação no ponto", lines: ok ? [`f′(${fmt(x0)}) = ${fmt(m, 5)} · f(${fmt(x0)}) = ${fmt(y0, 5)}`, `Reta tangente: y = ${tangentExpression(m, b)}`] : [`A função não é definida ou não é derivável em x = ${fmt(x0)}. Não existe reta tangente com inclinação finita neste ponto.`] }]; })()} />}
           </Panel>
           <Panel title="Interpretação geométrica">
