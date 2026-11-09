@@ -92,7 +92,7 @@ export function Plot({ fn, xMin: initialXMin, xMax: initialXMax, points = EMPTY_
       {axisTicks(xMin, xMax, 5).map((t) => (
         <g key={`x${t}`}>
           <line x1={sx(t)} x2={sx(t)} y1={P} y2={H - P} className="stroke-grid" />
-          <text x={sx(t)} y={H - P + 16} textAnchor="middle" className="fill-muted-foreground text-[12px]">{axisLabel(t, xMax - xMin)}</text>
+          <text x={sx(t)} y={H - P + 16} textAnchor="middle" className="fill-axis-x text-[12px] font-semibold">{axisLabel(t, xMax - xMin)}</text>
         </g>
       ))}
       {axisTicks(yMin, yMax).map((t) => (
