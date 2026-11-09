@@ -15,8 +15,8 @@ import { curveChartRows, plotSamples, sampleCurve } from "@/lib/plot-sampling";
 import { useSettledPlotDomain } from "@/lib/use-settled-plot-domain";
 import { tangentExpression } from "@/lib/math-format";
 
-export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax, tangentAt, analysis = true }: {
-  functions: ComparisonFunction[]; xMin: number; xMax: number; tangentAt?: number; analysis?: boolean;
+export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax, tangentAt, tangentPoints, analysis = true }: {
+  functions: ComparisonFunction[]; xMin: number; xMax: number; tangentAt?: number; tangentPoints?: Partial<Record<number, number>>; analysis?: boolean;
 }) {
   const [hidden, setHidden] = useModuleState<number[]>(tangentAt === undefined ? "funcoes.hiddenCurves" : "derivadas.hiddenCurves", []);
   useEffect(() => {
@@ -30,12 +30,13 @@ export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax
     let low = Math.min(0, values[Math.floor(values.length * 0.03)] ?? -1);
     let high = Math.max(0, values[Math.floor(values.length * 0.97)] ?? 1);
     for (const item of visible) {
-      const y = tangentAt !== undefined ? item.fn?.(tangentAt) : NaN;
+      const point = tangentPoints ? tangentPoints[item.slot] : tangentAt;
+      const y = point !== undefined ? item.fn?.(point) : NaN;
       if (y !== undefined && Number.isFinite(y)) { low = Math.min(low, y); high = Math.max(high, y); }
     }
     const pad = Math.max(high - low, 1) * 0.12;
     return { low: low - pad, high: high + pad };
-  }, [visible, initialXMin, initialXMax, tangentAt]);
+  }, [visible, initialXMin, initialXMax, tangentAt, tangentPoints]);
   let { low, high } = initialRange;
   const navigation = usePlotViewport({ xMin: initialXMin, xMax: initialXMax, yMin: low, yMax: high }, functions.map((f) => `${f.slot}:${f.expression}`).join("|") + hidden.join(","));
   const { xMin, xMax, yMin: viewLow, yMax: viewHigh } = navigation.domain;
@@ -46,16 +47,17 @@ export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax
   const yIntercepts = useMemo(() => xMin <= 0 && xMax >= 0 ? curves.map((item) => ({ slot: item.slot, y: item.fn?.(0) ?? NaN })).filter((p) => Number.isFinite(p.y)) : [], [curves, xMin, xMax]);
 
   const tangents = useMemo(() => visible.map((item) => {
-    const y = tangentAt !== undefined ? item.fn?.(tangentAt) ?? NaN : NaN;
-    const slope = tangentAt !== undefined && item.fn ? derivative(item.fn, tangentAt) : NaN;
-    return { ...item, y, slope };
-  }), [visible, tangentAt]);
+    const point = tangentPoints ? tangentPoints[item.slot] : tangentAt;
+    const y = point !== undefined ? item.fn?.(point) ?? NaN : NaN;
+    const slope = point !== undefined && item.fn ? derivative(item.fn, point) : NaN;
+    return { ...item, point, y, slope };
+  }), [visible, tangentAt, tangentPoints]);
   const data = useMemo(() => {
     const sampled = tangents.map((item) => ({ key: `curve${item.slot}`, points: item.fn ? sampleCurve(item.fn, samples, low, high) : [] }));
     return curveChartRows(samples, sampled).map((row) => {
     const x = row["x"] ?? 0;
     for (const item of tangents) {
-      row[`tangent${item.slot}`] = tangentAt !== undefined && Number.isFinite(item.y) && Number.isFinite(item.slope) ? item.y + item.slope * (x - tangentAt) : null;
+      row[`tangent${item.slot}`] = item.point !== undefined && Number.isFinite(item.y) && Number.isFinite(item.slope) ? item.y + item.slope * (x - item.point) : null;
     }
     return row;
     });
@@ -72,7 +74,7 @@ export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax
           {xMin <= 0 && xMax >= 0 && <ReferenceLine x={0} stroke="var(--axis-y)" strokeWidth={2} shape={(props: { x1?: number; y1?: number; x2?: number; y2?: number }) => <ChalkAxis {...props} color="var(--axis-y)" />} />}
           {tangents.map((item) => <Line key={`curve${item.slot}`} type="linear" dataKey={`curve${item.slot}`} name={`${FUNCTION_SLOTS[item.slot]}(x)`} stroke={`var(--chart-${item.slot + 1})`} strokeWidth={2.5} dot={false} connectNulls={false} isAnimationActive={false} />)}
           {tangentAt !== undefined && tangents.filter((item) => Number.isFinite(item.y) && Number.isFinite(item.slope)).map((item) => <Line key={`tangent${item.slot}`} dataKey={`tangent${item.slot}`} name={`Tangente ${FUNCTION_SLOTS[item.slot]}`} stroke={`var(--chart-${item.slot + 1})`} strokeWidth={1.5} strokeDasharray="6 4" dot={false} isAnimationActive={false} />)}
-          {tangentAt !== undefined && tangents.filter((item) => Number.isFinite(item.y)).map((item) => <ReferenceDot key={item.slot} x={tangentAt} y={item.y} r={4} fill={`var(--chart-${item.slot + 1})`} stroke="var(--card)" />)}
+          {tangentAt !== undefined && tangents.filter((item) => Number.isFinite(item.y)).map((item) => <ReferenceDot key={item.slot} x={item.point} y={item.y} r={4} fill={`var(--chart-${item.slot + 1})`} stroke="var(--card)" />)}
           {annotations.filter((point) => !hidden.includes(point.slot) && point.y >= low && point.y <= high).map((point, index) => <ReferenceDot key={`annotation-${point.slot}-${index}`} x={point.x} y={point.y} ifOverflow="hidden" shape={(props: { cx?: number; cy?: number }) => <ChalkAnnotation {...props} point={point} color={`var(--chart-${point.slot + 1})`} />} />)}
           {annotations.filter((point) => point.kind !== "Raiz" && !hidden.includes(point.slot) && point.y >= low && point.y <= high).map((point, index) => <ReferenceLine key={`guide-${point.slot}-${index}`} segment={[{ x: point.x, y: 0 }, { x: point.x, y: point.y }]} stroke="var(--chart-2)" strokeDasharray="4 5" className="chalk-guide" />)}
           {annotations.filter((point) => !hidden.includes(point.slot) && point.y >= low && point.y <= high).flatMap((point, index) => [
@@ -80,7 +82,7 @@ export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax
             <ReferenceLine key={`uvy-${point.slot}-${index}`} segment={[{ x: Math.min(Math.max(0, xMin), xMax), y: point.y }, { x: point.x, y: point.y }]} stroke="var(--uv)" strokeDasharray="2 4" className="uv-layer" />,
             <ReferenceDot key={`uvd-${point.slot}-${index}`} x={point.x} y={point.y} ifOverflow="hidden" shape={(props: { cx?: number; cy?: number }) => props.cx === undefined || props.cy === undefined ? <g /> : <g className="uv-layer"><circle cx={props.cx} cy={props.cy} r={5} fill="var(--uv)" /><text x={props.cx + 8} y={props.cy + 16} className="uv-label">{`(${fmt(point.x, 3)}, ${fmt(point.y, 3)})`}</text></g>} />,
           ])}
-          {tangentAt !== undefined && tangents.filter((item) => item.slot === 0 && Number.isFinite(item.y) && Number.isFinite(item.slope)).flatMap((item) => { const dx = (xMax - xMin) / 8, x1 = tangentAt + dx, y1 = item.y + item.slope * dx, bb = item.y - item.slope * tangentAt; return [
+          {tangentAt !== undefined && tangents.filter((item) => item.slot === 0 && item.point === tangentAt && Number.isFinite(item.y) && Number.isFinite(item.slope)).flatMap((item) => { const dx = (xMax - xMin) / 8, x1 = tangentAt + dx, y1 = item.y + item.slope * dx, bb = item.y - item.slope * tangentAt; return [
             <ReferenceLine key="tri-run" segment={[{ x: tangentAt, y: item.y }, { x: x1, y: item.y }]} stroke="var(--uv)" strokeWidth={2.5} className="uv-layer" ifOverflow="hidden" />,
             <ReferenceLine key="tri-rise" segment={[{ x: x1, y: item.y }, { x: x1, y: y1 }]} stroke="var(--uv)" strokeWidth={2.5} className="uv-layer" ifOverflow="hidden" />,
             <ReferenceLine key="tri-hyp" segment={[{ x: tangentAt, y: item.y }, { x: x1, y: y1 }]} stroke="var(--uv)" strokeWidth={3} className="uv-layer" ifOverflow="hidden" />,
