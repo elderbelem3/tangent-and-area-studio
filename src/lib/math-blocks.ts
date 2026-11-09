@@ -50,8 +50,8 @@ export function asciiToMathjs(ascii: string): string {
     .replace(/log_\(?10\)?/g, "log10")
     .replace(/\bln\b/g, "log")
     .replace(/\barc(sin|cos|tan)\b/g, "a$1")
-    .replace(/<=|≤/g, "<=").replace(/>=|≥/g, ">=")
-    .replace(/root\(3\)\(/g, "cbrt(");
+    .replace(/<=|≤/g, "<=").replace(/>=|≥/g, ">=");
+  s = convertRoots(s);
   // |a| → abs(a) for simple, non-nested pairs
   for (let i = 0; i < 5 && /\|[^|]+\|/.test(s); i++) s = s.replace(/\|([^|]+)\|/, "abs($1)");
   return normalizeLogarithms(s).replace(/\b(log10|log|sin|cos|tan|sec|csc|asin|acos|atan|sqrt|cbrt|exp|abs)\s+\(/g, "$1(").replace(/\s+/g, " ").trim();
