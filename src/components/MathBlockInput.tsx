@@ -162,9 +162,17 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
       insertTemplate: (insert) => {
         const el = mf.current; if (!el) return;
         focusField(el);
-        const isFunction = /^[a-z0-9]+\(\)$/.test(insert);
-        el.insert(templateToLatex(insert), { selectionMode: isFunction ? "after" : "placeholder", format: "latex" });
-        if (isFunction) el.executeCommand("moveToPreviousChar");
+        const prefix = el.getValue(0, el.position, "ascii-math");
+        const hasBase = /[0-9a-zA-Z)\]|□]\s*$/.test(prefix);
+        const block = blockTemplateLatex(insert, hasBase);
+        if (block) {
+          // Placeholder fields (□): MathLive selects the first empty field automatically.
+          el.insert(block, { selectionMode: "placeholder", format: "latex" });
+        } else {
+          const isFunction = /^[a-z0-9]+\(\)$/.test(insert);
+          el.insert(templateToLatex(insert), { selectionMode: isFunction ? "after" : "placeholder", format: "latex" });
+          if (isFunction) el.executeCommand("moveToPreviousChar");
+        }
         el.dispatchEvent(new Event("input"));
       },
       clear: () => { const el = mf.current; if (!el) return; el.setValue(""); lastEmitted.current = ""; onChangeRef.current(""); focusField(el); },
