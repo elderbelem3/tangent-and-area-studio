@@ -49,17 +49,8 @@ function Funcoes() {
     window.addEventListener(EV_FUNCTION, on);
     return () => window.removeEventListener(EV_FUNCTION, on);
   }, []);
-  const { fn } = useMemo(() => parseFn(expr), [expr]);
-  const xMin = num(a), xMax = num(b), st = num(step);
+  const xMin = num(a), xMax = num(b);
   const rangeErr = xMin === null || xMax === null ? "Informe números válidos para o intervalo." : xMin >= xMax ? "O início do intervalo deve ser menor que o fim." : null;
-  const stepErr = st === null || st <= 0 ? "O passo deve ser um número positivo." : null;
-
-  const rows = useMemo(() => {
-    if (!fn || rangeErr || stepErr || xMin === null || xMax === null || st === null) return [];
-    const out: { x: number; y: number }[] = [];
-    for (let x = xMin; x <= xMax + 1e-9 && out.length < 200; x += st) out.push({ x: Number(x.toFixed(8)), y: fn(Number(x.toFixed(8))) });
-    return out;
-  }, [fn, xMin, xMax, st, rangeErr, stepErr]);
 
   return (
     <>
