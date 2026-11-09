@@ -40,6 +40,23 @@ export function templateToLatex(insert: string): string {
   return map[insert] ?? insert;
 }
 
+/** ascii-math `root(n)(x)` → mathjs: cube root keeps cbrt, other indices become nthRoot(x, n). */
+function convertRoots(s: string): string {
+  let out = "", i = 0;
+  while (i < s.length) {
+    const m = /^root\((\d+)\)\(/.exec(s.slice(i));
+    if (!m) { out += s[i]; i++; continue; }
+    const start = i + m[0].length;
+    let depth = 1, j = start;
+    while (j < s.length && depth > 0) { if (s[j] === "(") depth++; else if (s[j] === ")") depth--; j++; }
+    if (depth !== 0) { out += s[i]; i++; continue; }
+    const inner = s.slice(start, j - 1);
+    out += m[1] === "3" ? `cbrt(${inner})` : `nthRoot(${inner}, ${m[1]})`;
+    i = j;
+  }
+  return out;
+}
+
 /** MathLive ascii-math output → mathjs syntax understood by the parser/plotter. */
 export function asciiToMathjs(ascii: string): string {
   // MathLive serializes typed operator names as space-separated letters.
