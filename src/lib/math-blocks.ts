@@ -1,6 +1,27 @@
 import { parse } from "mathjs";
 import { normalize, normalizeLogarithms } from "@/lib/calc";
 
+const PL = "\\placeholder{}";
+
+/**
+ * Potências-tab buttons insert visual structures with empty editable fields (□).
+ * Returns null when the button keeps the ordinary-parentheses behavior.
+ * `hasBase` tells whether an atom already sits before the cursor (then x²/xʸ only add the exponent).
+ */
+export function blockTemplateLatex(insert: string, hasBase: boolean): string | null {
+  switch (insert) {
+    case "^2": return hasBase ? "^{2}" : `${PL}^{2}`;
+    case "^()": return hasBase ? `^{${PL}}` : `${PL}^{${PL}}`;
+    case "sqrt()": return `\\sqrt{${PL}}`;
+    case "nthroot": return `\\sqrt[${PL}]{${PL}}`;
+    case "log()": return `\\ln\\left(${PL}\\right)`;
+    case "log10()": return `\\log_{10}\\left(${PL}\\right)`;
+    case "logb()": return `\\log_{${PL}}\\left(${PL}\\right)`;
+    case "abs()": return `\\left|${PL}\\right|`;
+    default: return null;
+  }
+}
+
 /** Functions use ordinary empty parentheses; powers and fractions retain structured placeholders. */
 export function templateToLatex(insert: string): string {
   const fn = insert.match(/^([a-z0-9]+)\(\)$/);
