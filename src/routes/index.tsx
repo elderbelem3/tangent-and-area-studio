@@ -7,7 +7,7 @@ import { FunctionEditor } from "@/components/FunctionEditor";
 import { addComparisonFunction, FUNCTION_BG_COLORS, FUNCTION_SLOTS, removeComparisonFunction, type ComparisonFunction } from "@/lib/comparison";
 import { PageHeader, Panel, Field, ErrorBox, Chip, num } from "@/components/Lab";
 import { Smart3DView } from "@/components/Smart3DView";
-import { InversePanel } from "@/components/InversePanel";
+import { ValueTables } from "@/components/ValueTables";
 import { UvStepsPanel } from "@/components/UvStepsPanel";
 import { needs3D, surfaceAnalysis } from "@/lib/smart3d";
 import { EV_FUNCTION } from "@/lib/copilot-actions";
@@ -38,7 +38,6 @@ function Funcoes() {
   const setExpr = (expression: string) => changeExpression(0, expression);
   const [a, setA] = useModuleState("funcoes.a", () => String(imported?.plot?.intervalo[0] ?? -3));
   const [b, setB] = useModuleState("funcoes.b", () => String(imported?.plot?.intervalo[1] ?? 3));
-  const [step, setStep] = useModuleState("funcoes.step", "0.5");
   useEffect(() => {
     if (!imported?.plot) return;
     setFunctions(tutorPlotFunctions(imported.plot));
