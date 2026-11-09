@@ -110,6 +110,7 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
               event.preventDefault(); event.stopImmediatePropagation();
               const context = mathSuggestions("x^");
               if (context) {
+                typedPower.current = true;
                 suggestionRef.current = { items: context.suggestions, start: end - 1, end, active: 0 };
                 setSuggestions(context.suggestions); setActive(0);
                 el.insert("^{#0}", { selectionMode: "placeholder", format: "latex" });
@@ -167,6 +168,7 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
       insertTemplate: (insert) => {
         const el = mf.current; if (!el) return;
         focusField(el);
+        typedPower.current = false;
         const prefix = el.getValue(0, el.position, "ascii-math");
         const hasBase = /[0-9a-zA-Z)\]|□]\s*$/.test(prefix);
         const block = blockTemplateLatex(insert, hasBase);
