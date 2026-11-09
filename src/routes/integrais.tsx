@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef } from "react";
 import { parseFn, fmt } from "@/lib/calc";
 import { MathExpression } from "@/components/MathExpression";
+import { expressionLatex } from "@/lib/math-format";
 import { Plot } from "@/components/Plot";
 import { IntegralUvOverlay } from "@/components/UvOverlays";
 import { UvStepsPanel } from "@/components/UvStepsPanel";
@@ -78,7 +79,7 @@ function Integrais() {
               {primitive !== null && <p className="text-xs text-muted-foreground">C é a constante de integração. A primitiva vale em cada intervalo do domínio da função.</p>}
             </div>
           </Panel>}
-          {valid && !bad && (mode === "solido" && solid ? <Stat label={`V = π ∫ de ${fmt(a)} a ${fmt(b)} f(x)² dx`} value={fmt(solid.volume, 6)} /> : <Panel title="Integral definida"><MathExpression expression={String(value)} prefix={`\\int_{${a}}^{${b}} \\left(${expressionForIntegral(expr)}\\right)\\,dx = `} /></Panel>)}
+          {valid && !bad && (mode === "solido" && solid ? <Stat label={`V = π ∫ de ${fmt(a)} a ${fmt(b)} f(x)² dx`} value={fmt(solid.volume, 6)} /> : <Panel title="Integral definida"><MathExpression expression={fmt(value, 6)} prefix={`\\int_{${a}}^{${b}} \\left(${expressionLatex(expr)}\\right)\\,dx ${result?.method === "Simpson" ? "\\approx" : "="} `} /></Panel>)}
         </div>
         <div className="min-w-0 space-y-6">
           <Panel title={mode === "solido" ? "Sólido de revolução (3D)" : "Área sob a curva"}>
