@@ -175,14 +175,17 @@ function SurfaceUv({ d, info }: { d: NonNullable<ReturnType<typeof surfaceData>>
 }
 
 function Axes({ chalk, dark, L }: { chalk: boolean; dark?: boolean; L: number }) {
-  const color = chalk ? CHALK : dark ? "#94a3b8" : "#64748b";
+  // Vivid per-axis colors so users identify each axis at a glance, in every theme.
+  const xColor = chalk ? "#fde047" : dark ? "#60a5fa" : "#4f46e5";
+  const zColor = chalk ? "#f9a8d4" : dark ? "#fb923c" : "#ea580c";
+  const yColor = chalk ? "#86efac" : dark ? "#4ade80" : "#16a34a";
   return <group>
-    <Line points={[[-L, 0, 0], [L, 0, 0]]} color={color} lineWidth={1.2} />
-    <Line points={[[0, -L, 0], [0, L, 0]]} color={color} lineWidth={1.2} />
-    <Line points={[[0, 0, L], [0, 0, -L]]} color={color} lineWidth={1.2} />
-    <TextSprite position={[L + 0.25, 0, 0]} text="x" color={color} bg={null} size={0.4} />
-    <TextSprite position={[0, L + 0.25, 0]} text="z" color={color} bg={null} size={0.4} />
-    <TextSprite position={[0, 0, -L - 0.25]} text="y" color={color} bg={null} size={0.4} />
+    <Line points={[[-L, 0, 0], [L, 0, 0]]} color={xColor} lineWidth={1.8} />
+    <Line points={[[0, -L, 0], [0, L, 0]]} color={zColor} lineWidth={1.8} />
+    <Line points={[[0, 0, L], [0, 0, -L]]} color={yColor} lineWidth={1.8} />
+    <TextSprite position={[L + 0.25, 0, 0]} text="x" color={xColor} bg={null} size={0.4} />
+    <TextSprite position={[0, L + 0.25, 0]} text="z" color={zColor} bg={null} size={0.4} />
+    <TextSprite position={[0, 0, -L - 0.25]} text="y" color={yColor} bg={null} size={0.4} />
   </group>;
 }
 

@@ -98,11 +98,11 @@ export function Plot({ fn, xMin: initialXMin, xMax: initialXMax, points = EMPTY_
       {axisTicks(yMin, yMax).map((t) => (
         <g key={`y${t}`}>
           <line x1={P} x2={W - P} y1={sy(t)} y2={sy(t)} className="stroke-grid" />
-          <text x={P - 6} y={sy(t) + 4} textAnchor="end" className="fill-muted-foreground text-[12px]">{axisLabel(t, yMax - yMin)}</text>
+          <text x={P - 6} y={sy(t) + 4} textAnchor="end" className="fill-axis-y text-[12px] font-semibold">{axisLabel(t, yMax - yMin)}</text>
         </g>
       ))}
-      {yMin <= 0 && yMax >= 0 && <line x1={P} x2={W - P} y1={sy(0)} y2={sy(0)} className="stroke-axis" strokeWidth={1.5} />}
-      {xMin <= 0 && xMax >= 0 && <line x1={sx(0)} x2={sx(0)} y1={P} y2={H - P} className="stroke-axis" strokeWidth={1.5} />}
+      {yMin <= 0 && yMax >= 0 && <line x1={P} x2={W - P} y1={sy(0)} y2={sy(0)} className="stroke-axis-x" strokeWidth={2} />}
+      {xMin <= 0 && xMax >= 0 && <line x1={sx(0)} x2={sx(0)} y1={P} y2={H - P} className="stroke-axis-y" strokeWidth={2} />}
       <g clipPath={`url(#${clipId})`}>
         {shade && <path d={shadePath} className="fill-primary/25 stroke-primary/40" />}
         {curvePath.map((d, i) => <path key={i} d={d} fill="none" className="stroke-primary" strokeWidth={2.5} strokeLinejoin="round" />)}
