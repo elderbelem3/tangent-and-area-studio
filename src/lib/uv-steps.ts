@@ -176,6 +176,20 @@ export function integralSteps(expression: string, a: number, b: number): UvStep[
   return definiteIntegral(expression, a, b).steps;
 }
 
+/** Expose only primitives whose derivative is structurally verified, without needing bounds. */
+export function indefiniteIntegral(expression: string): string | null {
+  try {
+    if (!parseFn(expression).fn) return null;
+    const node = parse(normalize(expression));
+    const A = anti(node);
+    if (!A) return null;
+    const F = simplify(A.F);
+    const difference = simplify(`(${d(F).toString()}) - (${node.toString()})`);
+    if (difference.toString() !== "0") return null;
+    return F.toString();
+  } catch { return null; }
+}
+
 export function definiteIntegral(expression: string, a: number, b: number): { value: number; method: "primitiva" | "Simpson" | null; error: string | null; steps: UvStep[] | null } {
   const invalid = (error: string) => ({ value: NaN, method: null, error, steps: null });
   const { fn } = parseFn(expression); if (!fn || !Number.isFinite(a) || !Number.isFinite(b)) return invalid("Informe uma função e limites válidos.");
