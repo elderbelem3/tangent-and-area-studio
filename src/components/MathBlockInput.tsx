@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState, useId } from "react";
-import { asciiToMathjs, exprToLatex, templateToLatex } from "@/lib/math-blocks";
+import { asciiToMathjs, blockTemplateLatex, exprToLatex, templateToLatex } from "@/lib/math-blocks";
 import { mathSuggestions, type MathSuggestion } from "@/lib/math-suggestions";
 import { MathSuggestions } from "@/components/MathSuggestions";
 
@@ -44,6 +44,8 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
     const [suggestions, setSuggestions] = useState<MathSuggestion[]>([]);
     const [active, setActive] = useState(0);
     const suggestionRef = useRef<{ items: MathSuggestion[]; start: number; end: number; active: number } | null>(null);
+    // Power suggestions only apply when the user typed ^ — not when the xʸ button inserted the block.
+    const typedPower = useRef(false);
     const dismiss = () => { suggestionRef.current = null; setSuggestions([]); };
     const acceptRef = useRef<(item: MathSuggestion) => void>(() => {});
     acceptRef.current = (item) => {
@@ -80,11 +82,14 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
           const end = el.position;
           const prefix = asciiToMathjs(el.getValue(0, end, "ascii-math")).replace(/x\^\(\(\)\)$/, "x^");
           const context = mathSuggestions(prefix);
-          if (/x\^\{\\placeholder\{\}\}$/.test(el.value)) {
-            const powerContext = mathSuggestions("x^");
-            if (powerContext) {
-              suggestionRef.current = { items: powerContext.suggestions, start: Math.max(0, el.lastOffset - 4), end: el.lastOffset, active: 0 };
-              setSuggestions(powerContext.suggestions); setActive(0); return;
+          if (typedPower.current) {
+            typedPower.current = false;
+            if (/x\^\{\\placeholder\{\}\}$/.test(el.value)) {
+              const powerContext = mathSuggestions("x^");
+              if (powerContext) {
+                suggestionRef.current = { items: powerContext.suggestions, start: Math.max(0, el.lastOffset - 4), end: el.lastOffset, active: 0 };
+                setSuggestions(powerContext.suggestions); setActive(0); return;
+              }
             }
           }
           if (!context) { dismiss(); return; }
@@ -105,6 +110,7 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
               event.preventDefault(); event.stopImmediatePropagation();
               const context = mathSuggestions("x^");
               if (context) {
+                typedPower.current = true;
                 suggestionRef.current = { items: context.suggestions, start: end - 1, end, active: 0 };
                 setSuggestions(context.suggestions); setActive(0);
                 el.insert("^{#0}", { selectionMode: "placeholder", format: "latex" });
@@ -162,9 +168,18 @@ export const MathBlockInput = forwardRef<MathBlockHandle, { label: string; value
       insertTemplate: (insert) => {
         const el = mf.current; if (!el) return;
         focusField(el);
-        const isFunction = /^[a-z0-9]+\(\)$/.test(insert);
-        el.insert(templateToLatex(insert), { selectionMode: isFunction ? "after" : "placeholder", format: "latex" });
-        if (isFunction) el.executeCommand("moveToPreviousChar");
+        typedPower.current = false;
+        const prefix = el.getValue(0, el.position, "ascii-math");
+        const hasBase = /[0-9a-zA-Z)\]|□]\s*$/.test(prefix);
+        const block = blockTemplateLatex(insert, hasBase);
+        if (block) {
+          // Placeholder fields (□): MathLive selects the first empty field automatically.
+          el.insert(block, { selectionMode: "placeholder", format: "latex" });
+        } else {
+          const isFunction = /^[a-z0-9]+\(\)$/.test(insert);
+          el.insert(templateToLatex(insert), { selectionMode: isFunction ? "after" : "placeholder", format: "latex" });
+          if (isFunction) el.executeCommand("moveToPreviousChar");
+        }
         el.dispatchEvent(new Event("input"));
       },
       clear: () => { const el = mf.current; if (!el) return; el.setValue(""); lastEmitted.current = ""; onChangeRef.current(""); focusField(el); },

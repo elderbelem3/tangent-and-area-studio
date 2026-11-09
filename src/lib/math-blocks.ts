@@ -1,6 +1,27 @@
 import { parse } from "mathjs";
 import { normalize, normalizeLogarithms } from "@/lib/calc";
 
+const PL = "\\placeholder{}";
+
+/**
+ * Potências-tab buttons insert visual structures with empty editable fields (□).
+ * Returns null when the button keeps the ordinary-parentheses behavior.
+ * `hasBase` tells whether an atom already sits before the cursor (then x²/xʸ only add the exponent).
+ */
+export function blockTemplateLatex(insert: string, hasBase: boolean): string | null {
+  switch (insert) {
+    case "^2": return hasBase ? "^{2}" : `${PL}^{2}`;
+    case "^()": return hasBase ? `^{${PL}}` : `${PL}^{${PL}}`;
+    case "sqrt()": return `\\sqrt{${PL}}`;
+    case "nthroot": return `\\sqrt[${PL}]{${PL}}`;
+    case "log()": return `\\ln\\left(${PL}\\right)`;
+    case "log10()": return `\\log_{10}\\left(${PL}\\right)`;
+    case "logb()": return `\\log_{${PL}}\\left(${PL}\\right)`;
+    case "abs()": return `\\left|${PL}\\right|`;
+    default: return null;
+  }
+}
+
 /** Functions use ordinary empty parentheses; powers and fractions retain structured placeholders. */
 export function templateToLatex(insert: string): string {
   const fn = insert.match(/^([a-z0-9]+)\(\)$/);
@@ -19,6 +40,23 @@ export function templateToLatex(insert: string): string {
   return map[insert] ?? insert;
 }
 
+/** ascii-math `root(n)(x)` → mathjs: cube root keeps cbrt, other indices become nthRoot(x, n). */
+function convertRoots(s: string): string {
+  let out = "", i = 0;
+  while (i < s.length) {
+    const m = /^root\((\d+)\)\(/.exec(s.slice(i));
+    if (!m) { out += s[i]; i++; continue; }
+    const start = i + m[0].length;
+    let depth = 1, j = start;
+    while (j < s.length && depth > 0) { if (s[j] === "(") depth++; else if (s[j] === ")") depth--; j++; }
+    if (depth !== 0) { out += s[i]; i++; continue; }
+    const inner = s.slice(start, j - 1);
+    out += m[1] === "3" ? `cbrt(${inner})` : `nthRoot(${inner}, ${m[1]})`;
+    i = j;
+  }
+  return out;
+}
+
 /** MathLive ascii-math output → mathjs syntax understood by the parser/plotter. */
 export function asciiToMathjs(ascii: string): string {
   // MathLive serializes typed operator names as space-separated letters.
@@ -29,8 +67,8 @@ export function asciiToMathjs(ascii: string): string {
     .replace(/log_\(?10\)?/g, "log10")
     .replace(/\bln\b/g, "log")
     .replace(/\barc(sin|cos|tan)\b/g, "a$1")
-    .replace(/<=|≤/g, "<=").replace(/>=|≥/g, ">=")
-    .replace(/root\(3\)\(/g, "cbrt(");
+    .replace(/<=|≤/g, "<=").replace(/>=|≥/g, ">=");
+  s = convertRoots(s);
   // |a| → abs(a) for simple, non-nested pairs
   for (let i = 0; i < 5 && /\|[^|]+\|/.test(s); i++) s = s.replace(/\|([^|]+)\|/, "abs($1)");
   return normalizeLogarithms(s).replace(/\b(log10|log|sin|cos|tan|sec|csc|asin|acos|atan|sqrt|cbrt|exp|abs)\s+\(/g, "$1(").replace(/\s+/g, " ").trim();
