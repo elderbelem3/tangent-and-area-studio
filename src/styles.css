@@ -89,6 +89,8 @@
   --accent-strong: oklch(0.52 0.115 175);
   --grid: oklch(0.93 0.006 260);
   --axis: oklch(0.65 0.012 260);
+  --axis-x: oklch(0.55 0.2 260);
+  --axis-y: oklch(0.62 0.19 45);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(0.929 0.013 255.508);
@@ -112,6 +114,8 @@
 .dark {
   --grid: oklch(0.32 0.03 257);
   --axis: oklch(0.6 0.03 257);
+  --axis-x: oklch(0.72 0.17 250);
+  --axis-y: oklch(0.78 0.16 60);
   --accent-strong: oklch(0.75 0.12 175);
   --background: oklch(0.208 0.042 265.755);
   --foreground: oklch(0.929 0.013 255.508);
@@ -165,6 +169,10 @@
 }
 @utility stroke-grid { stroke: var(--grid); }
 @utility stroke-axis { stroke: var(--axis); }
+@utility stroke-axis-x { stroke: var(--axis-x); }
+@utility stroke-axis-y { stroke: var(--axis-y); }
+@utility fill-axis-x { fill: var(--axis-x); }
+@utility fill-axis-y { fill: var(--axis-y); }
 @utility shadow-soft { box-shadow: var(--shadow-soft); }
 
 @layer base {
@@ -208,6 +216,8 @@
   --ring: var(--primary);
   --grid: oklch(0.9 0.012 140 / 9%);
   --axis: oklch(0.96 0.01 105 / 90%);
+  --axis-x: oklch(0.88 0.15 95);
+  --axis-y: oklch(0.74 0.16 350);
   --chart-1: oklch(0.754 0.151 232.7);
   --chart-2: oklch(0.852 0.199 91.94);
   --chart-3: oklch(0.8 0.182 151.7);
