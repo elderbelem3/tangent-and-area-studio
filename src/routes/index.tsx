@@ -62,33 +62,16 @@ function Funcoes() {
               <FunctionEditor functions={functions} onChange={changeExpression} onAdd={() => setFunctions(addComparisonFunction)} onRemove={(slot) => setFunctions((previous) => removeComparisonFunction(previous, slot))} mainExtras={<div className="flex flex-wrap gap-2">
                 {functionExamples.map((e) => <Chip key={e.label} onClick={() => setExpr(e.expression)}>{e.label}</Chip>)}
               </div>} />
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <Field label="x mín" value={a} onChange={setA} />
                 <Field label="x máx" value={b} onChange={setB} />
-                <Field label="passo" value={step} onChange={setStep} />
               </div>
               {rangeErr && <ErrorBox msg={rangeErr} />}
               {imported?.error && <ErrorBox msg={imported.error} />}
-              {stepErr && <ErrorBox msg={stepErr} />}
               <p className="text-xs text-muted-foreground">Suporta: + − * / ^, sin, cos, tan, exp, log (ln), sqrt, abs, pi, e.</p>
             </div>
           </Panel>
-          {!is3D && xMin !== null && xMax !== null && <InversePanel expression={expr} xMin={xMin} xMax={xMax} onPlot={(inverse) => setFunctions((prev) => {
-            const main = prev.find((item) => item.slot === 0) ?? { slot: 0, expression: expr };
-            return [main, { slot: 1, expression: inverse }, { slot: 2, expression: "x" }];
-          })} />}
-          <Panel title="Tabela de valores">
-            <div className="max-h-80 overflow-auto">
-              <table className="w-full font-mono text-sm">
-                <thead className="sticky top-0 bg-card text-left text-muted-foreground"><tr><th className="py-1">x</th><th>f(x)</th></tr></thead>
-                <tbody>
-                  {rows.map((r) => (
-                    <tr key={r.x} className="border-t border-border"><td className="py-1">{fmt(r.x, 4)}</td><td className={Number.isNaN(r.y) ? "text-destructive" : ""}>{fmt(r.y, 4)}</td></tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Panel>
+          <ValueTables functions={functions} />
         </div>
         <Panel className="tour-graph" title={is3D ? "Gráfico 3D · f(x, y)" : "Gráfico das funções"}>
           {is3D ? <Surface3D layers={functions.map((f) => ({ expression: f.expression, slot: f.slot })).filter((l) => l.expression.trim())} expression={expr} range={xMin !== null && xMax !== null && !rangeErr ? Math.max(Math.abs(xMin), Math.abs(xMax)) : 3} /> : !rangeErr && xMin !== null && xMax !== null ? <ComparisonPlot functions={functions} xMin={xMin} xMax={xMax} /> : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
