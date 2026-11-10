@@ -1,5 +1,5 @@
 # Refinamento visual
-- [ ] Adicionar Modo Código informativo com expressão, árvore de parsing, amostras reais dos gráficos, derivação e estado do renderizador; verificar edição e telas móveis.
+- [x] Adicionar Modo Código informativo nos quatro módulos com expressão, árvore de parsing, prévia das amostras reais 2D/3D, derivação e estado do renderizador; edição, alternância, celular e 163 testes verificados.
 - [x] Remover Tutor, ENADE, Copiloto, chamadas e dependência de IA; tour de 10 passos e guia de 11 capítulos atualizados, seis abas verificadas, link antigo redirecionado e 160 testes aprovados.
 - [x] Adicionar página no Como Usar explicando código, abas e funcionalidades; acesso pelo menu, busca, capítulos e leitura mobile verificados.
 - [x] Exibir derivadas simbólicas e integrais indefinidas formatadas, com valores de x₀ independentes por função; preservar cálculos definidos e verificar casos do relatório (173 testes e conferência visual; primitivas não verificadas recebem aviso).

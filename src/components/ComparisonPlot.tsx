@@ -66,7 +66,7 @@ export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax
   }, [samples, sampled, tangents, tangentAt]);
   useRenderTrace(() => curves.map((item) => {
     const points = sampled.find((curve) => curve.key === `curve${item.slot}`)?.points ?? [];
-    return { expression: item.expression, renderer: "Recharts 2D", count: points.length, points: tracePoints(points), status: item.error ?? (hidden.includes(item.slot) ? "Courbe ocultada pela legenda" : "Dados enviados ao gráfico; null e breakBefore separam descontinuidades") };
+    return { expression: item.expression, renderer: "Recharts 2D", count: points.length, points: tracePoints(points), status: item.error ?? (hidden.includes(item.slot) ? "Curva ocultada pela legenda" : "Dados enviados ao gráfico; null e breakBefore separam descontinuidades") };
   }), [curves, sampled, hidden]);
   const analysisFunctions = useMemo(() => functions.filter((f) => !hidden.includes(f.slot)), [functions, hidden]);
   const analysisPanel = useMemo(() => analysis ? <AnalysisPanels functions={analysisFunctions} xMin={settled.xMin} xMax={settled.xMax} /> : null, [analysis, analysisFunctions, settled]);
