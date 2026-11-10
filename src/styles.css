@@ -470,7 +470,7 @@
   --slide-border: var(--border);
   --slide-example: var(--secondary);
   --slide-title: 78px;
-  --slide-body: 40px;
+  --slide-body: 32px;
   --slide-caption: 30px;
   font-family: var(--font-sans);
 }
@@ -486,7 +486,7 @@
 .slide-flow svg { width: 32px; height: 32px; margin-left: auto; flex-shrink: 0; color: var(--slide-primary); }
 .slide-step { font-family: var(--font-mono); color: var(--slide-primary); }
 .slide-columns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 48px; margin-top: 40px; }
-.app-presentation .slide-columns h3 { font-family: var(--font-display); font-size: 42px; font-weight: 700; line-height: 1.15; }
+.app-presentation .slide-columns h3 { font-family: var(--font-display); font-size: 36px; font-weight: 700; line-height: 1.15; }
 .app-presentation .slide-columns p { font-family: var(--font-sans); font-size: var(--slide-body); line-height: 1.3; margin-top: 18px; color: var(--slide-muted); }
 .slide-example { position: absolute; bottom: 124px; left: 88px; right: 88px; display: flex; justify-content: space-between; align-items: center; gap: 24px; border-left: 5px solid var(--slide-primary); background: var(--slide-example); padding: 24px 32px; }
 .slide-example pre { font-family: var(--font-mono); font-size: var(--slide-caption); line-height: 1.45; white-space: pre-wrap; }

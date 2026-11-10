@@ -10,7 +10,7 @@ import { AppPresentation } from "@/components/AppPresentation";
 import { presentationSlide } from "@/lib/app-presentation";
 
 export const Route = createFileRoute("/como-funciona")({
-  validateSearch: (search: Record<string, unknown>): { slide?: number } => ({ slide: presentationSlide(search.slide) }),
+  validateSearch: (search: Record<string, unknown>): { slide?: number | undefined } => ({ slide: presentationSlide(search["slide"]) }),
   head: () => ({ meta: [
     { title: "Como o código funciona · CalculusLab" },
     { name: "description", content: "Guia do código do CalculusLab: arquitetura, funcionalidades de cada aba, motor matemático, gráficos, temas e ligações entre módulos." },

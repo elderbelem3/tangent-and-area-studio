@@ -20,7 +20,7 @@ function ScaledSlide({ children }: { children: ReactNode }) {
   return <div ref={host} className="presentation-stage"><div className="presentation-slide" style={{ transform: `scale(${scale})` }}>{children}</div></div>;
 }
 
-export function AppPresentation({ slideNumber, onChange }: { slideNumber?: number; onChange: (slide?: number) => void }) {
+export function AppPresentation({ slideNumber, onChange }: { slideNumber: number | undefined; onChange: (slide?: number) => void }) {
   const slide = slideNumber === undefined ? undefined : APP_SLIDES[slideNumber - 1];
   const touch = useRef<{ x: number; y: number } | null>(null);
   const move = (delta: number) => {
