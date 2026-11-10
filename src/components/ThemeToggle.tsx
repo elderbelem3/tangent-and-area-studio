@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { Presentation, Flashlight, Sun, Moon } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Presentation, Flashlight, Sun, Moon, Code2 } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger, DropdownMenuCheckboxItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { useCodeMode } from "@/components/CodeMode";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { EV_THEME, type ThemeEventDetail } from "@/lib/theme-events";
@@ -11,6 +12,7 @@ const THEMES = [
   { value: "chalkboard", label: "Modo Quadro Negro", icon: Presentation },
 ] as const;
 export function ThemeToggle() {
+  const { enabled: codeEnabled, toggle: toggleCode } = useCodeMode();
   const [theme, setTheme] = useState<LabTheme>("standard");
   const [uv, setUv] = useState(false);
   const [uvHint, setUvHint] = useState(false);
@@ -60,6 +62,10 @@ export function ThemeToggle() {
         <DropdownMenuRadioGroup value={theme} onValueChange={(v) => pickTheme(v as LabTheme)}>
           {THEMES.map((t) => <DropdownMenuRadioItem key={t.value} value={t.value} className="gap-2"><t.icon className="h-4 w-4" />{t.label}</DropdownMenuRadioItem>)}
         </DropdownMenuRadioGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuCheckboxItem checked={codeEnabled} onCheckedChange={toggleCode} className="gap-2">
+          <Code2 className="h-4 w-4" />Modo Código
+        </DropdownMenuCheckboxItem>
       </DropdownMenuContent>
     </DropdownMenu>
     {theme === "chalkboard" && <div className="grid min-w-0 justify-items-end gap-1 py-2">

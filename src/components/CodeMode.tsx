@@ -1,6 +1,5 @@
 import { createContext, useContext, useDeferredValue, useEffect, useMemo, useState, useSyncExternalStore, type DependencyList, type ReactNode } from "react";
-import { Code2, Terminal } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Terminal } from "lucide-react";
 import { inspectParsing, type RenderTrace } from "@/lib/code-inspection";
 import { derivativeSteps } from "@/lib/uv-steps";
 import { MathFormula } from "@/components/MathFormula";
@@ -18,10 +17,7 @@ export function CodeModeProvider({ children }: { children: ReactNode }) {
   return <CodeContext.Provider value={value}>{children}</CodeContext.Provider>;
 }
 
-export function CodeModeToggle() {
-  const { enabled, toggle } = useContext(CodeContext);
-  return <Button variant={enabled ? "default" : "outline"} size="sm" className="my-2 shrink-0" aria-pressed={enabled} onClick={toggle} title="Inspecionar a execução atual"><Code2 className="h-4 w-4" />Modo Código</Button>;
-}
+export function useCodeMode() { return useContext(CodeContext); }
 
 export function useRenderTrace(factory: () => RenderTrace[], dependencies: DependencyList) {
   const { enabled } = useContext(CodeContext);
