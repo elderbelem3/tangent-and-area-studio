@@ -13,7 +13,7 @@ import { useEffect, type ReactNode } from "react";
 import { ChartSpline, MoveHorizontal, TrendingUp, Sigma, BookOpen, GraduationCap, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { CodeModeProvider, CodeModeToggle } from "@/components/CodeMode";
+import { CodeModeProvider } from "@/components/CodeMode";
 import { HelpButton } from "@/components/GuidedTour";
 import chalkDust from "@/assets/chalk-dust.png.asset.json";
 import appCss from "../styles.css?url";
@@ -138,7 +138,6 @@ function RootComponent() {
               </Button>
             ))}
           </nav>
-          <CodeModeToggle />
           <ThemeToggle />
           </div>
         </header>
