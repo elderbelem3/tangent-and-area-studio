@@ -44,10 +44,12 @@ function InspectionPanel({ expressions, renderer, blocked }: { expressions: stri
   const deferred = useDeferredValue(key);
   const analyses = useMemo(() => (JSON.parse(deferred) as string[]).map((expression) => ({ expression, parsing: inspectParsing(expression), steps: needs3D(expression) ? null : derivativeSteps(expression) })), [deferred]);
   return <section className="code-inspector mt-6 min-w-0 overflow-hidden rounded-lg border" aria-label="Inspeção de código">
-    <div className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3">
-      <h2 className="flex items-center gap-2 text-sm font-semibold"><Terminal className="h-4 w-4" />Modo Código</h2>
-      <span className="code-muted text-xs">{key !== deferred ? "Atualizando…" : renderer} · somente leitura</span>
+    <div className="code-titlebar flex flex-wrap items-center gap-x-4 gap-y-2 border-b px-4 py-3">
+      <div className="code-window-controls flex shrink-0 gap-2" aria-hidden="true"><span className="code-window-close" /><span className="code-window-minimize" /><span className="code-window-maximize" /></div>
+      <h2 className="flex min-w-0 flex-1 items-center gap-2 text-sm font-semibold"><Terminal className="h-4 w-4 shrink-0" />Modo Código</h2>
+      <span className="code-muted hidden text-xs sm:inline">calculuslab — inspect</span>
     </div>
+    <div className="code-statusbar flex flex-wrap items-center gap-2 border-b px-4 py-2 text-xs"><span className="code-live-dot" aria-hidden="true" /><span>{key !== deferred ? "Atualizando…" : renderer}</span><span className="code-muted ml-auto">somente leitura</span></div>
     <div className="max-h-[640px] space-y-5 overflow-y-auto p-4 text-xs leading-relaxed">
       {analyses.map(({ expression, parsing, steps }, index) => {
         const trace = key === deferred && !blocked ? currentTraces.find((item) => item.expression === expression && item.renderer === renderer) : undefined;
@@ -68,5 +70,16 @@ function InspectionPanel({ expressions, renderer, blocked }: { expressions: stri
 }
 
 function Output({ label, value }: { label?: string; value: unknown }) {
-  return <div className="min-w-0">{label && <p className="code-accent mb-1">{label}</p>}<pre className="max-h-48 overflow-auto whitespace-pre-wrap break-all">{JSON.stringify(value, null, 2)}</pre></div>;
+  const lines = useMemo(() => (JSON.stringify(value, null, 2) ?? "undefined").split("\n"), [value]);
+  return <div className="min-w-0">{label && <p className="code-accent mb-2">{label}</p>}<pre className="code-output max-h-48 overflow-auto" aria-label={label}>{lines.map((line, index) => <span className="code-line" key={index}><span className="code-line-number" aria-hidden="true">{index + 1}</span><code className="code-line-content"><HighlightedLine line={line} /></code></span>)}</pre></div>;
+}
+
+/** Presentation only: escaping stays with React, never HTML injection. */
+function HighlightedLine({ line }: { line: string }) {
+  const tokens = line.match(/"(?:\\.|[^"\\])*"|\b(?:true|false|null|undefined)\b|\b\d+(?:\.\d+)?(?:e[+-]?\d+)?\b|[a-zA-Z_][a-zA-Z_0-9]*|[^a-zA-Z_0-9"]/gi) ?? [];
+  return <>{tokens.map((token, index) => {
+    const isKey = token.startsWith('"') && tokens.slice(index + 1).find((part) => part.trim()) === ":";
+    const kind = isKey ? "key" : token.startsWith('"') ? "string" : /^(true|false|null|undefined)$/.test(token) ? "keyword" : /^\d/.test(token) ? "number" : /^[a-zA-Z_]/.test(token) ? "variable" : "punctuation";
+    return <span key={index} className={`code-syntax-${kind}`}>{token}</span>;
+  })}</>;
 }
