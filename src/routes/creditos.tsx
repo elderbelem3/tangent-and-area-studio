@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BookOpen, GraduationCap, Users, Sigma, Sparkles } from "lucide-react";
+import { BookOpen, GraduationCap, Users, Sigma, Sparkles, Code2 } from "lucide-react";
 import logoAsset from "@/assets/unicatolica-logo.png.asset.json";
 
 export const Route = createFileRoute("/creditos")({
@@ -13,13 +13,13 @@ export const Route = createFileRoute("/creditos")({
       {
         name: "description",
         content:
-          "AP2 de Cálculo Diferencial e Integral — UniCatólica do RN, professora e alunos integrantes do grupo.",
+          "AP2 de Cálculo Diferencial e Integral — UniCatólica do RN, professoras e alunos integrantes do grupo.",
       },
       { property: "og:title", content: "Créditos · CalculusLab" },
       {
         property: "og:description",
         content:
-          "AP2 de Cálculo Diferencial e Integral — UniCatólica do RN, professora e alunos integrantes do grupo.",
+          "AP2 de Cálculo Diferencial e Integral — UniCatólica do RN, professoras e alunos integrantes do grupo.",
       },
     ],
   }),
@@ -77,9 +77,13 @@ function Creditos() {
             </div>
             <div>
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Professora
+                Professoras
               </p>
               <p className="font-display text-lg font-semibold">Flaviana Moreira de Souza Amorim</p>
+              <p className="mt-3 flex items-start gap-2 font-display text-lg font-semibold">
+                <Code2 aria-label="Programadora" className="uv-professor-symbol mt-1 h-5 w-5 shrink-0" />
+                <span>Luana Dantas Pontes Espinola Casado</span>
+              </p>
             </div>
           </div>
         </div>
