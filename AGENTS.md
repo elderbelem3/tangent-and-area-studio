@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## UI architecture
+- Keep the app presentation as bounded educational data with one 1920×1080 slide renderer; URL slide coordinates and a mobile reading view preserve sharing and legibility without invoking calculation engines.
 - Keep Code Mode read-only and opt-in: renderers publish bounded previews of their actual sampled inputs through useRenderTrace; deferred inspection never resamples curves or writes module state, preserving calculation and typing performance.
 - Keep the app free of AI handlers and tools; retain a redirect-only legacy /ia route and isolate tour theme events from calculation modules so local tools remain independent.
 - Keep the code walkthrough as typed educational content separate from its route and reachable through the shared help menu; this documents each module without importing calculation engines into the guide.

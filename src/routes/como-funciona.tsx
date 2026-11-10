@@ -6,8 +6,11 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { PageHeader } from "@/components/Lab";
 import { CODE_GUIDE } from "@/lib/code-guide";
 import { useModuleState } from "@/lib/module-state";
+import { AppPresentation } from "@/components/AppPresentation";
+import { presentationSlide } from "@/lib/app-presentation";
 
 export const Route = createFileRoute("/como-funciona")({
+  validateSearch: (search: Record<string, unknown>): { slide?: number } => ({ slide: presentationSlide(search.slide) }),
   head: () => ({ meta: [
     { title: "Como o código funciona · CalculusLab" },
     { name: "description", content: "Guia do código do CalculusLab: arquitetura, funcionalidades de cada aba, motor matemático, gráficos, temas e ligações entre módulos." },
@@ -20,6 +23,8 @@ export const Route = createFileRoute("/como-funciona")({
 });
 
 function CodeGuidePage() {
+  const { slide } = Route.useSearch();
+  const navigate = Route.useNavigate();
   const [selected, setSelected] = useModuleState("code-guide.selected", "arquitetura");
   const [query, setQuery] = useModuleState("code-guide.query", "");
   const section = CODE_GUIDE.find((item) => item.id === selected) ?? CODE_GUIDE[0];
@@ -37,6 +42,7 @@ function CodeGuidePage() {
   return <>
     <Button asChild variant="ghost" size="sm" className="mb-4 px-0 text-muted-foreground"><Link to="/"><ArrowLeft className="h-4 w-4" />Voltar às Funções</Link></Button>
     <PageHeader tag="Como Usar · Guia do projeto" title="Como o código funciona" desc="Da expressão ao resultado: entenda cada aba, os arquivos envolvidos e como as funcionalidades se conectam." />
+    <AppPresentation slideNumber={slide} onChange={(next) => { void navigate({ search: { slide: next }, replace: true }); }} />
     <div className="grid min-w-0 gap-8 lg:grid-cols-[270px_minmax(0,1fr)]">
       <aside className="min-w-0 lg:sticky lg:top-40 lg:max-h-[calc(100dvh-11rem)] lg:self-start lg:overflow-y-auto">
         <label htmlFor="guide-search" className="mb-2 block text-sm font-medium">Buscar no guia</label>
