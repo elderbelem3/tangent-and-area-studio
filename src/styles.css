@@ -386,6 +386,8 @@
 .tour-bubble { overflow: hidden; } .chalkboard .tour-bubble { background: oklch(0.2 0.02 160); }
 
 /* Créditos secretos: bloco invisível e sem ocupar espaço até a Luz Negra acender. */
+.uv-professor-symbol { display: none; }
+.blacklight .uv-professor-symbol { display: block; color: var(--uv); }
 .uv-secret { display: none; }
 .blacklight .uv-secret {
   display: block;
