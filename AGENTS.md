@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## UI architecture
+- Keep the code walkthrough as typed educational content separate from its route and reachable through the shared help menu; this documents each module without importing calculation engines into the guide.
 - Share structural domain restrictions in lib/domain across analysis, limits and integration; split monotonicity at domain boundaries and reject unverified improper integrals so off-grid poles cannot produce ordinary integral values.
 - Use the shared mathjs-to-KaTeX expression formatter for analytic formulas, and keep definite integral values and their displayed method in one result so explanations match the calculation.
 - Detect real constants structurally through the shared calculus helper before analytic root searches; represent no isolated roots or stationary points and explain the identically-zero case separately to avoid enumerating continua.
