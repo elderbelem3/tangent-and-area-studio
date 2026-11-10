@@ -460,3 +460,40 @@
   .math-block-host { touch-action: pan-y; }
   .lab-panel { padding: 1rem; }
 }
+
+/* The educational deck has one fixed-resolution master in every slide. */
+.app-presentation {
+  --slide-background: var(--card);
+  --slide-foreground: var(--foreground);
+  --slide-muted: var(--muted-foreground);
+  --slide-primary: var(--primary);
+  --slide-border: var(--border);
+  --slide-example: var(--secondary);
+  --slide-title: 78px;
+  --slide-body: 32px;
+  --slide-caption: 30px;
+  font-family: var(--font-sans);
+}
+.presentation-body { display: flex; flex-direction: column; }
+.presentation-stage { position: relative; overflow: hidden; width: 100%; height: 100%; min-height: 0; flex: 1; }
+.presentation-slide { position: absolute; width: 1920px; height: 1080px; left: 50%; top: 50%; margin-left: -960px; margin-top: -540px; transform-origin: center center; overflow: hidden; padding: 64px 88px; background: var(--slide-background); color: var(--slide-foreground); }
+.app-presentation :is(h2, h3, p, pre, li, span) { letter-spacing: 0; }
+.app-presentation .slide-kicker { font-family: var(--font-mono); font-size: 24px; color: var(--slide-primary); }
+.app-presentation .slide-title { font-family: var(--font-display); font-size: var(--slide-title); line-height: 1.1; font-weight: 700; margin-top: 24px; }
+.app-presentation .slide-subtitle { font-size: 38px; line-height: 1.2; color: var(--slide-muted); margin-top: 18px; }
+.slide-flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; border-block: 2px solid var(--slide-border); padding-block: 28px; margin-top: 40px; }
+.slide-flow li { display: flex; align-items: center; gap: 20px; font-size: 32px; }
+.slide-flow svg { width: 32px; height: 32px; margin-left: auto; flex-shrink: 0; color: var(--slide-primary); }
+.slide-step { font-family: var(--font-mono); color: var(--slide-primary); }
+.slide-columns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 48px; margin-top: 40px; }
+.app-presentation .slide-columns h3 { font-family: var(--font-display); font-size: 36px; font-weight: 700; line-height: 1.15; }
+.app-presentation .slide-columns p { font-family: var(--font-sans); font-size: var(--slide-body); line-height: 1.3; margin-top: 18px; color: var(--slide-muted); }
+.slide-example { position: absolute; bottom: 124px; left: 88px; right: 88px; display: flex; justify-content: space-between; align-items: center; gap: 24px; border-left: 5px solid var(--slide-primary); background: var(--slide-example); padding: 24px 32px; }
+.slide-example pre { font-family: var(--font-mono); font-size: var(--slide-caption); line-height: 1.45; white-space: pre-wrap; }
+.slide-example img { height: 100px; width: auto; max-width: 220px; object-fit: contain; }
+.slide-footer { position: absolute; bottom: 48px; left: 88px; right: 88px; display: flex; justify-content: space-between; gap: 24px; font-size: 22px; color: var(--slide-muted); }
+.presentation-mobile { display: none; }
+@media (max-width: 767px) {
+  .presentation-stage { height: auto; min-height: 210px; flex: none; aspect-ratio: 16 / 9; }
+  .presentation-mobile { display: block; }
+}
