@@ -1,8 +1,8 @@
 import { EV_THEME } from "@/lib/copilot-actions";
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { CircleHelp, ChevronDown, ChevronLeft, ChevronRight, Keyboard, Sparkles, Route as RouteIcon, X } from "lucide-react";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { CircleHelp, ChevronDown, ChevronLeft, ChevronRight, Code2, Keyboard, Sparkles, Route as RouteIcon, X } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { HelpChat } from "@/components/HelpChat";
 import { AiMaintenanceDialog } from "@/components/AiMaintenance";
@@ -60,6 +60,9 @@ export function HelpButton() {
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={openAi} className="items-start gap-3 p-2.5">
           <Sparkles className="mt-0.5 h-4 w-4 text-primary" /><span><span className="block font-semibold">Ajuda com IA</span><span className="block text-xs text-muted-foreground">Copiloto que explica e demonstra ao vivo</span></span>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className="items-start gap-3 p-2.5">
+          <Link to="/como-funciona" preload="intent"><Code2 className="mt-0.5 h-4 w-4 text-primary" /><span><span className="block font-semibold">Como o código funciona</span><span className="block text-xs text-muted-foreground">Abas, funcionalidades e conexões do projeto</span></span></Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

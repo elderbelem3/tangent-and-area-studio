@@ -1,4 +1,5 @@
 # Refinamento visual
+- [x] Adicionar página no Como Usar com 12 capítulos explicando código, abas e funcionalidades; acesso pelo menu, busca, capítulos e leitura mobile verificados, com quatro testes de navegação aprovados.
 - [x] Exibir derivadas simbólicas e integrais indefinidas formatadas, com valores de x₀ independentes por função; preservar cálculos definidos e verificar casos do relatório (173 testes e conferência visual; primitivas não verificadas recebem aviso).
 - [x] Corrigir domínio e intervalos de monotonia, derivabilidade, limites e integrais apontados no relatório; padronizar fórmulas principais e verificar casos pendentes e preservação dos parâmetros. Integrais impróprias gerais continuam exigindo análise de convergência separada, sem retornar números não verificados.
 - [x] Tratar constantes na análise UV e nas regras de derivação sem enumerar raízes ou pontos críticos; verificar testes e interface.
