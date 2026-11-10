@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { fmt, parseFn } from "@/lib/calc";
 import { needs3D, parseFn2, type SurfaceInfo } from "@/lib/smart3d";
 import { useLabTheme } from "@/lib/use-lab-theme";
+import { useRenderTrace } from "@/components/CodeMode";
 
 export type Scene3D =
   | { kind: "surface"; expression: string; range: number; info: SurfaceInfo | null; layers?: Layer3D[] }
@@ -43,18 +44,19 @@ function surfaceData(expression: string, R: number, shared?: { lo: number; hi: n
   const { lo, hi } = rg;
   const scale = hi - lo > 1e-9 ? (R * 1.2) / (hi - lo) : 1, mid = (hi + lo) / 2;
   const Z = (z: number) => Number.isFinite(z) ? (Math.max(lo, Math.min(hi, z)) - mid) * scale : 0;
-  return { N, R, fn, Z, at: (i: number, j: number) => P(-R + 2 * R * i / N, -R + 2 * R * j / N, Z(zs[i * (N + 1) + j]!)), lo, hi };
+  return { N, R, fn, Z, zs, at: (i: number, j: number) => P(-R + 2 * R * i / N, -R + 2 * R * j / N, Z(zs[i * (N + 1) + j] ?? NaN)), lo, hi };
 }
 
 function solidData(expression: string, a: number, b: number) {
   const { fn } = parseFn(expression);
   if (!fn) return null;
   const lo = Math.min(a, b), hi = Math.max(a, b), N = 60, M = 48;
+  const samples: { x: number; y: number | null }[] = [];
   let rMax = 0;
-  for (let i = 0; i <= N; i++) { const r = Math.abs(fn(lo + (hi - lo) * i / N)); if (Number.isFinite(r)) rMax = Math.max(rMax, r); }
+  for (let i = 0; i <= N; i++) { const x = lo + (hi - lo) * i / N, value = fn(x), r = Math.abs(value); samples.push({ x, y: Number.isFinite(value) ? value : null }); if (Number.isFinite(r)) rMax = Math.max(rMax, r); }
   const span = hi - lo || 1, xs = 4.4 / span, scale = 1.9 / Math.max(rMax, 1e-6), cx = (lo + hi) / 2;
   const at = (x: number, t: number): V3 => { const r = Math.abs(fn(x)) * scale; const R = Number.isFinite(r) ? r : 0; return [(x - cx) * xs, R * Math.sin(t), R * Math.cos(t)]; };
-  return { fn, lo, hi, N, M, at, scale, xs, cx };
+  return { fn, lo, hi, N, M, at, scale, xs, cx, samples };
 }
 
 /** All user layers share one z scale so surfaces and curves intersect truthfully. */
@@ -75,13 +77,15 @@ function layerScene(layers: Layer3D[], R: number) {
   const items = parsed.map((p) => {
     if (p.kind === "surface") { const d = surfaceData(p.expression, R, rg); return d ? { slot: p.slot, kind: "surface" as const, d } : null; }
     const segs: V3[][] = []; let cur: V3[] = [];
+    const samples: { x: number; y: number; z: number | null }[] = [];
     for (let i = 0; i <= 400; i++) {
       const x = -R + 2 * R * i / 400, z = p.fn1(x);
+      samples.push({ x, y: 0, z: Number.isFinite(z) ? z : null });
       if (Number.isFinite(z) && z >= rg.lo - (rg.hi - rg.lo) && z <= rg.hi + (rg.hi - rg.lo)) cur.push(P(x, 0, (Math.max(rg.lo, Math.min(rg.hi, z)) - mid) * scale));
       else { if (cur.length > 1) segs.push(cur); cur = []; }
     }
     if (cur.length > 1) segs.push(cur);
-    return { slot: p.slot, kind: "curve" as const, segs };
+    return { slot: p.slot, kind: "curve" as const, segs, samples };
   }).filter((v): v is NonNullable<typeof v> => v !== null);
   return { items, primary: items.find((i) => i.kind === "surface" && i.slot === 0) };
 }
@@ -196,6 +200,19 @@ export default function Smart3DCanvas({ scene }: { scene: Scene3D }) {
   const surf = multi ? (multi.primary?.kind === "surface" ? multi.primary.d : null) : single;
   const solid = useMemo(() => scene.kind === "solid" ? solidData(scene.expression, scene.a, scene.b) : null, [scene]);
   const orbit = chalkboard || interactive;
+  useRenderTrace(() => {
+    const surfaceTrace = (expression: string, d: NonNullable<ReturnType<typeof surfaceData>>) => ({
+      expression, renderer: "Three.js 3D", count: d.zs.length,
+      points: d.zs.slice(0, 12).map((z, index) => ({ x: -d.R + 2 * d.R * Math.floor(index / (d.N + 1)) / d.N, y: -d.R + 2 * d.R * (index % (d.N + 1)) / d.N, z: Number.isFinite(z) ? z : null })),
+      status: "Malha de superfície montada; prévia em coordenadas matemáticas antes da escala visual",
+    });
+    if (solid) return [{ expression: scene.expression, renderer: "Three.js 3D", count: solid.samples.length, points: solid.samples.slice(0, 12), status: `Perfil de revolução montado; ${(solid.N + 1) * (solid.M + 1)} vértices na malha` }];
+    if (scene.kind === "surface" && multi) return multi.items.map((item) => {
+      const expression = scene.layers?.find((layer) => layer.slot === item.slot)?.expression ?? "";
+      return item.kind === "surface" ? surfaceTrace(expression, item.d) : { expression, renderer: "Three.js 3D", count: item.samples.length, points: item.samples.slice(0, 12), status: `${item.segs.length} segmentos de curva montados no plano y = 0` };
+    });
+    return single ? [surfaceTrace(scene.expression, single)] : [];
+  }, [scene, multi, single, solid]);
   if (!surf && !solid && !multi?.items.length) return <p className="text-muted-foreground">Não foi possível montar o gráfico 3D desta função.</p>;
   return <div className="relative">
     {!chalkboard && <Button type="button" size="sm" variant={interactive ? "default" : "outline"} aria-pressed={interactive} onClick={() => setInteractive((v) => !v)} className="absolute right-3 top-3 z-20 gap-1.5">
