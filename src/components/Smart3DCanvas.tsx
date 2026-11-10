@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useModuleState } from "@/lib/module-state";
-import { EV_3D, consumePending3D } from "@/lib/copilot-actions";
 import { Canvas } from "@react-three/fiber";
 import { Environment, Lightformer, Line, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
@@ -192,8 +191,6 @@ function Axes({ chalk, dark, L }: { chalk: boolean; dark?: boolean; L: number })
 export default function Smart3DCanvas({ scene }: { scene: Scene3D }) {
   const { chalkboard, blacklight, dark } = useLabTheme();
   const [interactive, setInteractive] = useModuleState("smart3d.interactive", false);
-  useEffect(() => { if (consumePending3D()) setInteractive(true); }, [setInteractive]);
-  useEffect(() => { const on = () => { consumePending3D(); setInteractive(true); }; window.addEventListener(EV_3D, on); return () => window.removeEventListener(EV_3D, on); }, []);
   const multi = useMemo(() => scene.kind === "surface" && scene.layers && scene.layers.length > 1 ? layerScene(scene.layers, scene.range) : null, [scene]);
   const single = useMemo(() => scene.kind === "surface" && !multi ? surfaceData(scene.expression, scene.range) : null, [scene, multi]);
   const surf = multi ? (multi.primary?.kind === "surface" ? multi.primary.d : null) : single;

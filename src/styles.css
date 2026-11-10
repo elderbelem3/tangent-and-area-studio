@@ -370,32 +370,6 @@
 .tour-dots span.on { width: 18px; background: var(--primary); }
 .tour-bubble { overflow: hidden; } .chalkboard .tour-bubble { background: oklch(0.2 0.02 160); }
 
-/* Helpdesk mini-chat */
-.help-chat { position: fixed; right: 1rem; bottom: 1rem; z-index: 90; display: flex; flex-direction: column; width: min(360px, calc(100vw - 2rem)); height: min(480px, calc(100vh - 6rem)); border: 1px solid var(--border); border-radius: 16px; background: var(--card); color: var(--foreground); box-shadow: 0 18px 50px oklch(0 0 0 / 30%); animation: tour-in 280ms ease; }
-.tour-ai { background: linear-gradient(90deg, var(--primary), oklch(0.62 0.2 300)); color: var(--primary-foreground); box-shadow: 0 0 0 0 oklch(0.62 0.2 300 / 50%); animation: help-pulse 2.2s ease-in-out infinite; }
-@media (prefers-reduced-motion: reduce) { .tour-ai { animation: none; } }
-/* Copilot side panel */
-.help-chat { top: 0; right: 0; bottom: 0; height: 100vh; width: min(380px, 100vw); border-radius: 0; border-width: 0 0 0 1px; animation: copilot-in 300ms ease; }
-@keyframes copilot-in { from { transform: translateX(24px); opacity: 0; } }
-
-/* Luz Negra on the IA tab: fluorescent ink chat + hidden annotations revealed (always rendered, swapped via CSS). */
-.uv-reveal { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 450ms ease, opacity 450ms ease, margin 450ms ease; }
-.uv-reveal > div { overflow: hidden; display: grid; gap: .6rem; }
-.blacklight .uv-reveal { grid-template-rows: 1fr; opacity: 1; margin-top: 1rem; }
-.uv-reveal-label { display: block; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .2rem; }
-.uv-reveal :is(.uv-ink-purple, .uv-ink-blue, .uv-ink-green) { border: 2px dashed currentColor; border-radius: 8px; padding: .6rem .8rem; font-size: .92rem; line-height: 1.6; }
-.uv-ink-purple { color: oklch(0.85 0.17 305); }
-.uv-ink-blue { color: oklch(0.85 0.14 230); }
-.uv-ink-green { color: oklch(0.88 0.2 145); }
-.blacklight .ia-uv-scope { background: oklch(0.13 0.04 295); border-radius: 14px; padding: 1.25rem; box-shadow: 0 0 0 2px oklch(0.72 0.18 305 / 45%), 0 0 28px oklch(0.6 0.2 305 / 35%); transition: background 400ms ease, box-shadow 400ms ease; }
-.blacklight .ia-uv-scope article, .blacklight .ia-uv-scope [data-testid=enade-feedback], .blacklight .ia-uv-scope [role=radio] { background: oklch(0.17 0.05 295 / 80%); border-color: oklch(0.72 0.18 305 / 55%); }
-.blacklight .ia-uv-scope :is(h2, h3) { color: oklch(0.85 0.14 230); }
-.blacklight .ia-uv-scope p, .blacklight .ia-uv-scope li, .blacklight .ia-uv-scope [role=radio] span:last-child { color: oklch(0.88 0.12 305); }
-.blacklight .ia-uv-scope .text-primary, .blacklight .ia-uv-scope .katex { color: oklch(0.88 0.2 145); }
-.blacklight .ia-uv-scope .uv-ink-blue, .blacklight .ia-uv-scope .uv-ink-blue p { color: oklch(0.85 0.14 230); }
-.blacklight .ia-uv-scope .uv-ink-green { color: oklch(0.88 0.2 145); }
-.blacklight .ia-uv-scope .uv-ink-purple { color: oklch(0.85 0.17 305); }
-
 /* Créditos secretos: bloco invisível e sem ocupar espaço até a Luz Negra acender. */
 .uv-secret { display: none; }
 .blacklight .uv-secret {

@@ -16,7 +16,7 @@ export const CODE_GUIDE: CodeGuideSection[] = [
     flow: ["Ação na tela", "Estado React", "Motor matemático", "Resultado e gráfico"],
     files: [
       { path: "src/routes/__root.tsx", role: "Estrutura comum: cabeçalho, menu Como Usar, abas, temas e rodapé. Outlet é o espaço onde a página escolhida aparece." },
-      { path: "src/routes/", role: "Uma página por arquivo: index é Funções; limites, derivadas, integrais, aprenda, ia e creditos são as outras abas." },
+      { path: "src/routes/", role: "Uma página por arquivo: index é Funções; limites, derivadas, integrais, aprenda e creditos são as outras abas." },
       { path: "src/components/", role: "Peças reutilizáveis da interface: entradas, teclados, gráficos, tabelas e painéis." },
       { path: "src/lib/", role: "Regras de cálculo, conversões, conteúdo de estudo, análise e armazenamento temporário." },
     ],
@@ -89,7 +89,7 @@ export const CODE_GUIDE: CodeGuideSection[] = [
     topics: [
       { title: "As tabelas não avaliam apenas c", text: "O motor usa distâncias progressivamente menores de c pelos dois lados. Isso permite estudar uma expressão que não está definida exatamente em c, mas cujos valores próximos se aproximam de um limite." },
       { title: "Resultado bilateral e cautela", text: "A página compara as estimativas da esquerda e da direita. Lados diferentes, oscilações ou ausência de convergência geram avisos. Uma estimativa por amostragem não deve ser confundida com prova geral; as etapas algébricas usam os métodos disponíveis para a expressão." },
-      { title: "Exemplos e UV", text: "Os exemplos de fatoração, racionalização e limite trigonométrico preenchem expressão e ponto de estudo. O gráfico SVG compartilha navegação com os outros gráficos 2D; a Luz Negra acrescenta guias e o painel de resolução, sem fazer uma chamada de IA." },
+      { title: "Exemplos e UV", text: "Os exemplos de fatoração, racionalização e limite trigonométrico preenchem expressão e ponto de estudo. O gráfico SVG compartilha navegação com os outros gráficos 2D; a Luz Negra acrescenta guias e o painel de resolução, com cálculo local." },
     ],
     code: { path: "src/routes/limites.tsx · trecho", source: 'const { left, right, L1, L2, oscillation } =\n  evaluateLimit(expr, c);', explanation: "Uma chamada fornece as linhas das duas tabelas, as estimativas laterais e uma observação sobre oscilação. A direção escolhida determina como esses dados são apresentados." },
   },
@@ -154,7 +154,7 @@ export const CODE_GUIDE: CodeGuideSection[] = [
     ],
     topics: [
       { title: "Três ambientes de estudo", text: "Claro e Escuro usam tipografia limpa e gráficos sem wireframe de giz. Quadro Negro aplica textura, moldura e tipografia temática sem inflar os controles; dados matemáticos usam fonte monoespaçada. Os valores de cores ficam no CSS compartilhado, não espalhados por cada página." },
-      { title: "Visão Analítica UV", text: "Disponível no Quadro Negro, a Luz Negra controla contraste analítico, guias e painéis complementares. Nos gráficos 2D, resumo e camadas analíticas já estão renderizados e sua visibilidade muda por CSS, evitando remontar o gráfico ao alternar. Ela não reativa a IA em manutenção." },
+      { title: "Visão Analítica UV", text: "Disponível no Quadro Negro, a Luz Negra controla contraste analítico, guias e painéis complementares. Nos gráficos 2D, resumo e camadas analíticas já estão renderizados e sua visibilidade muda por CSS, evitando remontar o gráfico ao alternar." },
       { title: "Fórmulas não são código na tela de cálculo", text: "O motor produz expressões em texto; expressionLatex converte a notação e MathFormula renderiza a fórmula tradicional. LaTeX é um formato intermediário, não o resultado cru mostrado ao estudante. Esta página exibe trechos de código intencionalmente para explicar a implementação." },
     ],
     code: { path: "src/components/MathExpression.tsx · trecho", source: 'return <MathFormula\n  formula={`${prefix}${expressionLatex(expression)}${suffix}`}\n/>;', explanation: "Prefixo, expressão convertida e sufixo (como + C) formam uma fórmula renderizada. O estudante vê a fração e o expoente, não os comandos de formatação." },
@@ -176,23 +176,6 @@ export const CODE_GUIDE: CodeGuideSection[] = [
     code: { path: "src/routes/aprenda.tsx · trecho", source: 'onClick={() => void navigate({\n  to: applyGraphTest(test)\n})}', explanation: "applyGraphTest escreve o exemplo no estado do módulo de destino e devolve sua rota. navigate abre essa página com a expressão preparada." },
   },
   {
-    id: "ia", title: "Aba IA, anexos, ENADE e Copiloto",
-    summary: "Esses recursos estão implementados, mas temporariamente bloqueados por manutenção; os módulos matemáticos locais continuam funcionando.",
-    flow: ["Pedido do usuário", "Verificação de disponibilidade", "Serviço e validação, se ativo", "Resposta estruturada"],
-    files: [
-      { path: "src/routes/ia.tsx · src/lib/tutor.functions.ts · src/lib/tutor.ts", role: "Tutor, perguntas por etapa, validação de dados e histórico da sessão." },
-      { path: "src/components/EnadePanel.tsx · src/lib/enade.functions.ts · src/lib/enade.ts", role: "Questões contextualizadas A–E, resposta do estudante e resolução." },
-      { path: "src/components/HelpChat.tsx · src/lib/helpdesk.functions.ts · src/lib/copilot-actions.ts", role: "Ajuda do Copiloto e ações na aplicação por eventos." },
-      { path: "src/lib/ai-maintenance.ts · src/components/AiMaintenance.tsx · src/lib/tutor-plot.ts", role: "Bloqueio compartilhado e validação das sugestões de gráfico." },
-    ],
-    topics: [
-      { title: "Tutor e perguntas por etapa — quando disponível", text: "O problema é enviado a uma função de servidor, que usa o serviço de IA e valida uma resposta estruturada. A interface organiza etapas, fórmulas e conclusão; perguntas adicionais levam o contexto da etapa escolhida. O histórico é guardado em sessionStorage na sessão da aba do navegador, não como histórico permanente de conta." },
-      { title: "Anexos, ENADE e transferência de gráficos — quando disponíveis", text: "O Tutor aceita PDF, PNG e JPEG, com prévia, remoção e limite de 8 MB. A interface mostra o estado de análise ao enviar. ENADE oferece questões geradas para treino, alternativas A–E, avaliação e resolução — não um banco oficial de provas. Sugestões de gráfico passam por validação de estrutura e expressões antes de abrir Funções por um parâmetro de URL." },
-      { title: "Copiloto e manutenção atual", text: "O Copiloto orienta sobre ferramentas e pode enviar eventos para mudar a aba, preencher a função, alternar tema/UV ou abrir 3D quando estiver disponível. No estado atual, Tutor, ENADE e Copiloto mostram manutenção, e os próprios handlers bloqueiam solicitações ao provedor. UV não contorna esse bloqueio." },
-    ],
-    code: { path: "src/routes/ia.tsx · trecho", source: 'if (AI_MAINTENANCE) return <>\n  <PageHeader tag="Tutor de Cálculo 1 e 2"\n    title="IA" desc="IA em manutenção" />\n  <p role="alert" className="border-y border-border py-6 text-muted-foreground">\n    {AI_MAINTENANCE_MESSAGE}\n  </p>\n</>;\nreturn <TutorPage />;', explanation: "A página de manutenção é apresentada antes de montar o Tutor. A proteção também existe nas funções do servidor: esconder o botão não é a única barreira." },
-  },
-  {
     id: "ajuda-estado", title: "Como Usar, Créditos e preservação de dados",
     summary: "As ferramentas de apoio compartilham a estrutura do site; cada tipo de informação tem uma duração diferente.",
     flow: ["Menu ou mudança de aba", "Navegação / estado compartilhado", "Página escolhida", "Dados preservados durante a navegação"],
@@ -203,9 +186,9 @@ export const CODE_GUIDE: CodeGuideSection[] = [
       { path: "src/test/", role: "Testes de cálculos, domínio, teclado, gráficos, estado, limites e outras regras." },
     ],
     topics: [
-      { title: "Tour e esta página", text: "Cada etapa do tour define um alvo da interface e pode declarar a aba que precisa abrir. O tour navega, mede o elemento e posiciona spotlight e balão; há Anterior, Próximo e Pular. O menu também oferece os atalhos de digitação, a ajuda de IA (em manutenção) e esta explicação do código." },
+      { title: "Tour e esta página", text: "Cada etapa do tour define um alvo da interface e pode declarar a aba que precisa abrir. O tour navega, mede o elemento e posiciona spotlight e balão; há Anterior, Próximo e Pular. O menu também oferece os atalhos de digitação e esta explicação do código." },
       { title: "Créditos", text: "A aba identifica a AP2 de Cálculo Diferencial e Integral, a UniCatólica do RN, a professora e os alunos integrantes. O logotipo é uma imagem referenciada como recurso do projeto. A apresentação acompanha os temas compartilhados sem participar dos cálculos." },
-      { title: "O que fica salvo e por quanto tempo", text: "Os campos dos módulos ficam em um Map em memória: sobrevivem à troca de aba, mas não a uma recarga completa. Tema e preferência UV usam localStorage e podem sobreviver à recarga. O histórico do Tutor usa sessionStorage quando o serviço está disponível. Não há salvamento permanente automático dos exercícios em uma conta." },
+      { title: "O que fica salvo e por quanto tempo", text: "Os campos dos módulos ficam em um Map em memória: sobrevivem à troca de aba, mas não a uma recarga completa. Tema e preferência UV usam localStorage e podem sobreviver à recarga. Não há salvamento permanente automático dos exercícios em uma conta." },
       { title: "Validação, testes e limites do sistema", text: "Entradas inválidas recebem avisos; resultados numéricos e simbólicos têm limitações próprias. Os testes verificam regras concretas, como domínio, constantes, independência de funções e cortes de assíntotas. A separação entre lógica, apresentação e navegação permite corrigir uma regra compartilhada sem duplicá-la em cada aba." },
     ],
     code: { path: "src/lib/module-state.ts · trecho", source: 'const store = new Map<string, unknown>();\n\nuseEffect(() => {\n  store.set(key, value);\n}, [key, value]);', explanation: "A chave identifica um campo, como funcoes.a ou integrais.expr. O efeito atualiza o valor em memória; useModuleState o recupera quando o módulo volta a aparecer. Esse Map não é um armazenamento permanente." },

@@ -4,19 +4,16 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
-  useRouterState,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
-import { ChartSpline, MoveHorizontal, TrendingUp, Sigma, BookOpen, GraduationCap, ArrowUpRight, BrainCircuit } from "lucide-react";
+import { ChartSpline, MoveHorizontal, TrendingUp, Sigma, BookOpen, GraduationCap, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { HelpButton } from "@/components/GuidedTour";
-import { AiMaintenanceDialog } from "@/components/AiMaintenance";
-import { AI_MAINTENANCE } from "@/lib/ai-maintenance";
 import chalkDust from "@/assets/chalk-dust.png.asset.json";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -96,18 +93,16 @@ const nav = [
   { to: "/derivadas", label: "Derivadas", icon: TrendingUp },
   { to: "/integrais", label: "Integrais", icon: Sigma },
   { to: "/aprenda", label: "Aprenda", icon: BookOpen },
-  { to: "/ia", label: "IA", icon: BrainCircuit },
   { to: "/creditos", label: "Créditos", icon: GraduationCap },
 ] as const;
 
 function RootComponent() {
-  const [maintenance, setMaintenance] = useState(false);
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
   useEffect(() => {
     let cancelled = false;
     // Load route chunks after the first page is usable, without mounting hidden
-    // charts or executing tutor actions. Sequential work avoids a download burst.
+    // charts. Sequential work avoids a download burst.
     const timer = window.setTimeout(() => {
       void (async () => {
         for (const item of nav) {
@@ -137,14 +132,13 @@ function RootComponent() {
           <nav className="flex min-w-0 flex-1 basis-full gap-1 overflow-x-auto sm:basis-0" aria-label="Módulos">
             {nav.map((n) => (
               <Button key={n.to} asChild variant="ghost" className="h-12 shrink-0 rounded-none border-b-2 border-transparent px-4 text-muted-foreground hover:bg-muted/60 hover:text-foreground">
-                <Link to={n.to} onClick={(event) => { if (n.to === "/ia" && AI_MAINTENANCE) { event.preventDefault(); setMaintenance(true); } }} activeOptions={{ exact: true }} activeProps={{ className: "border-primary bg-primary/5 !text-primary" }}><n.icon className="h-4 w-4" />{n.label}</Link>
+                <Link to={n.to} activeOptions={{ exact: true }} activeProps={{ className: "border-primary bg-primary/5 !text-primary" }}><n.icon className="h-4 w-4" />{n.label}</Link>
               </Button>
             ))}
           </nav>
           <ThemeToggle />
           </div>
         </header>
-        <AiMaintenanceDialog open={maintenance} onOpenChange={setMaintenance} />
         <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 md:py-10">
           <div className="module-enter"><Outlet /></div>
         </main>
