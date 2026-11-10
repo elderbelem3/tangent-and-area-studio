@@ -14,6 +14,8 @@ import { useModuleState } from "@/lib/module-state";
 import { curveChartRows, plotSamples, sampleCurve } from "@/lib/plot-sampling";
 import { useSettledPlotDomain } from "@/lib/use-settled-plot-domain";
 import { tangentExpression } from "@/lib/math-format";
+import { useRenderTrace } from "@/components/CodeMode";
+import { tracePoints } from "@/lib/code-inspection";
 
 export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax, tangentAt, tangentPoints, analysis = true }: {
   functions: ComparisonFunction[]; xMin: number; xMax: number; tangentAt?: number; tangentPoints?: Partial<Record<number, number>>; analysis?: boolean;
@@ -52,8 +54,8 @@ export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax
     const slope = point !== undefined && item.fn ? derivative(item.fn, point) : NaN;
     return { ...item, point, y, slope };
   }), [visible, tangentAt, tangentPoints]);
+  const sampled = useMemo(() => tangents.map((item) => ({ key: `curve${item.slot}`, points: item.fn ? sampleCurve(item.fn, samples, low, high) : [] })), [tangents, samples, low, high]);
   const data = useMemo(() => {
-    const sampled = tangents.map((item) => ({ key: `curve${item.slot}`, points: item.fn ? sampleCurve(item.fn, samples, low, high) : [] }));
     return curveChartRows(samples, sampled).map((row) => {
     const x = row["x"] ?? 0;
     for (const item of tangents) {
@@ -61,7 +63,11 @@ export function ComparisonPlot({ functions, xMin: initialXMin, xMax: initialXMax
     }
     return row;
     });
-  }, [samples, tangents, low, high, tangentAt]);
+  }, [samples, sampled, tangents, tangentAt]);
+  useRenderTrace(() => curves.map((item) => {
+    const points = sampled.find((curve) => curve.key === `curve${item.slot}`)?.points ?? [];
+    return { expression: item.expression, renderer: "Recharts 2D", count: points.length, points: tracePoints(points), status: item.error ?? (hidden.includes(item.slot) ? "Courbe ocultada pela legenda" : "Dados enviados ao gráfico; null e breakBefore separam descontinuidades") };
+  }), [curves, sampled, hidden]);
   const analysisFunctions = useMemo(() => functions.filter((f) => !hidden.includes(f.slot)), [functions, hidden]);
   const analysisPanel = useMemo(() => analysis ? <AnalysisPanels functions={analysisFunctions} xMin={settled.xMin} xMax={settled.xMax} /> : null, [analysis, analysisFunctions, settled]);
   const chart = useMemo(() => (

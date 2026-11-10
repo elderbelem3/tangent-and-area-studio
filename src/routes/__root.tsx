@@ -13,6 +13,7 @@ import { useEffect, type ReactNode } from "react";
 import { ChartSpline, MoveHorizontal, TrendingUp, Sigma, BookOpen, GraduationCap, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { CodeModeProvider, CodeModeToggle } from "@/components/CodeMode";
 import { HelpButton } from "@/components/GuidedTour";
 import chalkDust from "@/assets/chalk-dust.png.asset.json";
 import appCss from "../styles.css?url";
@@ -115,6 +116,7 @@ function RootComponent() {
   }, [router]);
   return (
     <QueryClientProvider client={queryClient}>
+      <CodeModeProvider>
       <div className="app-shell min-h-screen bg-background">
         <img className="chalk-surface" src={chalkDust.url} alt="" aria-hidden="true" />
         <header className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur">
@@ -136,6 +138,7 @@ function RootComponent() {
               </Button>
             ))}
           </nav>
+          <CodeModeToggle />
           <ThemeToggle />
           </div>
         </header>
@@ -148,6 +151,7 @@ function RootComponent() {
         </footer>
         <div className="chalk-tray" aria-hidden="true"><span className="chalk-eraser" /><span className="chalk-piece chalk-piece-white" /><span className="chalk-piece chalk-piece-blue" /><span className="chalk-piece chalk-piece-yellow" /><span className="chalk-piece chalk-piece-pink" /><span className="chalk-piece chalk-piece-green" /></div>
       </div>
+      </CodeModeProvider>
     </QueryClientProvider>
   );
 }

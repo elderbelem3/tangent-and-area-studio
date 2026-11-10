@@ -10,6 +10,7 @@ import { ValueTables } from "@/components/ValueTables";
 import { UvStepsPanel } from "@/components/UvStepsPanel";
 import { needs3D, surfaceAnalysis } from "@/lib/smart3d";
 import { functionExamples } from "@/lib/study-examples";
+import { CodeInspector } from "@/components/CodeMode";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -60,6 +61,7 @@ function Funcoes() {
           {is3D ? <Surface3D layers={functions.map((f) => ({ expression: f.expression, slot: f.slot })).filter((l) => l.expression.trim())} expression={expr} range={xMin !== null && xMax !== null && !rangeErr ? Math.max(Math.abs(xMin), Math.abs(xMax)) : 3} /> : !rangeErr && xMin !== null && xMax !== null ? <ComparisonPlot functions={functions} xMin={xMin} xMax={xMax} /> : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
         </Panel>
       </div>
+      <CodeInspector expressions={functions.map((item) => item.expression)} renderer={is3D ? "Three.js 3D" : "Recharts 2D"} blocked={Boolean(rangeErr) && !is3D} />
     </>
   );
 }

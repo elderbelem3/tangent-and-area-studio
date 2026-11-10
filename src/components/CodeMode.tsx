@@ -1,9 +1,10 @@
-import { createContext, useContext, useDeferredValue, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, useContext, useDeferredValue, useEffect, useMemo, useState, useSyncExternalStore, type DependencyList, type ReactNode } from "react";
 import { Code2, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { inspectParsing, type RenderTrace } from "@/lib/code-inspection";
 import { derivativeSteps } from "@/lib/uv-steps";
 import { MathFormula } from "@/components/MathFormula";
+import { needs3D } from "@/lib/smart3d";
 
 const CodeContext = createContext({ enabled: false, toggle: () => {} });
 let traces: RenderTrace[] = [];
@@ -22,7 +23,7 @@ export function CodeModeToggle() {
   return <Button variant={enabled ? "default" : "outline"} size="sm" className="my-2 shrink-0" aria-pressed={enabled} onClick={toggle} title="Inspecionar a execução atual"><Code2 className="h-4 w-4" />Modo Código</Button>;
 }
 
-export function useRenderTrace(factory: () => RenderTrace[], dependencies: React.DependencyList) {
+export function useRenderTrace(factory: () => RenderTrace[], dependencies: DependencyList) {
   const { enabled } = useContext(CodeContext);
   useEffect(() => {
     if (!enabled) return;
@@ -45,7 +46,7 @@ function InspectionPanel({ expressions, renderer, blocked }: { expressions: stri
   const currentTraces = useSyncExternalStore(subscribe, () => traces, () => EMPTY);
   const key = JSON.stringify(expressions);
   const deferred = useDeferredValue(key);
-  const analyses = useMemo(() => (JSON.parse(deferred) as string[]).map((expression) => ({ expression, parsing: inspectParsing(expression), steps: derivativeSteps(expression) })), [deferred]);
+  const analyses = useMemo(() => (JSON.parse(deferred) as string[]).map((expression) => ({ expression, parsing: inspectParsing(expression), steps: needs3D(expression) ? null : derivativeSteps(expression) })), [deferred]);
   return <section className="code-inspector mt-6 min-w-0 overflow-hidden rounded-lg border" aria-label="Inspeção de código">
     <div className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3">
       <h2 className="flex items-center gap-2 text-sm font-semibold"><Terminal className="h-4 w-4" />Modo Código</h2>
@@ -62,7 +63,7 @@ function InspectionPanel({ expressions, renderer, blocked }: { expressions: stri
           <Output label="renderizador.estado" value={{ renderer, status: blocked ? "Bloqueado: parâmetros inválidos" : parsing.error ? "Aguardando expressão válida" : trace?.status ?? "Sem dados enviados pelo gráfico atual", amostras: trace?.count ?? 0 }} />
           <details><summary className="cursor-pointer py-2 code-accent">amostras.reais · {trace ? `prévia de ${trace.points.length} / ${trace.count}` : "indisponíveis"}</summary><Output value={trace?.points ?? []} /></details>
           <details><summary className="cursor-pointer py-2 code-accent">derivada.passos · d/dx</summary>
-            {steps ? steps.map((step, i) => <div key={i} className="space-y-2 py-2"><h4 className="font-semibold">{step.title}</h4>{step.lines.map((line, j) => <p className="break-words" key={j}>{line}</p>)}{step.formulas?.map((formula, j) => <MathFormula key={j} latex={formula} />)}</div>) : <p className="code-muted py-2">Derivação simbólica indisponível para esta expressão no método atual.</p>}
+            {steps ? steps.map((step, i) => <div key={i} className="space-y-2 py-2"><h4 className="font-semibold">{step.title}</h4>{step.lines.map((line, j) => <p className="break-words" key={j}>{line}</p>)}{step.formulas?.map((formula, j) => <MathFormula key={j} formula={formula} />)}</div>) : <p className="code-muted py-2">{needs3D(expression) ? "Função de duas variáveis: utilize derivadas parciais. Os passos de d/dx de uma variável não se aplicam aqui." : "Derivação simbólica indisponível para esta expressão no método atual."}</p>}
           </details>
         </article>;
       })}
