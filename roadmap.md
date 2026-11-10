@@ -1,5 +1,6 @@
 # Refinamento visual
-- [x] Adicionar página no Como Usar com 12 capítulos explicando código, abas e funcionalidades; acesso pelo menu, busca, capítulos e leitura mobile verificados, com quatro testes de navegação aprovados.
+- [x] Remover Tutor, ENADE, Copiloto, chamadas e dependência de IA; tour de 10 passos e guia de 11 capítulos atualizados, seis abas verificadas, link antigo redirecionado e 160 testes aprovados.
+- [x] Adicionar página no Como Usar explicando código, abas e funcionalidades; acesso pelo menu, busca, capítulos e leitura mobile verificados.
 - [x] Exibir derivadas simbólicas e integrais indefinidas formatadas, com valores de x₀ independentes por função; preservar cálculos definidos e verificar casos do relatório (173 testes e conferência visual; primitivas não verificadas recebem aviso).
 - [x] Corrigir domínio e intervalos de monotonia, derivabilidade, limites e integrais apontados no relatório; padronizar fórmulas principais e verificar casos pendentes e preservação dos parâmetros. Integrais impróprias gerais continuam exigindo análise de convergência separada, sem retornar números não verificados.
 - [x] Tratar constantes na análise UV e nas regras de derivação sem enumerar raízes ou pontos críticos; verificar testes e interface.
@@ -11,8 +12,7 @@
 - [x] Otimizar carregamento e troca de abas com pré-carregamento, renderização eficiente e preservação de estado; verificar navegação e recursos.
 - [x] Atualizar os exemplos oficiais das quatro abas, manter um único exemplo 3D e verificar seleção e cálculos.
 - [x] Adicionar zoom/pan compartilhado aos gráficos 2D, ticks adaptativos e cursor preciso; verificar mouse e touch.
-- [x] Ampliar tour com atalhos, teclado científico, Aprenda e orientação da IA em manutenção; validar sintaxe e navegação.
-- [x] Suspender temporariamente tutor, ENADE e copiloto e verificar avisos de manutenção.
+- [x] Ampliar tour com atalhos, teclado científico e Aprenda; validar sintaxe e navegação.
 - [x] Refinar identidade, navegação e controles compartilhados.
 - [x] Harmonizar as seis abas e gráficos sem mudar os cálculos.
 - [x] Verificar navegação, teclado matemático, telas estreitas e testes existentes.
@@ -28,20 +28,10 @@
 - [x] Comparar curvas com Recharts, cores distintas e legenda interativa.
 - [x] Verificar limite, exclusão, reinserção e gráficos nos dois módulos.
 
-# Tutor IA
-- [x] Criar aba IA com entrada de problema, resolução numerada e histórico da sessão.
-- [x] Conectar tutor de Cálculo e dúvidas contextualizadas por etapa.
-- [x] Verificar resolução e perguntas sobre etapas com respostas reais.
-
 # Modo Quadro Negro
 - [x] Adicionar alternância no cabeçalho e persistência local.
 - [x] Aplicar tokens, escrita de giz, moldura e anotações aos gráficos.
 - [x] Verificar alternância, recarregamento e interações em todas as abas.
-
-# Gráfico a partir do tutor
-- [x] Incluir funções e intervalo estruturados na resolução.
-- [x] Transferir funções validadas para o gráfico pela ação do tutor.
-- [x] Testar validação e resolução real com navegação e curvas.
 
 # Lousa realista
 - [x] Refinar madeira, superfície apagada e contornos de giz.

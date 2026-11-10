@@ -3,7 +3,7 @@ import { Presentation, Flashlight, Sun, Moon } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { EV_THEME, type ThemeEventDetail } from "@/lib/copilot-actions";
+import { EV_THEME, type ThemeEventDetail } from "@/lib/theme-events";
 import { readTheme, saveTheme, readBlacklight, saveBlacklight, type LabTheme } from "@/lib/theme";
 const THEMES = [
   { value: "standard", label: "Modo Claro", icon: Sun },
