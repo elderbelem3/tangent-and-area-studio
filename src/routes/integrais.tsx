@@ -13,6 +13,7 @@ import { solidSteps } from "@/lib/smart3d";
 import { integralExamples } from "@/lib/study-examples";
 import { Button } from "@/components/ui/button";
 import { PageHeader, Panel, Field, ErrorBox, Chip, MathToolbar, Stat, num } from "@/components/Lab";
+import { CodeInspector } from "@/components/CodeMode";
 
 export const Route = createFileRoute("/integrais")({
   head: () => ({
@@ -83,7 +84,7 @@ function Integrais() {
         </div>
         <div className="min-w-0 space-y-6">
           <Panel title={mode === "solido" ? "Sólido de revolução (3D)" : "Área sob a curva"}>
-            {valid && mode === "solido" && !bad ? <><Smart3DView scene={{ kind: "solid", expression: expr, a, b }} /><UvStepsPanel title="Volume pelo Método dos Discos" steps={solid?.steps ?? null} /></> : valid ? <Plot fn={fn} xMin={lo - pad} xMax={hi + pad} {...(bad ? {} : { shade: [a, b] as [number, number], overlay: (h: import("@/components/Plot").PlotHelpers) => <IntegralUvOverlay h={h} a={a} b={b} value={value} /> })} /> : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
+            {valid && mode === "solido" && !bad ? <><Smart3DView scene={{ kind: "solid", expression: expr, a, b }} /><UvStepsPanel title="Volume pelo Método dos Discos" steps={solid?.steps ?? null} /></> : valid ? <Plot fn={fn} expression={expr} xMin={lo - pad} xMax={hi + pad} {...(bad ? {} : { shade: [a, b] as [number, number], overlay: (h: import("@/components/Plot").PlotHelpers) => <IntegralUvOverlay h={h} a={a} b={b} value={value} /> })} /> : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
             {valid && !bad && mode === "area" && <UvStepsPanel title="Antiderivada e Teorema Fundamental" steps={result?.steps ?? null} />}
           </Panel>
           <Panel title="Integral como área acumulada">
@@ -97,6 +98,7 @@ function Integrais() {
           </Panel>
         </div>
       </div>
+      <CodeInspector expressions={[expr]} renderer={valid && mode === "solido" && !bad ? "Three.js 3D" : "SVG 2D"} blocked={!valid} />
     </>
   );
 }

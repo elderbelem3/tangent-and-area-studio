@@ -11,6 +11,7 @@ import { derivativeExamples } from "@/lib/study-examples";
 import { FunctionEditor } from "@/components/FunctionEditor";
 import { addComparisonFunction, removeComparisonFunction, type ComparisonFunction } from "@/lib/comparison";
 import { PageHeader, Panel, Chip, num } from "@/components/Lab";
+import { CodeInspector } from "@/components/CodeMode";
 
 export const Route = createFileRoute("/derivadas")({
   head: () => ({
@@ -73,6 +74,7 @@ function Derivadas() {
           </Panel>
         </div>
       </div>
+      <CodeInspector expressions={functions.map((item) => item.expression)} renderer="Recharts 2D" />
     </>
   );
 }

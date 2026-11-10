@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## UI architecture
+- Keep Code Mode read-only and opt-in: renderers publish bounded previews of their actual sampled inputs through useRenderTrace; deferred inspection never resamples curves or writes module state, preserving calculation and typing performance.
 - Keep the app free of AI handlers and tools; retain a redirect-only legacy /ia route and isolate tour theme events from calculation modules so local tools remain independent.
 - Keep the code walkthrough as typed educational content separate from its route and reachable through the shared help menu; this documents each module without importing calculation engines into the guide.
 - Share structural domain restrictions in lib/domain across analysis, limits and integration; split monotonicity at domain boundaries and reject unverified improper integrals so off-grid poles cannot produce ordinary integral values.

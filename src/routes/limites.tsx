@@ -10,6 +10,7 @@ import { limitSteps } from "@/lib/uv-steps";
 import { evaluateLimit } from "@/lib/limits";
 import { limitExamples } from "@/lib/study-examples";
 import { PageHeader, Panel, Field, ErrorBox, Chip, MathToolbar, Stat, num } from "@/components/Lab";
+import { CodeInspector } from "@/components/CodeMode";
 
 export const Route = createFileRoute("/limites")({
   head: () => ({
@@ -82,7 +83,7 @@ function Limites() {
         <div className="min-w-0 space-y-6">
           <Panel title="Gráfico">
             {fn && c !== null && data ? (
-              <Plot fn={fn} xMin={c - span} xMax={c + span} points={Number.isFinite(data.L) ? [{ x: c, y: data.L, label: `(${fmt(c)}, ${fmt(data.L, 3)})`, hollow: Number.isNaN(fn(c)) }] : []} overlay={(h) => <LimitUvOverlay h={h} c={c} L={data.L} />} />
+              <Plot fn={fn} expression={expr} xMin={c - span} xMax={c + span} points={Number.isFinite(data.L) ? [{ x: c, y: data.L, label: `(${fmt(c)}, ${fmt(data.L, 3)})`, hollow: Number.isNaN(fn(c)) }] : []} overlay={(h) => <LimitUvOverlay h={h} c={c} L={data.L} />} />
             ) : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
             {steps && <UvStepsPanel title="Resolução Algébrica do Limite" steps={steps} />}
           </Panel>
@@ -94,6 +95,7 @@ function Limites() {
           )}
         </div>
       </div>
+      <CodeInspector expressions={[expr]} renderer="SVG 2D" blocked={!fn || c === null} />
     </>
   );
 }

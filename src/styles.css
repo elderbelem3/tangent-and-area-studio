@@ -71,6 +71,11 @@
 }
 
 :root {
+  --code-background: oklch(0.19 0.006 260);
+  --code-foreground: oklch(0.93 0.008 260);
+  --code-muted: oklch(0.72 0.018 260);
+  --code-accent: oklch(0.82 0.12 165);
+  --code-border: oklch(0.36 0.015 260);
   --radius: 0.75rem;
   --background: oklch(0.975 0.004 260);
   --foreground: oklch(0.255 0.018 260);
@@ -417,6 +422,11 @@
 .math-block-field { display: block; width: 100%; min-height: 2.5rem; font-size: 1.15rem; background: transparent; color: var(--foreground); border: 0; outline: none; --caret-color: var(--primary); --selection-background-color: color-mix(in oklab, var(--primary) 25%, transparent); --placeholder-color: var(--muted-foreground); --contains-highlight-background-color: color-mix(in oklab, var(--primary) 10%, transparent); }
 .math-block-field::part(virtual-keyboard-toggle), .math-block-field::part(menu-toggle) { display: none; }
 .math-block-field::part(content) { max-width: 100%; overflow-x: auto; }
+.code-inspector { background: var(--code-background); color: var(--code-foreground); border-color: var(--code-border); font-family: var(--font-mono); }
+.code-inspector :is(h2, h3, h4, p, pre, summary, span) { font-family: var(--font-mono) !important; letter-spacing: 0 !important; }
+.code-inspector :is(article, .border-b) { border-color: var(--code-border); }
+.code-inspector .code-accent { color: var(--code-accent); }
+.code-inspector .code-muted { color: var(--code-muted); }
 @media (pointer: coarse) {
   input, textarea { font-size: 1rem; }
   button, a, [role="tab"] { touch-action: manipulation; }

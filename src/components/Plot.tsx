@@ -7,9 +7,12 @@ import { findPlotAnnotations } from "@/lib/plot-annotations";
 import { ChalkAnnotation } from "@/components/ChalkAnnotation";
 import { curveSegments, plotSamples, sampleCurve } from "@/lib/plot-sampling";
 import { useSettledPlotDomain } from "@/lib/use-settled-plot-domain";
+import { useRenderTrace } from "@/components/CodeMode";
+import { tracePoints } from "@/lib/code-inspection";
 
 type Props = {
   fn: Fn;
+  expression?: string;
   xMin: number;
   xMax: number;
   points?: { x: number; y: number; label?: string; hollow?: boolean }[];
@@ -23,7 +26,7 @@ const W = 640, H = 400, P = 36;
 const EMPTY_POINTS: NonNullable<Props["points"]> = [];
 const EMPTY_LINES: Fn[] = [];
 
-export function Plot({ fn, xMin: initialXMin, xMax: initialXMax, points = EMPTY_POINTS, lines = EMPTY_LINES, shade, overlay }: Props) {
+export function Plot({ fn, expression = "", xMin: initialXMin, xMax: initialXMax, points = EMPTY_POINTS, lines = EMPTY_LINES, shade, overlay }: Props) {
   const clipId = useId();
   const pointRangeKey = JSON.stringify(points.map((p) => p.y));
   const initialRange = useMemo(() => {
@@ -61,7 +64,9 @@ export function Plot({ fn, xMin: initialXMin, xMax: initialXMax, points = EMPTY_
     );
   };
 
-  const curvePath = useMemo(() => path(fn), [fn, xs, xMin, xMax, yMin, yMax]);
+  const sampled = useMemo(() => sampleCurve(fn, xs, yMin, yMax), [fn, xs, yMin, yMax]);
+  const curvePath = useMemo(() => curveSegments(sampled).map((segment) => segment.map(({ x, y }, index) => `${index === 0 ? "M" : "L"}${sx(x).toFixed(1)},${sy(y).toFixed(1)}`).join("")), [sampled, xMin, xMax, yMin, yMax]);
+  useRenderTrace(() => [{ expression, renderer: "SVG 2D", count: sampled.length, points: tracePoints(sampled), status: `${curvePath.length} subcaminhos enviados ao SVG; descontinuidades separadas` }], [expression, sampled, curvePath]);
   const linePaths = useMemo(() => lines.map(path), [lines, xs, xMin, xMax, yMin, yMax]);
   const shadePath = useMemo(() => {
   let shadePath = "";
