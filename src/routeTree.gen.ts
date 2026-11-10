@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AprendaRouteImport } from './routes/aprenda'
+import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as CreditosRouteImport } from './routes/creditos'
 import { Route as DerivadasRouteImport } from './routes/derivadas'
 import { Route as IaRouteImport } from './routes/ia'
@@ -25,6 +26,11 @@ const IndexRoute = IndexRouteImport.update({
 const AprendaRoute = AprendaRouteImport.update({
   id: '/aprenda',
   path: '/aprenda',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
+  id: '/como-funciona',
+  path: '/como-funciona',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CreditosRoute = CreditosRouteImport.update({
@@ -56,6 +62,7 @@ const LimitesRoute = LimitesRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/aprenda': typeof AprendaRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/creditos': typeof CreditosRoute
   '/derivadas': typeof DerivadasRoute
   '/ia': typeof IaRoute
@@ -65,6 +72,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/aprenda': typeof AprendaRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/creditos': typeof CreditosRoute
   '/derivadas': typeof DerivadasRoute
   '/ia': typeof IaRoute
@@ -75,6 +83,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/aprenda': typeof AprendaRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/creditos': typeof CreditosRoute
   '/derivadas': typeof DerivadasRoute
   '/ia': typeof IaRoute
@@ -86,6 +95,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/aprenda'
+    | '/como-funciona'
     | '/creditos'
     | '/derivadas'
     | '/ia'
@@ -95,6 +105,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/aprenda'
+    | '/como-funciona'
     | '/creditos'
     | '/derivadas'
     | '/ia'
@@ -104,6 +115,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/aprenda'
+    | '/como-funciona'
     | '/creditos'
     | '/derivadas'
     | '/ia'
@@ -114,6 +126,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AprendaRoute: typeof AprendaRoute
+  ComoFuncionaRoute: typeof ComoFuncionaRoute
   CreditosRoute: typeof CreditosRoute
   DerivadasRoute: typeof DerivadasRoute
   IaRoute: typeof IaRoute
@@ -135,6 +148,13 @@ declare module '@tanstack/react-router' {
       path: '/aprenda'
       fullPath: '/aprenda'
       preLoaderRoute: typeof AprendaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/como-funciona': {
+      id: '/como-funciona'
+      path: '/como-funciona'
+      fullPath: '/como-funciona'
+      preLoaderRoute: typeof ComoFuncionaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/creditos': {
@@ -178,6 +198,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AprendaRoute: AprendaRoute,
+  ComoFuncionaRoute: ComoFuncionaRoute,
   CreditosRoute: CreditosRoute,
   DerivadasRoute: DerivadasRoute,
   IaRoute: IaRoute,
