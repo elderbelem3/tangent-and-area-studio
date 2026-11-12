@@ -133,7 +133,19 @@ export function ValueTables({ functions }: { functions: ComparisonFunction[] }) 
                             className={inputClass}
                           />
                         </td>
-                        <td className={`py-1.5 align-middle ${result.error ? "text-destructive" : ""}`}>{result.text}</td>
+                        <td className={`py-1.5 align-middle ${result.error ? "text-destructive" : ""}`}>
+                          {result.roots ? (
+                            <div className="flex flex-col gap-0.5">
+                              {result.roots.map((r, k) => (
+                                <span key={k}>
+                                  x<sub>{k + 1}</sub> = {fmt(r, 6)}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            result.text
+                          )}
+                        </td>
                       </tr>
                     );
                   })}
