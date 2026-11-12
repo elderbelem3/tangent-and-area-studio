@@ -51,7 +51,7 @@ export function ValueTables({ functions }: { functions: ComparisonFunction[] }) 
     const roots = solutions[index];
     if (!roots) return { text: "—" };
     if (!roots.length) return { text: "sem solução real em [−50, 50]", error: true };
-    return roots.length === 1 ? { text: `x = ${fmt(roots[0], 6)}` } : { text: "", roots };
+    return roots.length === 1 ? { text: `x = ${fmt(roots[0]!, 6)}` } : { text: "", roots };
   };
 
   return (
