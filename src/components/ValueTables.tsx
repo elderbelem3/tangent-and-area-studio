@@ -40,7 +40,7 @@ export function ValueTables({ functions }: { functions: ComparisonFunction[] }) 
     [mode, fn, rows, expression],
   );
 
-  const resultFor = (row: string, index: number): { text: string; error?: boolean } => {
+  const resultFor = (row: string, index: number): { text: string; roots?: number[]; error?: boolean } => {
     const n = num(row);
     if (n === null) return { text: row.trim() ? "valor inválido" : "—", error: Boolean(row.trim()) };
     if (mode === "fx") {
@@ -50,7 +50,8 @@ export function ValueTables({ functions }: { functions: ComparisonFunction[] }) 
     }
     const roots = solutions[index];
     if (!roots) return { text: "—" };
-    return roots.length ? { text: roots.map((r) => `x = ${fmt(r, 6)}`).join("   ·   ") } : { text: "sem solução real em [−50, 50]", error: true };
+    if (!roots.length) return { text: "sem solução real em [−50, 50]", error: true };
+    return roots.length === 1 ? { text: `x = ${fmt(roots[0], 6)}` } : { text: "", roots };
   };
 
   return (
