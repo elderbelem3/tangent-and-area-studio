@@ -8,6 +8,7 @@ import { BookOpen, CheckCircle2, Lightbulb, Sigma, Bookmark, ArrowUpRight, Alert
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { PageHeader } from "@/components/Lab";
 import { MathFormula } from "@/components/MathFormula";
+import { LearnRules } from "@/components/LearnRules";
 import { LEARN } from "@/lib/learn-content";
 import { useModuleState } from "@/lib/module-state";
 
@@ -17,9 +18,9 @@ export const Route = createFileRoute("/aprenda")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { title: "Aprenda · Manual de Cálculo 1 e 2 · CalculusLab" },
-      { name: "description", content: "Manual avançado de Cálculo 1 e 2: funções, limites, derivadas, integrais, séries e várias variáveis, com teoremas e exemplos resolvidos." },
+      { name: "description", content: "Regras e propriedades de funções, limites, derivadas e integrais, com fórmulas formatadas, condições de aplicação e um manual avançado de Cálculo 1 e 2." },
       { property: "og:title", content: "Aprenda · Manual de Cálculo 1 e 2 · CalculusLab" },
-      { property: "og:description", content: "33 tópicos de cálculo com definições rigorosas, fórmulas e exemplos detalhados passo a passo." },
+      { property: "og:description", content: "Estude os quatro pilares do cálculo com regras, propriedades, fórmulas e exemplos resolvidos, dos fundamentos às aplicações avançadas." },
     ],
   }),
   component: Aprenda,
@@ -52,6 +53,7 @@ function Aprenda() {
   return (
     <>
       <PageHeader tag="Manual de estudos" title="Aprenda" desc="Cálculo 1 e 2: fundamentos, teoremas e aplicações." />
+      <LearnRules />
       <div className="grid min-w-0 grid-cols-1 gap-8 lg:grid-cols-[260px_minmax(0,1fr)]">
         <aside className="min-w-0 lg:sticky lg:top-36 lg:max-h-[calc(100dvh-10rem)] lg:self-start lg:overflow-y-auto">
           <nav aria-label="Índice do manual" className="space-y-5">

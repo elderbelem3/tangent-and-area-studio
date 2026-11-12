@@ -20,6 +20,7 @@
 - [x] Verificar navegação, teclado matemático, telas estreitas e testes existentes.
 
 # Manual avançado Aprenda
+- [ ] Adicionar referência de Regras e Propriedades em quatro abas, com condições matemáticas, fórmulas e exemplos; verificar navegação e legibilidade mobile.
 - [x] Expandir os conteúdos de Cálculo 1 e 2 com hipóteses, fórmulas e exemplos detalhados.
 - [x] Organizar índice por curso e unidades, acordeões e destaque de teoremas.
 - [x] Verificar fórmulas e navegação no manual em telas amplas e estreitas.
