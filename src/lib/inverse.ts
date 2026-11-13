@@ -68,25 +68,204 @@ export function invertFunction(expression: string): InverseResult {
   return { inverse, steps, error: null };
 }
 
-/** Find all real x in [a, b] with f(x) = y, by sign changes + bisection. */
+// ---- Raízes polinomiais com multiplicidade (Durand-Kerner) ----
+
+type Cx = { re: number; im: number };
+const cx = (re: number, im = 0): Cx => ({ re, im });
+const cadd = (a: Cx, b: Cx): Cx => cx(a.re + b.re, a.im + b.im);
+const csub = (a: Cx, b: Cx): Cx => cx(a.re - b.re, a.im - b.im);
+const cmul = (a: Cx, b: Cx): Cx => cx(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+const cdiv = (a: Cx, b: Cx): Cx => {
+  const d = b.re * b.re + b.im * b.im;
+  return cx((a.re * b.re + a.im * b.im) / d, (a.im * b.re - a.re * b.im) / d);
+};
+const cabs = (a: Cx) => Math.hypot(a.re, a.im);
+
+const trimPoly = (p: number[]): number[] => {
+  while (p.length > 1 && Math.abs(p[p.length - 1]!) < 1e-12) p.pop();
+  return p;
+};
+const polyMul = (A: number[], B: number[]): number[] => {
+  const r = new Array<number>(A.length + B.length - 1).fill(0);
+  A.forEach((a, i) => B.forEach((b, j) => (r[i + j]! += a * b)));
+  return r;
+};
+
+const polyDer = (p: number[]): number[] => p.slice(1).map((c, i) => c * (i + 1));
+const polyEval = (p: number[], r: number): number => p.reduceRight((s, c) => s * r + c, 0);
+
+/**
+ * Refina uma raiz de multiplicidade m: ela também é raiz da (m−1)-ésima derivada,
+ * onde Newton converge quadraticamente mesmo com multiplicidade.
+ */
+function polishRoot(coeffs: number[], r0: number, multiplicity: number): number {
+  let d = coeffs;
+  for (let k = 1; k < multiplicity; k++) d = polyDer(d);
+  const dd = polyDer(d);
+  let r = r0;
+  for (let k = 0; k < 60; k++) {
+    const fv = polyEval(d, r), dfv = polyEval(dd, r);
+    if (dfv === 0) break;
+    const step = fv / dfv;
+    r -= step;
+    if (Math.abs(step) < 1e-14 * Math.max(1, Math.abs(r))) break;
+  }
+  return r;
+}
+
+/** Coeficientes (do termo constante ao de maior grau) se o nó for um polinômio em x com coeficientes numéricos; senão null. */
+function polyCoeffs(node: MathNode): number[] | null {
+  if (node.type === "ConstantNode") {
+    const v = Number((node as unknown as { value: unknown }).value);
+    return Number.isFinite(v) ? [v] : null;
+  }
+  if (node.type === "SymbolNode") return (node as unknown as { name: string }).name === "x" ? [0, 1] : null;
+  if (node.type === "ParenthesisNode") return polyCoeffs((node as unknown as { content: MathNode }).content);
+  if (node.type !== "OperatorNode") return null;
+  const op = node as unknown as { op: string; fn: string; args: MathNode[] };
+  if (op.fn === "unaryMinus") { const p = polyCoeffs(op.args[0]!); return p ? p.map((c) => -c) : null; }
+  if (op.fn === "unaryPlus") return polyCoeffs(op.args[0]!);
+  if (op.args.length !== 2) return null;
+  const A = polyCoeffs(op.args[0]!), B = polyCoeffs(op.args[1]!);
+  if (op.op === "+" && A && B) {
+    const r = new Array<number>(Math.max(A.length, B.length)).fill(0);
+    A.forEach((c, i) => (r[i]! += c)); B.forEach((c, i) => (r[i]! += c));
+    return trimPoly(r);
+  }
+  if (op.op === "-" && A && B) {
+    const r = new Array<number>(Math.max(A.length, B.length)).fill(0);
+    A.forEach((c, i) => (r[i]! += c)); B.forEach((c, i) => (r[i]! -= c));
+    return trimPoly(r);
+  }
+  if (op.op === "*" && A && B) return trimPoly(polyMul(A, B));
+  if (op.op === "^" && A) {
+    const e = op.args[1]!;
+    if (e.type === "ConstantNode") {
+      const n = Number((e as unknown as { value: unknown }).value);
+      if (Number.isInteger(n) && n >= 0 && n <= 64) {
+        let r = [1];
+        for (let i = 0; i < n; i++) r = polyMul(r, A);
+        return trimPoly(r);
+      }
+    }
+  }
+  return null;
+}
+
+/** Método de Durand-Kerner: todas as raízes complexas do polinômio, incluindo repetições. */
+function durandKerner(coeffs: number[]): Cx[] {
+  const n = coeffs.length - 1;
+  const lead = coeffs[n]!;
+  const a = coeffs.map((c) => c / lead);
+  const radius = 1 + Math.max(0, ...a.slice(0, n).map((c) => Math.abs(c)));
+  let roots = Array.from({ length: n }, (_, k) => {
+    const t = (2 * Math.PI * k) / n + 0.4;
+    return cx(radius * Math.cos(t), radius * Math.sin(t));
+  });
+  const evalP = (z: Cx): Cx => {
+    let acc = cx(a[n]!);
+    for (let i = n - 1; i >= 0; i--) acc = cadd(cmul(acc, z), cx(a[i]!));
+    return acc;
+  };
+  for (let iter = 0; iter < 5000; iter++) {
+    let maxStep = 0;
+    roots = roots.map((r, k) => {
+      let denom = cx(1);
+      for (let j = 0; j < n; j++) if (j !== k) denom = cmul(denom, csub(r, roots[j]!));
+      const step = cdiv(evalP(r), denom);
+      maxStep = Math.max(maxStep, cabs(step));
+      return csub(r, step);
+    });
+    if (maxStep < 1e-13) break;
+  }
+  return roots;
+}
+
+/**
+ * Se f(x) − y for um polinômio em x (grau 1 a 20), devolve TODAS as raízes reais,
+ * repetidas conforme a multiplicidade (ex.: (x−1)²(x−2)³ → [1, 1, 2, 2, 2]).
+ * Retorna null quando a expressão não é polinomial, para o chamador usar a busca numérica.
+ */
+function polynomialRealRoots(expression: string, y: number): number[] | null {
+  if (!Number.isFinite(y)) return null;
+  try {
+    const node = parse(`(${normalize(expression)}) - (${y})`);
+    const coeffs = polyCoeffs(node);
+    if (!coeffs) return null;
+    trimPoly(coeffs);
+    const n = coeffs.length - 1;
+    if (n < 1 || n > 20 || coeffs.some((c) => !Number.isFinite(c))) return null;
+    const scaleAt = (r: number) => coeffs.reduce((s, c, i) => s + Math.abs(c) * Math.abs(r) ** i, 0);
+    const realish = durandKerner(coeffs)
+      .filter((z) => Math.abs(z.im) <= 1e-4 * Math.max(1, Math.abs(z.re)))
+      .map((z) => z.re)
+      .sort((p, q) => p - q);
+    // Agrupa aproximações da mesma raiz: o tamanho do grupo é a multiplicidade.
+    const real: number[] = [];
+    for (let i = 0; i < realish.length; ) {
+      let j = i + 1;
+      while (j < realish.length && Math.abs(realish[j]! - realish[i]!) <= 1e-3) j++;
+      const mean = realish.slice(i, j).reduce((s, v) => s + v, 0) / (j - i);
+      const r = Number(polishRoot(coeffs, mean, j - i).toFixed(10));
+      const residual = Math.abs(polyEval(coeffs, r));
+      // Se algum grupo não convergiu, devolve null para o chamador usar a busca numérica.
+      if (residual > 1e-6 * Math.max(1, scaleAt(r))) return null;
+      const v = Object.is(r, -0) ? 0 : r;
+      for (let k = i; k < j; k++) real.push(v);
+      i = j;
+    }
+    return real.sort((p, q) => p - q);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Find all real x in [a, b] with f(x) = y.
+ * Polinômios: raízes exatas com multiplicidade (repetidas aparecem repetidas).
+ * Demais funções: mudanças de sinal + bisseção, e raízes de tangência
+ * (mínimos locais de |f(x) − y| que tocam zero sem trocar de sinal).
+ */
 export function solveForX(expression: string, y: number, a = -50, b = 50): number[] {
+  const poly = polynomialRealRoots(expression, y);
+  if (poly) return poly;
   const { fn } = parseFn(expression);
   if (!fn) return [];
   const g = (x: number) => fn(x) - y;
   const n = 4000, out: number[] = [];
-  let px = a, pv = g(a);
+  const xs = new Array<number>(n + 1), vs = new Array<number>(n + 1);
+  for (let i = 0; i <= n; i++) { xs[i] = a + ((b - a) * i) / n; vs[i] = g(xs[i]!); }
+  const tol = 1e-6 * Math.max(1, Math.abs(y));
   for (let i = 1; i <= n; i++) {
-    const x = a + ((b - a) * i) / n, v = g(x);
+    const pv = vs[i - 1]!, v = vs[i]!;
     if (Number.isFinite(pv) && Number.isFinite(v)) {
-      if (Math.abs(pv) < 1e-12) out.push(px);
+      if (Math.abs(pv) < 1e-12) out.push(xs[i - 1]!);
       else if (pv * v < 0) {
-        let lo = px, hi = x;
+        let lo = xs[i - 1]!, hi = xs[i]!;
         for (let k = 0; k < 80; k++) { const m = (lo + hi) / 2; if (g(lo) * g(m) <= 0) hi = m; else lo = m; }
         const r = (lo + hi) / 2;
-        if (Math.abs(g(r)) < 1e-6 * Math.max(1, Math.abs(y))) out.push(r);
+        if (Math.abs(g(r)) < tol) out.push(r);
       }
     }
-    px = x; pv = v;
   }
-  return out.filter((r, i) => i === 0 || Math.abs(r - out[i - 1]!) > 1e-6).map((r) => Number(r.toFixed(10)));
+  // Raízes de tangência: mínimos locais de |g| que chegam a zero sem mudança de sinal.
+  const goldenMin = (lo: number, hi: number): number => {
+    const gr = (Math.sqrt(5) - 1) / 2;
+    let c = hi - gr * (hi - lo), d = lo + gr * (hi - lo);
+    for (let k = 0; k < 100; k++) {
+      if (Math.abs(g(c)) < Math.abs(g(d))) hi = d; else lo = c;
+      c = hi - gr * (hi - lo); d = lo + gr * (hi - lo);
+    }
+    return (lo + hi) / 2;
+  };
+  for (let i = 1; i < n; i++) {
+    const av = Math.abs(vs[i]!);
+    if (!Number.isFinite(av) || av > Math.abs(vs[i - 1]!) || av > Math.abs(vs[i + 1]!)) continue;
+    const m = goldenMin(xs[i - 1]!, xs[i + 1]!);
+    if (Math.abs(g(m)) < tol && !out.some((r) => Math.abs(r - m) <= 1e-6)) out.push(m);
+  }
+  return out
+    .sort((p, q) => p - q)
+    .filter((r, i, arr) => i === 0 || Math.abs(r - arr[i - 1]!) > 1e-6)
+    .map((r) => Number(r.toFixed(10)));
 }
