@@ -83,6 +83,13 @@ const small = (v: number) => Math.abs(v) < 1e-9;
 
 export function limitSteps(expression: string, c: number, L: number, L1: number, L2: number): UvStep[] | null {
   const { fn } = parseFn(expression); if (!fn) return null;
+  if (!Number.isFinite(c)) {
+    const far = fn(c > 0 ? 1e6 : -1e6);
+    return [
+      { title: "Passo 1 — Limite no infinito", lines: [`Como x → ${c > 0 ? "+∞" : "−∞"}, analisamos o comportamento assintótico de f(x) em vez de substituir um ponto.`, `Amostra numérica: f(${c > 0 ? "10⁶" : "−10⁶"}) = ${fmt(far, 6)}`] },
+      { title: "Conclusão", lines: [Number.isFinite(L) ? `Os valores estabilizam em ${fmt(L, 6)}, logo lim f(x) = ${fmt(L, 6)}.` : !Number.isNaN(L) ? `Os valores crescem sem limite em módulo: lim f(x) = ${fmt(L)}.` : "Os valores não convergem — o limite não existe."] },
+    ];
+  }
   const node = strip(parse(normalize(expression)));
   const steps: UvStep[] = [];
   const direct = fn(c);
