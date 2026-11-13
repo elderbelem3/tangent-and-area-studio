@@ -188,6 +188,36 @@ export const LEARN: LearnModule[] = [
         "warning": "∞ não é um número real para substituição direta. Ausência de valor no gráfico não prova, por si só, a existência de assíntota."
       },
       {
+        "id": "infinito",
+        "title": "Limites no infinito: o que acontece quando x cresce sem parar",
+        "theory": [
+          "Quando escrevemos x → +∞, não estamos aproximando x de um número: estamos descrevendo o comportamento de f(x) quando x cresce além de qualquer valor fixo. Dizer que lim x→+∞ f(x) = L significa que, por maior que x fique, f(x) se aproxima de L tanto quanto quisermos — e permanece lá. O mesmo vale para x → −∞.",
+          "∞ não é um número real, então nunca “substituímos x por ∞”. Em vez disso, analisamos qual termo domina a expressão. Em 1/x, o denominador cresce sem parar enquanto o numerador fica fixo, e a fração se aproxima de zero: a reta y = 0 é assíntota horizontal. Já sen(x) oscila para sempre entre −1 e 1, sem se aproximar de valor algum — por isso lim x→∞ sen(x) não existe.",
+          "Em razões de polinômios, divide-se tudo pela maior potência de x do denominador: os termos que tendem a zero desaparecem e sobra a razão dos coeficientes dominantes. Hierarquia de crescimento: logaritmos ≪ potências ≪ exponenciais."
+        ],
+        "formulas": [
+          "\\lim_{x\\to\\infty}\\frac1x=0,\\qquad\\lim_{x\\to\\infty}\\frac{c}{x^k}=0\\ (k>0)",
+          "\\lim_{x\\to\\infty}\\sin x\\ \\text{não existe (oscila entre }-1\\text{ e }1\\text{)}",
+          "\\lim_{x\\to\\infty}\\frac{a_nx^n+\\cdots}{b_mx^m+\\cdots}=\\begin{cases}\\frac{a_n}{b_n},&n=m\\\\0,&n<m\\\\\\pm\\infty,&n>m\\end{cases}"
+        ],
+        "example": {
+          "problem": "Calcule lim x→∞ (3x² + 1)/(x² + 5).",
+          "steps": [
+            "Não podemos “substituir ∞”: ∞/∞ é uma indeterminação.",
+            "Divida numerador e denominador pela maior potência, x².",
+            "A expressão vira (3 + 1/x²)/(1 + 5/x²).",
+            "Quando x → ∞, tanto 1/x² quanto 5/x² tendem a zero.",
+            "Sobram 3/1: o limite é 3, e y = 3 é assíntota horizontal."
+          ],
+          "answer": "\\lim_{x\\to\\infty}\\frac{3x^2+1}{x^2+5}=3"
+        },
+        "tip": {
+          "module": "Funções",
+          "text": "Plote 1/x de 1 a 50 e veja a curva colar no eixo X; depois plote sin(x) e observe que ela nunca para de oscilar."
+        },
+        "warning": "Oscilação não é limite: sen(x) e cos(x) não têm limite no infinito. E cuidado com a intuição numérica — uma função pode parecer estabilizar e ainda assim crescer devagar para sempre, como ln(x)."
+      },
+      {
         "id": "confronto",
         "title": "Teorema do Confronto (Sanduíche)",
         "theory": [

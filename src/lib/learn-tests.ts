@@ -16,6 +16,7 @@ export const GRAPH_TESTS: Record<string, GraphTest> = {
   familias: { module: "Funções", expression: "x^2-4*x+3", a: -1, b: 5 },
   epsilon: { module: "Limites", expression: "3*x+1", c: 2 },
   assintotas: { module: "Limites", expression: "(2*x+1)/(x-2)", c: 2 },
+  infinito: { module: "Funções", expression: "1/x", a: 1, b: 50 },
   confronto: { module: "Limites", expression: "sin(x)/x", c: 0 },
   continuidade: { module: "Funções", expression: "x^3+x-1", a: -2, b: 2 },
   "def-derivada": { module: "Derivadas", expression: "x^2", x0: 3 },
