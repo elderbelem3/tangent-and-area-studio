@@ -38,7 +38,8 @@ export function normalize(expr: string): string {
       // An identifier such as log10 is not an implicit multiplication coefficient.
       return /[a-zA-Z_][a-zA-Z_0-9]*$/.test(source.slice(0, offset + 1)) ? match : `${digit}*${next}`;
     })
-    .replace(/\)\s*([a-zA-Z0-9(])/g, ")*$1");
+    .replace(/\)\s*([a-zA-Z0-9(])/g, ")*$1")
+    .replace(/∞|\binfinity\b/gi, "Infinity");
 }
 
 export function parseFn(expr: string): { fn: Fn | null; error: string | null } {

@@ -18,7 +18,7 @@ type Props = {
   points?: { x: number; y: number; label?: string; hollow?: boolean }[];
   lines?: Fn[];
   shade?: [number, number];
-  overlay?: (h: PlotHelpers) => ReactNode;
+  overlay?: ((h: PlotHelpers) => ReactNode) | undefined;
 };
 export type PlotHelpers = { sx: (x: number) => number; sy: (y: number) => number; xMin: number; xMax: number; yMin: number; yMax: number; fn: Fn };
 
