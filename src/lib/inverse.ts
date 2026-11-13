@@ -1,4 +1,4 @@
-import { parse, rationalize, simplify, type MathNode } from "mathjs";
+import { parse, simplify, type MathNode } from "mathjs";
 import { normalize, parseFn } from "@/lib/calc";
 
 export type InverseStep = { text: string; equation: string };
@@ -167,7 +167,7 @@ function durandKerner(coeffs: number[]): Cx[] {
 function polynomialRealRoots(expression: string, y: number): number[] | null {
   if (!Number.isFinite(y)) return null;
   try {
-    const node = rationalize(`(${normalize(expression)}) - (${y})`) as MathNode;
+    const node = parse(`(${normalize(expression)}) - (${y})`);
     const coeffs = polyCoeffs(node);
     if (!coeffs) return null;
     trimPoly(coeffs);
