@@ -91,6 +91,28 @@ const polyMul = (A: number[], B: number[]): number[] => {
   return r;
 };
 
+const polyDer = (p: number[]): number[] => p.slice(1).map((c, i) => c * (i + 1));
+const polyEval = (p: number[], r: number): number => p.reduceRight((s, c) => s * r + c, 0);
+
+/**
+ * Refina uma raiz de multiplicidade m: ela também é raiz da (m−1)-ésima derivada,
+ * onde Newton converge quadraticamente mesmo com multiplicidade.
+ */
+function polishRoot(coeffs: number[], r0: number, multiplicity: number): number {
+  let d = coeffs;
+  for (let k = 1; k < multiplicity; k++) d = polyDer(d);
+  const dd = polyDer(d);
+  let r = r0;
+  for (let k = 0; k < 60; k++) {
+    const fv = polyEval(d, r), dfv = polyEval(dd, r);
+    if (dfv === 0) break;
+    const step = fv / dfv;
+    r -= step;
+    if (Math.abs(step) < 1e-14 * Math.max(1, Math.abs(r))) break;
+  }
+  return r;
+}
+
 /** Coeficientes (do termo constante ao de maior grau) se o nó for um polinômio em x com coeficientes numéricos; senão null. */
 function polyCoeffs(node: MathNode): number[] | null {
   if (node.type === "ConstantNode") {
@@ -182,10 +204,10 @@ function polynomialRealRoots(expression: string, y: number): number[] | null {
     const real: number[] = [];
     for (let i = 0; i < realish.length; ) {
       let j = i + 1;
-      while (j < realish.length && Math.abs(realish[j]! - realish[i]!) <= 1e-5) j++;
+      while (j < realish.length && Math.abs(realish[j]! - realish[i]!) <= 1e-3) j++;
       const mean = realish.slice(i, j).reduce((s, v) => s + v, 0) / (j - i);
-      const r = Number(mean.toFixed(10));
-      const residual = Math.abs(coeffs.reduce((s, c, k) => s + c * r ** k, 0));
+      const r = Number(polishRoot(coeffs, mean, j - i).toFixed(10));
+      const residual = Math.abs(polyEval(coeffs, r));
       // Se algum grupo não convergiu, devolve null para o chamador usar a busca numérica.
       if (residual > 1e-6 * Math.max(1, scaleAt(r))) return null;
       const v = Object.is(r, -0) ? 0 : r;
