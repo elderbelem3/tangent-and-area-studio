@@ -38,9 +38,9 @@ function Limites() {
 
   const data = useMemo(() => {
     if (!fn || c === null) return null;
-    const { left, right, L1, L2, oscillation } = evaluateLimit(expr, c);
+    const { left, right, L1, L2, L: Linf, oscillation } = evaluateLimit(expr, c);
     let L = NaN, note = "";
-    if (!Number.isFinite(c)) L = evaluateLimit(expr, c).L;
+    if (!Number.isFinite(c)) L = Linf;
     else if (dir === "esq") L = L1;
     else if (dir === "dir") L = L2;
     else if (Number.isFinite(L1) && Number.isFinite(L2) && Math.abs(L1 - L2) < 1e-3 * Math.max(1, Math.abs(L1))) L = (L1 + L2) / 2;
@@ -54,6 +54,9 @@ function Limites() {
   const steps = useMemo(() => (data && c !== null ? limitSteps(expr, c, data.L, data.L1, data.L2) : null), [data, c, expr]);
   const dirLabel = dir === "esq" ? "⁻" : dir === "dir" ? "⁺" : "";
   const span = 3;
+  const cFinite = c !== null && Number.isFinite(c);
+  const plotMin = c === null ? 0 : cFinite ? c - span : c > 0 ? 0 : -20;
+  const plotMax = c === null ? 0 : cFinite ? c + span : c > 0 ? 20 : 0;
 
   return (
     <>
@@ -84,14 +87,14 @@ function Limites() {
         <div className="min-w-0 space-y-6">
           <Panel title="Gráfico">
             {fn && c !== null && data ? (
-              <Plot fn={fn} expression={expr} xMin={c - span} xMax={c + span} points={Number.isFinite(data.L) ? [{ x: c, y: data.L, label: `(${fmt(c)}, ${fmt(data.L, 3)})`, hollow: Number.isNaN(fn(c)) }] : []} overlay={(h) => <LimitUvOverlay h={h} c={c} L={data.L} />} />
+              <Plot fn={fn} expression={expr} xMin={plotMin} xMax={plotMax} points={cFinite && Number.isFinite(data.L) ? [{ x: c, y: data.L, label: `(${fmt(c)}, ${fmt(data.L, 3)})`, hollow: Number.isNaN(fn(c)) }] : []} overlay={cFinite ? (h) => <LimitUvOverlay h={h} c={c} L={data.L} /> : undefined} />
             ) : <p className="text-muted-foreground">Corrija os campos para ver o gráfico.</p>}
             {steps && <UvStepsPanel title="Resolução Algébrica do Limite" steps={steps} />}
           </Panel>
           {data && (
             <div className="grid gap-4 md:grid-cols-2">
-              {(dir !== "dir") && <ApproxTable title="Pela esquerda (x → c⁻)" rows={data.left} />}
-              {(dir !== "esq") && <ApproxTable title="Pela direita (x → c⁺)" rows={data.right} />}
+              {(dir !== "dir") && data.left.length > 0 && <ApproxTable title="Pela esquerda (x → c⁻)" rows={data.left} />}
+              {(dir !== "esq") && data.right.length > 0 && <ApproxTable title="Pela direita (x → c⁺)" rows={data.right} />}
             </div>
           )}
         </div>
