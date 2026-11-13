@@ -1,4 +1,4 @@
-import { parse, simplify, type MathNode } from "mathjs";
+import { parse, rationalize, simplify, type MathNode } from "mathjs";
 import { normalize, parseFn } from "@/lib/calc";
 
 export type InverseStep = { text: string; equation: string };
