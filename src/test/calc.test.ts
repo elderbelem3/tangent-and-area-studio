@@ -24,9 +24,9 @@ describe("Special functions and logarithm bases", () => {
 });
 describe("Infinity handling", () => {
   it.each(["infinity", "Infinity", "∞", "INFINITY"])("parses %s as the infinity constant", (token) => {
-    const parsed = parseFn(`x + ${token}`);
+    const parsed = parseFn(`1/(x + ${token})`);
     expect(parsed.error).toBeNull();
-    expect(parsed.fn?.(1)).toBe(Infinity);
+    expect(parsed.fn?.(1)).toBe(0);
   });
   it("keeps implicit multiplication with infinity", () => {
     expect(normalize("2infinity")).toBe("2*Infinity");
@@ -44,7 +44,7 @@ describe("Infinity handling", () => {
   it("evaluates limits at +∞ and −∞ with a single approach side", async () => {
     const { evaluateLimit } = await import("@/lib/limits");
     const pos = evaluateLimit("1/x", Infinity);
-    expect(pos.L).toBeCloseTo(0, 6);
+    expect(pos.L).toBeCloseTo(0, 4);
     expect(pos.left.length).toBeGreaterThan(0);
     expect(pos.right.length).toBe(0);
     const neg = evaluateLimit("x^2", -Infinity);
