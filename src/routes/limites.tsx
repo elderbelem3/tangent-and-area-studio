@@ -40,7 +40,8 @@ function Limites() {
     if (!fn || c === null) return null;
     const { left, right, L1, L2, oscillation } = evaluateLimit(expr, c);
     let L = NaN, note = "";
-    if (dir === "esq") L = L1;
+    if (!Number.isFinite(c)) L = evaluateLimit(expr, c).L;
+    else if (dir === "esq") L = L1;
     else if (dir === "dir") L = L2;
     else if (Number.isFinite(L1) && Number.isFinite(L2) && Math.abs(L1 - L2) < 1e-3 * Math.max(1, Math.abs(L1))) L = (L1 + L2) / 2;
     else if (L1 === L2 && !Number.isFinite(L1) && !Number.isNaN(L1)) L = L1;
