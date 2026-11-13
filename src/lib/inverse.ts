@@ -145,7 +145,7 @@ function durandKerner(coeffs: number[]): Cx[] {
     for (let i = n - 1; i >= 0; i--) acc = cadd(cmul(acc, z), cx(a[i]!));
     return acc;
   };
-  for (let iter = 0; iter < 2000; iter++) {
+  for (let iter = 0; iter < 5000; iter++) {
     let maxStep = 0;
     roots = roots.map((r, k) => {
       let denom = cx(1);
@@ -174,12 +174,23 @@ function polynomialRealRoots(expression: string, y: number): number[] | null {
     const n = coeffs.length - 1;
     if (n < 1 || n > 20 || coeffs.some((c) => !Number.isFinite(c))) return null;
     const scaleAt = (r: number) => coeffs.reduce((s, c, i) => s + Math.abs(c) * Math.abs(r) ** i, 0);
+    const realish = durandKerner(coeffs)
+      .filter((z) => Math.abs(z.im) <= 1e-4 * Math.max(1, Math.abs(z.re)))
+      .map((z) => z.re)
+      .sort((p, q) => p - q);
+    // Agrupa aproximações da mesma raiz: o tamanho do grupo é a multiplicidade.
     const real: number[] = [];
-    for (const z of durandKerner(coeffs)) {
-      if (Math.abs(z.im) > 1e-6 * Math.max(1, Math.abs(z.re))) continue;
-      const r = Number(z.re.toFixed(10));
-      const residual = Math.abs(coeffs.reduce((s, c, i) => s + c * r ** i, 0));
-      if (residual <= 1e-6 * Math.max(1, scaleAt(r))) real.push(r);
+    for (let i = 0; i < realish.length; ) {
+      let j = i + 1;
+      while (j < realish.length && Math.abs(realish[j]! - realish[i]!) <= 1e-5) j++;
+      const mean = realish.slice(i, j).reduce((s, v) => s + v, 0) / (j - i);
+      const r = Number(mean.toFixed(10));
+      const residual = Math.abs(coeffs.reduce((s, c, k) => s + c * r ** k, 0));
+      // Se algum grupo não convergiu, devolve null para o chamador usar a busca numérica.
+      if (residual > 1e-6 * Math.max(1, scaleAt(r))) return null;
+      const v = Object.is(r, -0) ? 0 : r;
+      for (let k = i; k < j; k++) real.push(v);
+      i = j;
     }
     return real.sort((p, q) => p - q);
   } catch {
