@@ -12,6 +12,7 @@ export function estimateLimit(values: number[]): number {
 
 /** Recognize the bare sin/cos of a reciprocal pole; do not misclassify damped oscillations. */
 export function oscillationAt(expression: string, c: number): string | null {
+  if (!Number.isFinite(c)) return null;
   try {
     let node = parse(normalize(expression));
     while (node.type === "ParenthesisNode") node = (node as unknown as { content: MathNode }).content;
@@ -32,6 +33,13 @@ export function oscillationAt(expression: string, c: number): string | null {
 
 export function evaluateLimit(expression: string, c: number) {
   const { fn } = parseFn(expression);
+  if (!Number.isFinite(c)) {
+    // Limite no infinito: uma única direção existe, amostrada em magnitude crescente.
+    const sign = c > 0 ? 1 : -1;
+    const rows = [10, 100, 1000, 10000, 100000].map((m) => { const x = sign * m; return { x, y: fn?.(x) ?? NaN }; });
+    const L = estimateLimit(rows.map((p) => p.y));
+    return { left: sign > 0 ? rows : [], right: sign > 0 ? [] : rows, L1: sign > 0 ? L : NaN, L2: sign > 0 ? NaN : L, L, oscillation: null };
+  }
   const left = LIMIT_DISTANCES.map((h) => ({ x: c - h, y: fn?.(c - h) ?? NaN }));
   const right = LIMIT_DISTANCES.map((h) => ({ x: c + h, y: fn?.(c + h) ?? NaN }));
   const oscillation = oscillationAt(expression, c);
