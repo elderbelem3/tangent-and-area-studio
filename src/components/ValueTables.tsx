@@ -137,7 +137,7 @@ export function ValueTables({ functions }: { functions: ComparisonFunction[] }) 
                           {result.roots ? (
                             <div className="flex flex-col gap-0.5">
                               {result.roots.map((r, k) => (
-                                <span key={k}>
+                                <span key={k} className="whitespace-nowrap">
                                   x<sub>{k + 1}</sub> = {fmt(r, 6)}
                                 </span>
                               ))}
