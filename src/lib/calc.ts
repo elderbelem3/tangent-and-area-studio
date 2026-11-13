@@ -34,6 +34,7 @@ export function normalizeLogarithms(expr: string): string {
 /** Normalize student syntax: "3x" -> "3*x", preserving names such as log10. */
 export function normalize(expr: string): string {
   return normalizeLogarithms(expr)
+    .replace(/∞|\binfinity\b/gi, "Infinity")
     .replace(/(\d)\s*([a-zA-Z(])/g, (match: string, digit: string, next: string, offset: number, source: string) => {
       // An identifier such as log10 is not an implicit multiplication coefficient.
       return /[a-zA-Z_][a-zA-Z_0-9]*$/.test(source.slice(0, offset + 1)) ? match : `${digit}*${next}`;

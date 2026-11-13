@@ -205,6 +205,9 @@ export function Chip({ onClick, children }: { onClick: () => void; children: Rea
 }
 
 export function num(s: string): number | null {
-  const v = Number(s.replace(",", "."));
-  return s.trim() === "" || !Number.isFinite(v) ? null : v;
+  const t = s.trim().toLowerCase().replace(",", ".");
+  if (t === "") return null;
+  if (/^[+−-]?(infinity|inf|∞)$/.test(t)) return t.startsWith("-") || t.startsWith("−") ? -Infinity : Infinity;
+  const v = Number(t);
+  return Number.isFinite(v) ? v : null;
 }
