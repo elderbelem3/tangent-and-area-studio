@@ -22,3 +22,40 @@ describe("Special functions and logarithm bases", () => {
     expect(parseFn(asciiToMathjs("l o g _(10)(x)")).fn?.(100)).toBeCloseTo(2, 12);
   });
 });
+describe("Infinity handling", () => {
+  it.each(["infinity", "Infinity", "∞", "INFINITY"])("parses %s as the infinity constant", (token) => {
+    const parsed = parseFn(`x + ${token}`);
+    expect(parsed.error).toBeNull();
+    expect(parsed.fn?.(1)).toBe(Infinity);
+  });
+  it("keeps implicit multiplication with infinity", () => {
+    expect(normalize("2infinity")).toBe("2*Infinity");
+  });
+  it("num() accepts infinity spellings and signs", async () => {
+    const { num } = await import("@/components/Lab");
+    expect(num("infinity")).toBe(Infinity);
+    expect(num("-infinity")).toBe(-Infinity);
+    expect(num("∞")).toBe(Infinity);
+    expect(num("-∞")).toBe(-Infinity);
+    expect(num("inf")).toBe(Infinity);
+    expect(num("2")).toBe(2);
+    expect(num("abc")).toBeNull();
+  });
+  it("evaluates limits at +∞ and −∞ with a single approach side", async () => {
+    const { evaluateLimit } = await import("@/lib/limits");
+    const pos = evaluateLimit("1/x", Infinity);
+    expect(pos.L).toBeCloseTo(0, 6);
+    expect(pos.left.length).toBeGreaterThan(0);
+    expect(pos.right.length).toBe(0);
+    const neg = evaluateLimit("x^2", -Infinity);
+    expect(neg.L).toBe(Infinity);
+    expect(neg.right.length).toBeGreaterThan(0);
+    expect(neg.left.length).toBe(0);
+  });
+  it("limitSteps explains the infinite case instead of substituting a point", async () => {
+    const { limitSteps } = await import("@/lib/uv-steps");
+    const steps = limitSteps("1/x", Infinity, 0, 0, NaN);
+    expect(steps?.[0]?.title).toContain("infinito");
+    expect(steps?.[1]?.lines[0]).toContain("lim f(x) = 0");
+  });
+});
