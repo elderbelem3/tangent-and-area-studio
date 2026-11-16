@@ -6,7 +6,7 @@ export const STRESS_TOLERANCE = 1e-4;
 export const STRESS_PILLARS = ["Funções", "Limites", "Derivadas", "Integrais"] as const;
 export type StressPillar = typeof STRESS_PILLARS[number];
 type Expected = number | "indefinido" | "integral rejeitada";
-export type StressCase = { id: string; pillar: StressPillar; expression: string; parameters: string; point: number; end?: number; expected: Expected; basis: string };
+export type StressCase = { id: string; pillar: StressPillar; expression: string; parameters: string; point: number; end?: number | undefined; expected: Expected; basis: string };
 export type StressResult = { test: StressCase; actual: Expected | "erro"; passed: boolean; elapsed: number; error: number | null; detail: string | null };
 
 // Independent analytic answers: never derive an answer with the engine under test.
