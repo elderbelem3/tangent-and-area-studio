@@ -1,4 +1,5 @@
 # Refinamento visual
+- [ ] Adicionar Validação Algorítmica com bateria analítica nos quatro pilares, tolerância absoluta de 10⁻⁴, tempos e divergências; verificar testes e execução desktop/mobile.
 - [x] Adicionar apresentação educacional de cinco slides no guia, com navegação, teclado/toque, URL por slide e leitura mobile; testes e navegação verificados.
 - [x] Adicionar Modo Código informativo nos quatro módulos com expressão, árvore de parsing, prévia das amostras reais 2D/3D, derivação e estado do renderizador; edição, alternância, celular e 163 testes verificados.
 - [x] Remover Tutor, ENADE, Copiloto, chamadas e dependência de IA; tour de 10 passos e guia de 11 capítulos atualizados, seis abas verificadas, link antigo redirecionado e 160 testes aprovados.
