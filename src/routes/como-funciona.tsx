@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, BookOpen, Code2, FileCode2, Search } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Code2, FileCode2, Search, FlaskConical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -42,6 +42,7 @@ function CodeGuidePage() {
   return <>
     <Button asChild variant="ghost" size="sm" className="mb-4 px-0 text-muted-foreground"><Link to="/"><ArrowLeft className="h-4 w-4" />Voltar às Funções</Link></Button>
     <PageHeader tag="Como Usar · Guia do projeto" title="Como o código funciona" desc="Da expressão ao resultado: entenda cada aba, os arquivos envolvidos e como as funcionalidades se conectam." />
+    <Button asChild variant="outline" className="mb-5 min-h-11 h-auto max-w-full whitespace-normal py-3"><Link to="/validacao"><FlaskConical className="h-4 w-4 shrink-0" />Validação Algorítmica (Stress Test)</Link></Button>
     <AppPresentation slideNumber={slide} onChange={(next) => { void navigate({ search: { slide: next }, replace: true }); }} />
     <div className="grid min-w-0 gap-8 lg:grid-cols-[270px_minmax(0,1fr)]">
       <aside className="min-w-0 lg:sticky lg:top-40 lg:max-h-[calc(100dvh-11rem)] lg:self-start lg:overflow-y-auto">
