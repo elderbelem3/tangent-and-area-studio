@@ -17,6 +17,7 @@ import { Route as DerivadasRouteImport } from './routes/derivadas'
 import { Route as IaRouteImport } from './routes/ia'
 import { Route as IntegraisRouteImport } from './routes/integrais'
 import { Route as LimitesRouteImport } from './routes/limites'
+import { Route as ValidacaoRouteImport } from './routes/validacao'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +59,11 @@ const LimitesRoute = LimitesRouteImport.update({
   path: '/limites',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ValidacaoRoute = ValidacaoRouteImport.update({
+  id: '/validacao',
+  path: '/validacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/ia': typeof IaRoute
   '/integrais': typeof IntegraisRoute
   '/limites': typeof LimitesRoute
+  '/validacao': typeof ValidacaoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/ia': typeof IaRoute
   '/integrais': typeof IntegraisRoute
   '/limites': typeof LimitesRoute
+  '/validacao': typeof ValidacaoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/ia': typeof IaRoute
   '/integrais': typeof IntegraisRoute
   '/limites': typeof LimitesRoute
+  '/validacao': typeof ValidacaoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/ia'
     | '/integrais'
     | '/limites'
+    | '/validacao'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/ia'
     | '/integrais'
     | '/limites'
+    | '/validacao'
   id:
     | '__root__'
     | '/'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/ia'
     | '/integrais'
     | '/limites'
+    | '/validacao'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,6 +144,7 @@ export interface RootRouteChildren {
   IaRoute: typeof IaRoute
   IntegraisRoute: typeof IntegraisRoute
   LimitesRoute: typeof LimitesRoute
+  ValidacaoRoute: typeof ValidacaoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -192,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LimitesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/validacao': {
+      id: '/validacao'
+      path: '/validacao'
+      fullPath: '/validacao'
+      preLoaderRoute: typeof ValidacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -204,6 +224,7 @@ const rootRouteChildren: RootRouteChildren = {
   IaRoute: IaRoute,
   IntegraisRoute: IntegraisRoute,
   LimitesRoute: LimitesRoute,
+  ValidacaoRoute: ValidacaoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
