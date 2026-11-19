@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MAX_TABLE_ROWS, addTableRow, emptyRows, tableRows, writeRows, type TablesState } from "@/lib/value-tables";
+import { MAX_TABLE_ROWS, formatTableNumber, addTableRow, emptyRows, tableRows, writeRows, type TablesState } from "@/lib/value-tables";
 import { solveForX } from "@/lib/inverse";
 
 describe("tabela de valores — estado por função", () => {
@@ -29,6 +29,20 @@ describe("tabela de valores — estado por função", () => {
     let rows = emptyRows();
     for (let i = 0; i < 10; i++) rows = addTableRow(rows);
     expect(rows).toHaveLength(MAX_TABLE_ROWS);
+  });
+});
+
+describe("apresentação com até três casas decimais", () => {
+  it.each([[2.123456, "2.123"], [3.5, "3.5"], [4, "4"], [-1.234567, "-1.235"], [7.1239, "7.124"], [-0.00001, "0"]])("formata %s sem zeros desnecessários", (value, expected) => {
+    expect(formatTableNumber(Number(value))).toBe(expected);
+  });
+  it("preserva a precisão interna", () => {
+    const roots = solveForX("x^2", 2);
+    const root = roots[1];
+    expect(root).toBeDefined();
+    if (root === undefined) throw new Error("Missing root");
+    expect(formatTableNumber(root)).toBe("1.414");
+    expect(root * root).toBeCloseTo(2, 9);
   });
 });
 

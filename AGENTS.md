@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## UI architecture
+- Keep zero-target table searches isolated from the legacy inverse engine: exact rational square-free decomposition preserves polynomial multiplicities before global real-root isolation; report unverified/bounded outcomes explicitly and round only table presentation.
 - Keep stress validation in an independent typed analytic fixture module calling the existing calculus engines only on demand; compare raw outputs with absolute tolerance and preserve divergences so the dashboard cannot mask engine limitations.
 - Keep the app presentation as bounded educational data with one 1920×1080 slide renderer; URL slide coordinates and a mobile reading view preserve sharing and legibility without invoking calculation engines.
 - Keep Code Mode read-only and opt-in: renderers publish bounded previews of their actual sampled inputs through useRenderTrace; deferred inspection never resamples curves or writes module state, preserving calculation and typing performance.

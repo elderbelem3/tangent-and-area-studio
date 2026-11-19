@@ -27,6 +27,7 @@
 - [x] Verificar fórmulas e navegação no manual em telas amplas e estreitas.
 
 # Comparação de funções
+- [x] Validar raízes reais e multiplicidades para f(x)=0 com contagem exata e avisos de capacidade; preservar buscas não nulas e dados, ampliar resultados e arredondar somente a exibição a três casas; 74 testes e tabela desktop/mobile verificados.
 - [x] Reformular a Tabela de Valores com as modalidades x→f(x) e f(x)→x por função, absorvendo o painel de Função Inversa, com dados independentes por função e limpeza individual/geral.
 - [x] Adicionar gestão de até cinco funções em Funções e Derivadas.
 - [x] Comparar curvas com Recharts, cores distintas e legenda interativa.

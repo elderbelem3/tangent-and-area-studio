@@ -4,6 +4,12 @@
  * e os dados são invalidados apenas quando a expressão daquela função muda.
  */
 export const MAX_TABLE_ROWS = 5;
+/** Presentation only: the original number is never replaced in calculation state. */
+export function formatTableNumber(value: number): string {
+  if (!Number.isFinite(value)) return "indefinido";
+  const rounded = Number(value.toFixed(3));
+  return Object.is(rounded, -0) ? "0" : String(rounded);
+}
 export type TableMode = "fx" | "x";
 export type FunctionTableData = { expr: string; fx: string[]; x: string[] };
 export type TablesState = Record<number, FunctionTableData>;
