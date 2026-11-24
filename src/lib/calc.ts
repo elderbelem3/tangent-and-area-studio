@@ -32,8 +32,19 @@ export function normalizeLogarithms(expr: string): string {
 }
 
 /** Normalize student syntax: "3x" -> "3*x", preserving names such as log10. */
+const SUPERSCRIPTS: Record<string, string> = {
+  "⁰": "0", "¹": "1", "²": "2", "³": "3", "⁴": "4",
+  "⁵": "5", "⁶": "6", "⁷": "7", "⁸": "8", "⁹": "9",
+  "⁺": "+", "⁻": "-",
+};
+
 export function normalize(expr: string): string {
-  return normalizeLogarithms(expr)
+  return normalizeLogarithms(
+    expr
+      .replace(/−/g, "-")
+      .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+/g, (run) => `^(${Array.from(run, (ch) => SUPERSCRIPTS[ch] ?? ch).join("")})`)
+      .replace(/\^\{\s*([^{}]+?)\s*\}/g, "^($1)"),
+  )
     .replace(/(\d)\s*([a-zA-Z(])/g, (match: string, digit: string, next: string, offset: number, source: string) => {
       // An identifier such as log10 is not an implicit multiplication coefficient.
       return /[a-zA-Z_][a-zA-Z_0-9]*$/.test(source.slice(0, offset + 1)) ? match : `${digit}*${next}`;

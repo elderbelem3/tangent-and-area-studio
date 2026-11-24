@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { parseFn } from "@/lib/calc";
 import { solveForX } from "@/lib/inverse";
-import { findTableRoots, type TableRootResult } from "@/lib/table-roots";
+import { findTableRoots, polynomialDegree, type TableRootResult } from "@/lib/table-roots";
 import { needs3D } from "@/lib/smart3d";
 import { FUNCTION_BG_COLORS, FUNCTION_SLOTS, type ComparisonFunction } from "@/lib/comparison";
 import { useModuleState } from "@/lib/module-state";
@@ -39,7 +39,7 @@ export function ValueTables({ functions }: { functions: ComparisonFunction[] }) 
   const solutions = useMemo(
     () => mode === "x" && fn ? rows.map((r): TableRootResult | null => {
       const n = num(r);
-      return n === null || !Number.isFinite(n) ? null : n === 0 ? findTableRoots(expression) : { roots: solveForX(expression, n), status: "bounded" };
+      return n === null || !Number.isFinite(n) ? null : n === 0 ? findTableRoots(expression) : { roots: solveForX(expression, n), status: "bounded", degree: polynomialDegree(expression) };
     }) : [],
     [mode, fn, rows, expression],
   );

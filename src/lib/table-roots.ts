@@ -5,6 +5,7 @@ import { solveForX } from "@/lib/inverse";
 export type TableRootResult = {
   roots: number[];
   status: "complete" | "bounded" | "unverified" | "continuum";
+  degree: number | null;
 };
 
 // Exact rational arithmetic preserves multiplicity before numerical isolation.
@@ -133,12 +134,18 @@ function realRootCount(p: Polynomial): number {
 
 /** Isolate every real root of a square-free polynomial between its derivative roots. */
 function isolate(p: Polynomial): number[] {
+  if (p.length > 1 && p[0]?.n === 0n) {
+    return [...isolate(p.slice(1)), 0].sort((u, v) => u - v);
+  }
   const a = monic(p).map((v) => Number(v.n) / Number(v.d));
   if (a.some((v) => !Number.isFinite(v))) throw new Error("Numeric range");
   if (a.length === 2) return [-atNumber(a, 0)];
   if (a.length < 2) return [];
   const evalAt = (x: number) => a.reduceRight((s, c) => s * x + c, 0);
-  const bound = 1 + Math.max(...a.slice(0, -1).map(Math.abs));
+  const n = a.length - 1;
+  const cauchy = 1 + Math.max(...a.slice(0, -1).map(Math.abs));
+  const fujiwara = 2 * Math.max(...a.slice(0, -1).map((c, i) => Math.abs(c) ** (1 / (n - i)))) * 1.05 + 1e-6;
+  const bound = Math.min(cauchy, fujiwara);
   if (!Number.isFinite(bound)) throw new Error("Root bound");
   const d = derivative(p), distinctDerivative = quotient(d, gcd(d, derivative(d))).quotient;
   const critical = isolate(distinctDerivative);
@@ -168,11 +175,27 @@ function isolate(p: Polynomial): number[] {
 }
 const atNumber = (a: number[], i: number) => a[i] ?? 0;
 
+/**
+ * Determine the true polynomial degree of an expression after algebraic simplification
+ * across all terms (independent of term order, ignoring cancelled/zero coefficients).
+ * Returns null for non-polynomials, the identically-zero polynomial, or unsupported degree.
+ */
+export function polynomialDegree(expression: string): number | null {
+  try {
+    const p = coefficients(parse(normalize(expression)));
+    if (!p || (p.length === 1 && p[0]?.n === 0n)) return null;
+    return p.length - 1;
+  } catch {
+    return null;
+  }
+}
+
 export function findTableRoots(expression: string): TableRootResult {
   try {
     const p = coefficients(parse(normalize(expression)));
-    if (!p) return { roots: solveForX(expression, 0), status: "bounded" };
-    if (p.length === 1) return { roots: [], status: p[0]?.n === 0n ? "continuum" : "complete" };
+    if (!p) return { roots: solveForX(expression, 0), status: "bounded", degree: null };
+    if (p.length === 1) return { roots: [], status: p[0]?.n === 0n ? "continuum" : "complete", degree: p[0]?.n === 0n ? null : 0 };
+    const degree = p.length - 1;
     // Square-free decomposition determines exact multiplicities, without clustering.
     let repeated = gcd(p, derivative(p));
     let remaining = quotient(p, repeated).quotient;
@@ -188,9 +211,9 @@ export function findTableRoots(expression: string): TableRootResult {
       repeated = quotient(repeated, shared).quotient;
       multiplicity++;
     }
-    return { roots: roots.sort((a, b) => a - b), status: "complete" };
+    return { roots: roots.sort((a, b) => a - b), status: "complete", degree };
   } catch {
     // Never silently substitute a partial numeric search for a failed global solve.
-    return { roots: [], status: "unverified" };
+    return { roots: [], status: "unverified", degree: null };
   }
 }
